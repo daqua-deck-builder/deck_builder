@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+
 import axios, {type AxiosResponse} from "axios";
 import {ref, type Ref} from "vue";
 import {onMounted} from "vue";
@@ -9,10 +9,10 @@ const message: Ref<string> = ref('');
 
 onMounted(() => {
     axios.get('/api').then((res: AxiosResponse<{ hello: string }>) => {
-        console.log(res.data)
+        console.log(res.data);
         message.value = res.data.hello;
-    })
-})
+    });
+});
 
 </script>
 
