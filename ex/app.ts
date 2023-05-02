@@ -1,13 +1,19 @@
-import express, {type Request, Response, NextFunction} from 'express'
+import express, {type Request, Response} from 'express'
+import {PrismaClient} from '@prisma/client'
+const prisma = new PrismaClient();
 
 const port = 3000;
-
 
 const app = express();
 
 const router = express.Router();
-router.get('/', (req, res, next) => {
+router.get('/', (req: Request, res: Response) => {
     res.json({hello: 'world'})
+});
+
+router.get('/users', async (req: Request, res: Response) => {
+    const users = await prisma.user.findMany()
+    res.json({users});
 });
 
 app.use(express.static('../vite-project/dist'));

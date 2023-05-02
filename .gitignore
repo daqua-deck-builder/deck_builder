@@ -3,3 +3,6 @@ ex/node_modules
 vite-project/node_modules
 vite-project/.vscode
 .idea
+/ex/prisma/db.sqlite
+/ex/.env
+/ex/prisma/db.sqlite-journal
