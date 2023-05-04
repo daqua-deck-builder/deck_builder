@@ -59,7 +59,7 @@ const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests:
     });
     return files.sort();
 }
-const replaceImgWithAlt = (html) => {
+const replaceImgWithAlt = (html: string) => {
     const dom = new JSDOM(html);
     const imgElements = Array.from(dom.window.document.getElementsByTagName('img'));
 
@@ -80,9 +80,9 @@ const cleanup_skill_text_line = (t: string): string => {
         .trim();
 }
 
-const parse_card_skills = ($): {skills: string[], has_lb: boolean} => {
+const parse_card_skills = ($: any): {skills: string[], has_lb: boolean} => {
     const $cs = $('.cardSkill');
-    let ret = [];
+    let ret: string[] = [];
     let has_lb: boolean = false;
 
     for (let i = 0; i < $cs.length; i++) {
