@@ -16,7 +16,7 @@ type CardData = {
     level: string,
     color: string[],
     klass: string[],
-    cost: string,
+    cost: string[],
     limit: string,
     power: string,
     team: string[],
@@ -125,18 +125,18 @@ const parse_modern_structure = ($: any): CardData | false => {
     let lrig: string[] = [];
     const color: string[] = $cd.eq(2).text().split('');
     const level: string = $cd.eq(3).text();
-    let cost: string = '';
+    let cost: string[] = [];
     let klass: string[] = [];
     switch (card_type) {
         case 'ルリグ':
-            cost = $cd.eq(4).text();    // グロウコスト
+            cost = $cd.eq(4).text().split('\n');    // グロウコスト
             lrig = $cd.eq(1).text().replace(/限定/, '').split('/');
             break;
         case 'シグニ':
             klass = $cd.eq(1).text().split('\n');
             break;
         default:
-            cost = $cd.eq(5).text();    // スペル/\/アーツのコスト
+            cost = $cd.eq(5).text().split('\n');    // スペル/\/アーツのコスト
             break;
     }
 
