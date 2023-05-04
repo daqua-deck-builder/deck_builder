@@ -6,6 +6,12 @@ import type {CheerioAPI} from 'cheerio';
 // @ts-ignore
 import {JSDOM} from 'jsdom';
 
+const FORMAT: Record<'all' | 'key' | 'diva', 1 | 2 | 3> = {
+    all: 1,
+    key: 2,
+    diva: 3
+};
+
 type CardData = {
     slug: string,
     name: string,
@@ -25,7 +31,9 @@ type CardData = {
     rarity: string,
     has_lb: boolean,
     lb_text: string,
-    skills: string[]
+    skills: string[],
+    story: string,
+    format: 1 | 2 | 3
 };
 
 const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests: string[]): string[] => {
@@ -80,7 +88,7 @@ const cleanup_skill_text_line = (t: string): string => {
         .trim();
 }
 
-const parse_card_skills = ($: any): {skills: string[], has_lb: boolean} => {
+const parse_card_skills = ($: any): { skills: string[], has_lb: boolean } => {
     const $cs = $('.cardSkill');
     let ret: string[] = [];
     let has_lb: boolean = false;
@@ -95,7 +103,9 @@ const parse_card_skills = ($: any): {skills: string[], has_lb: boolean} => {
         const skill_list = skill_parsed.split('<br>').map((s) => {
             has_lb = has_lb || s.indexOf('ライフバースト') === 0;
             return cleanup_skill_text_line(s);
-        }).filter((s) => {return !!s});
+        }).filter((s) => {
+            return !!s
+        });
         ret = [...ret, ...skill_list];
     }
 
@@ -200,7 +210,20 @@ const parse_modern_structure = ($: any): CardData | false => {
         ({skills, has_lb} = parse_card_skills($));
     }
 
-    return <CardData>{
+    const story = $($cd.eq(11)).find('img[src*="dissona"]').length > 0 ? 'dissona' : '';
+
+    const format: 1 | 2 | 3 = (($$: any): 1 | 2 | 3 => {
+        if ($$.find('img[alt*="ディーヴァ"]').length > 0) {
+            return FORMAT.diva;
+        } else if ($$.find('img[alt*="キー"]').length > 0) {
+            return FORMAT.key;
+        } else {
+            return FORMAT.all;
+        }
+    })($cd.eq(10));
+
+
+    return {
         slug,
         name,
         pronounce,
@@ -219,9 +242,11 @@ const parse_modern_structure = ($: any): CardData | false => {
         rarity,
         has_lb,
         lb_text,
-        skills
+        skills,
+        story,
+        format
     };
-}
+};
 
 (() => {
     const tests: string[] = process.argv.slice(2);
