@@ -13,4 +13,42 @@ datasource db {
 model User {
   id      Int      @id @default(autoincrement())
   name    String?
+  password  String @default("")
+}
+
+model Product {
+  id Int @id @default(autoincrement())
+  name String
+  slug String @unique
+}
+
+model Color {
+  id Int @id @unique
+  slug  String
+}
+
+model Card {
+  id  Int @id @default(autoincrement())
+  name  String
+  pronounce String
+  img String?
+  type  String
+  slug  String
+  story String?
+  format  Int
+  cost String
+  burst String
+  power Int
+  text  String?
+  level Int?
+  lrig  String?
+  timing String?
+  rarerity  String
+  color_card  Int
+}
+
+model ColorCard {
+  id Int @id @default(autoincrement())
+  card Int
+  color Int
 }
