@@ -72,7 +72,7 @@ const replaceImgWithAlt = (html: string) => {
     const imgElements = Array.from(dom.window.document.getElementsByTagName('img'));
 
     imgElements.forEach(img => {
-        const altText = img.alt;
+        const altText = img.alt.replace(/2》/, '》');
         img.replaceWith(altText);
     });
 
