@@ -51,6 +51,80 @@ const compact_cost = (cost: string) => {
     return cost.replace(/[《》]/g, '');
 };
 
+const convert_lrig_name_to_slug = (lrig_name: string): string => {
+    const _ret = {
+        'タマ': 'tam',
+        'タウィル': 'taw',
+        'リメンバ': 'rem',
+        'サシェ': 'sas',
+        'ドーナ': 'don',
+        'エマ': 'ema',
+        'リゼ': 'riz',
+        'アンジュ': 'anj',
+        'アキノ': 'akn',
+        'LION': 'lio',
+        'ノヴァ': 'nov',
+        'ゆかゆか': 'yuk',
+        '花代': 'hny',
+        'ユヅキ': 'ydk',
+        'リル': 'ril',
+        'カーニバル': 'cnv',
+        'レイラ': 'rla',
+        'ＬｏＶ': 'lov',
+        'ヒラナ': 'hrn',
+        'LOVIT': 'lvt',
+        'エクス': 'ex',
+        'ピルルク': 'prk',
+        'エルドラ': 'eld',
+        'ミルルン': 'mil',
+        'あや': 'aya',
+        'レイ': 'rei',
+        'タマゴ': 'tmg',
+        'マドカ': 'mdk',
+        'みこみこ': 'mik',
+        '緑子': 'mdr',
+        'アン': 'ann',
+        'アイヤイ': 'ayy',
+        'メル': 'mel',
+        'ママ': 'mam',
+        'アト': 'ato',
+        'WOLF': 'wlf',
+        'バン': 'ban',
+        'サンガ': 'sng',
+        'ウリス': 'urt',
+        'イオナ': 'ion',
+        'ウムル': 'umr',
+        'ミュウ': 'myu',
+        'アルフォウ': 'alf',
+        'ハナレ': 'hnr',
+        'ナナシ': 'nns',
+        'グズ子': 'gzk',
+        'とこ': 'tok',
+        'ムジカ': 'mzk',
+        'デウス': 'des',
+        'マキナ': 'mac',
+        'まほまほ': 'mah',
+        '美兎': 'mit',
+        '夢限': 'mug',
+        '？': 'may',
+        'にじさんじ': 'nij',
+
+        '＜アンシエント･サプライズ＞': 'ansp',
+        '＜ドリームチーム＞': 'drtm',
+        'チーム制限なし': 'fret'
+    }[lrig_name];
+
+    return _ret ? _ret : '特定失敗';
+}
+
+const compact_team = (_teams: string[]): string[] => {
+    let teams = _teams.map((team: string) => {
+        const token: string = team.replace(/限定/, '');
+        return convert_lrig_name_to_slug(token);
+    });
+    return teams;
+};
+
 type CardDataCompact = {
     s: string,      // slug
     n: string,      // name
@@ -113,7 +187,7 @@ const compact = (d: CardData): CardDataCompact => {
         cs: d.cost.map(compact_cost),
         l: d.limit,
         pw: d.power,
-        tm: d.team,
+        tm: compact_team(d.team),
         tp: d.team_piece,
         ti: d.timing,
         r: d.rarity,
@@ -270,10 +344,12 @@ const parse_modern_structure = ($: any): CardData | false => {
         if (card_type.indexOf('クラフト') > -1) {
             card_type = 'アーツ(クラフト)';
         }
+        team = [$cd.eq(8).text()];
     } else if (card_type.startsWith('シグニ')) {
         if (card_type.indexOf('レゾナ') > -1) {    // 現状レゾナはレゾナ(クラフトしか存在しない)
             card_type = 'レゾナ(クラフト)';
         }
+        team = $cd.eq(8).text().split('/');
     } else {
         team = [$cd.eq(8).text()];
     }
