@@ -93,7 +93,6 @@ const parse_card_skills = ($): {skills: string[], has_lb: boolean} => {
     return {skills: ret, has_lb};
 }
 
-// const parse_modern_structure = ($: CheerioAPI): CardData | false => {
 const parse_modern_structure = ($: any): CardData | false => {
     const slug: string = $('.cardNum').text();
 
@@ -121,7 +120,6 @@ const parse_modern_structure = ($: any): CardData | false => {
     let klass: string[] = [];
     switch (card_type) {
         case 'ルリグ':
-            // glow cost
             cost = $cd.eq(4).text();    // グロウコスト
             lrig = $cd.eq(1).text().replace(/限定/, '').split('/');
             break;
@@ -132,7 +130,7 @@ const parse_modern_structure = ($: any): CardData | false => {
             cost = $cd.eq(5).text();    // スペル/\/アーツのコスト
             break;
     }
-    // lrig = $cd.eq(1).text().replace(/限定/, '').split('/');
+
     const limit: string = $cd.eq(6).text(); // リミット消費は検索不可とするが、レベルと一致しないシグニはここに数値が入る
     const power: string = $cd.eq(7).text();
     const $card_skills = $('.cardSkill');
@@ -180,49 +178,12 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     if (card_type === 'シグニ' || card_type.startsWith('レゾナ')) {
         ({skills, has_lb} = parse_card_skills($));
-        // @ts-ignore
-        // $card_skills.each((index, elem) => {
-        //     let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
-        //     const find_a = $(elem);
-        //     if (find_a.children('img[alt="ライフバースト"]').length > 0) {
-        //         skill_single = 'LB ' + skill_single.replace(/^：/, '');
-        //         skills.push(skill_single);
-        //         // } else if (find_a.children('img[alt*="出"]').length > 0) {
-        //         //     skill_single = 'CP ' + skill_single.replace(/^：/, '');
-        //         // } else if (find_a.children('img[alt*="自"]').length > 0) {
-        //         //     skill_single = 'PA ' + skill_single.replace(/^：/, '');
-        //         // } else if (find_a.children('img[alt*="起"]').length > 0) {
-        //         //     skill_single = 'AC ' + skill_single.replace(/^：/, '');
-        //     }
-        //     // skills.push(skill_single);
-        // });
     } else if (card_type === 'スペル') {
-        // // @ts-ignore
-        // $card_skills.each((index, elem) => {
-        //     let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
-        //     const find_a = $(elem);
-        //     if (find_a.children('img[alt="ライフバースト"]').length > 0) {
-        //         has_life_burst = true;
-        //         skill_single = 'LB ' + skill_single.replace(/^：/, '');
-        //     }
-        //     skills.push(skill_single);
-        // });
         ({skills, has_lb} = parse_card_skills($));
     } else if (card_type === 'ピース') {
-        // @ts-ignore
-        // $card_skills.each((index, elem) => {
-        //     const split_result = $(elem).text().split('\n').map((text: string) => {
-        //         return text.replace(/[\s　]+/ig, '');
-        //     }).filter((t: string) => {
-        //         return !!t
-        //     });
-        //
-        //     const [requires, ...skill_texts_rest] = split_result;
-        //     skills.push(`${requires}: ${skill_texts_rest.join('\n').replace(/\n+/ig, '\n')}`);
-        // });
-
         ({skills, has_lb} = parse_card_skills($));
     } else {
+        // アーツ・ルリグ
         // @ts-ignore
         $card_skills.each((index, elem) => {
             skills.push($(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n'));
@@ -263,12 +224,12 @@ const parse_modern_structure = ($: any): CardData | false => {
 
             const $: CheerioAPI = cheerio.load(html);
 
-            let d: Object = {};
-
             console.log(card_file);
 
-            d = parse_modern_structure($);
-            console.log(d);
+            const d: CardData | false = parse_modern_structure($);
+            if (d) {
+                console.log(d);
+            }
         });
     });
 })();
