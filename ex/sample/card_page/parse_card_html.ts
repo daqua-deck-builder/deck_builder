@@ -3,6 +3,8 @@ import process from 'node:process';
 import path from 'node:path'
 import * as cheerio from 'cheerio';
 import type {CheerioAPI} from 'cheerio';
+// @ts-ignore
+import {JSDOM} from 'jsdom';
 
 type CardData = {
     slug: string,
@@ -31,7 +33,7 @@ const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests:
     const files: string[] = [];
     tests = tests || [];
 
-    fs.readdirSync(root_dir).map((filename: string): void => {
+    fs.readdirSync(root_dir).forEach((filename: string): void => {
         if (tests.length > 0) {
             let passed = true;
             for (let i = 0; i < tests.length; i++) {
@@ -57,10 +59,42 @@ const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests:
     });
     return files.sort();
 }
+const replaceImgWithAlt = (html) => {
+    const dom = new JSDOM(html);
+    const imgElements = Array.from(dom.window.document.getElementsByTagName('img'));
+
+    imgElements.forEach(img => {
+        const altText = img.alt;
+        img.replaceWith(altText);
+    });
+
+    return dom.window.document.body.innerHTML;
+};
+
+const parse_card_skills = ($): {skills: string[], has_lb: boolean} => {
+    const $cs = $('.cardSkill');
+    let ret = [];
+    let has_lb: boolean = false;
+
+    for (let i = 0; i < $cs.length; i++) {
+        const skill_html = $($cs[i]).html();
+        if (!skill_html) {
+            return {skills: [], has_lb};
+        }
+        const skill_full = skill_html.trim();
+        const skill_parsed = replaceImgWithAlt(skill_full);
+        const skill_list = skill_parsed.split('<br>').map((s) => {
+            has_lb = has_lb || s.indexOf('ライフバースト') === 0;
+            return s.replace(/\n/ig, '').trim();
+        }).filter((s) => {return !!s});
+        ret = [...ret, ...skill_list];
+    }
+
+    return {skills: ret, has_lb};
+}
 
 // const parse_modern_structure = ($: CheerioAPI): CardData | false => {
 const parse_modern_structure = ($: any): CardData | false => {
-    console.log('MODERN');
     const slug: string = $('.cardNum').text();
 
     const $card_name_wrapper = $('.cardName');
@@ -140,54 +174,60 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     const timing: string[] = $cd.eq(9).text().split('\n');
 
-    let has_life_burst: boolean = false;
     let lb_text: string = '';
-    const skills: string[] = [];
+    let skills: string[] = [];
+    let has_lb: boolean = false;
 
     if (card_type === 'シグニ' || card_type.startsWith('レゾナ')) {
+        ({skills, has_lb} = parse_card_skills($));
         // @ts-ignore
-        $card_skills.each((index, elem) => {
-            let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
-            const find_a = $(elem);
-            if (find_a.children('img[alt="ライフバースト"]').length > 0) {
-                has_life_burst = true;
-                skill_single = 'LB ' + skill_single.replace(/^：/, '');
-            } else if (find_a.children('img[alt*="出"]').length > 0) {
-                skill_single = 'CP ' + skill_single.replace(/^：/, '');
-            } else if (find_a.children('img[alt*="自"]').length > 0) {
-                skill_single = 'AU ' + skill_single.replace(/^：/, '');
-            }
-            skills.push(skill_single);
-        });
+        // $card_skills.each((index, elem) => {
+        //     let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
+        //     const find_a = $(elem);
+        //     if (find_a.children('img[alt="ライフバースト"]').length > 0) {
+        //         skill_single = 'LB ' + skill_single.replace(/^：/, '');
+        //         skills.push(skill_single);
+        //         // } else if (find_a.children('img[alt*="出"]').length > 0) {
+        //         //     skill_single = 'CP ' + skill_single.replace(/^：/, '');
+        //         // } else if (find_a.children('img[alt*="自"]').length > 0) {
+        //         //     skill_single = 'PA ' + skill_single.replace(/^：/, '');
+        //         // } else if (find_a.children('img[alt*="起"]').length > 0) {
+        //         //     skill_single = 'AC ' + skill_single.replace(/^：/, '');
+        //     }
+        //     // skills.push(skill_single);
+        // });
     } else if (card_type === 'スペル') {
-        // @ts-ignore
-        $card_skills.each((index, elem) => {
-            let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
-            const find_a = $(elem);
-            if (find_a.children('img[alt="ライフバースト"]').length > 0) {
-                has_life_burst = true;
-                skill_single = 'LB ' + skill_single.replace(/^：/, '');
-            }
-            skills.push(skill_single);
-        });
+        // // @ts-ignore
+        // $card_skills.each((index, elem) => {
+        //     let skill_single = $(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n');
+        //     const find_a = $(elem);
+        //     if (find_a.children('img[alt="ライフバースト"]').length > 0) {
+        //         has_life_burst = true;
+        //         skill_single = 'LB ' + skill_single.replace(/^：/, '');
+        //     }
+        //     skills.push(skill_single);
+        // });
+        ({skills, has_lb} = parse_card_skills($));
     } else if (card_type === 'ピース') {
-        console.log('PIECE');
         // @ts-ignore
-        $card_skills.each((index, elem) => {
-            const split_result = $(elem).text().split('\n').map((text: string) => {
-                return text.replace(/[\s　]+/ig, '');
-            }).filter((t: string) => {
-                return !!t
-            });
+        // $card_skills.each((index, elem) => {
+        //     const split_result = $(elem).text().split('\n').map((text: string) => {
+        //         return text.replace(/[\s　]+/ig, '');
+        //     }).filter((t: string) => {
+        //         return !!t
+        //     });
+        //
+        //     const [requires, ...skill_texts_rest] = split_result;
+        //     skills.push(`${requires}: ${skill_texts_rest.join('\n').replace(/\n+/ig, '\n')}`);
+        // });
 
-            const [requires, ...skill_texts_rest] = split_result;
-            skills.push(`${requires}: ${skill_texts_rest.join('\n').replace(/\n+/ig, '\n')}`);
-        });
+        ({skills, has_lb} = parse_card_skills($));
     } else {
         // @ts-ignore
         $card_skills.each((index, elem) => {
             skills.push($(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n'));
         });
+        ({skills, has_lb} = parse_card_skills($));
     }
 
     return <CardData>{
@@ -207,7 +247,7 @@ const parse_modern_structure = ($: any): CardData | false => {
         team_piece,
         timing,
         rarity,
-        has_lb: has_life_burst,
+        has_lb,
         lb_text,
         skills
     };
@@ -216,7 +256,7 @@ const parse_modern_structure = ($: any): CardData | false => {
 (() => {
     const tests: string[] = process.argv.slice(2);
 
-    get_sample_file_list(process.argv[1], ['legacy'], tests).forEach((card_file: string) => {
+    get_sample_file_list(process.argv[1], [], tests).forEach((card_file: string) => {
         fs.readFile(card_file, (err: Error | null, _data: Buffer) => {
             if (err) throw err;
             const html: string = _data.toString();
@@ -224,14 +264,10 @@ const parse_modern_structure = ($: any): CardData | false => {
             const $: CheerioAPI = cheerio.load(html);
 
             let d: Object = {};
+
             console.log(card_file);
 
-            // @ts-ignore
-            if ($('.card_detail').length > 0) {
-                console.log('legacy')
-            } else {
-                d = parse_modern_structure($);
-            }
+            d = parse_modern_structure($);
             console.log(d);
         });
     });
