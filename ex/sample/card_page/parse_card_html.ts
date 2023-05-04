@@ -12,6 +12,69 @@ const FORMAT: Record<'all' | 'key' | 'diva', 1 | 2 | 3> = {
     diva: 3
 };
 
+type ColorCompact = 'w' | 'u' | 'k' | 'r' | 'g' | 'l' | '';   // l -> colorless
+const compact_color = (color: string): ColorCompact => {
+    let ret = '';
+    const _ret = {
+        '白': 'w',
+        '青': 'u',
+        '黒': 'k',
+        '赤': 'r',
+        '緑': 'g',
+        '無': 'l',
+    }[color];
+    return _ret ? _ret : ret;
+};
+
+const compact_card_type = (card_type: string) => {
+    let ret = '';
+    const _ret = {
+        'シグニ': 'sg',
+        'スペル': 'sp',
+        'ルリグ': 'lr',
+        'アーツ': 'ar',
+        'キー': 'ky',
+        'ピース': 'pi',
+        'レゾナ': 're',
+        'アシストルリグ': 'al',
+        'アーツ（クラフト）': 'ac',
+        'レゾナ（クラフト）': 'rc',
+    }[card_type];
+    return _ret ? _ret : ret;
+};
+
+const compact_img = (path: string, slug: string) => {
+    return path.split(slug).join('@');
+};
+
+const compact_cost = (cost: string) => {
+    return cost.replace(/[《》]/g, '');
+};
+
+type CardDataCompact = {
+    s: string,      // slug
+    n: string,      // name
+    p: string,      // pronounce
+    i: string,      // img
+    t: string,      // card_type
+    lr: string[],   // lrig
+    lv: string,     // level
+    c: string[],    // color
+    cl: string[],   // klass
+    cs: string[],   // cost
+    l: string,      // limit
+    pw: string,     // power
+    tm: string[],   // team
+    tp: boolean,    // team_piece
+    ti: string[],  // timing
+    r: string,      // rarity
+    b: boolean,     // has_lb
+    bt: string,     // lb_text
+    sk: string[],   // skills
+    st: 'd' | '',     // story
+    fm: 1 | 2 | 3   // format
+}
+
 type CardData = {
     slug: string,
     name: string,
@@ -32,8 +95,34 @@ type CardData = {
     has_lb: boolean,
     lb_text: string,
     skills: string[],
-    story: string,
+    story: 'd' | '',
     format: 1 | 2 | 3
+};
+
+const compact = (d: CardData): CardDataCompact => {
+    return {
+        s: d.slug,
+        n: d.name,
+        p: d.pronounce,
+        i: compact_img(d.img, d.slug),
+        t: compact_card_type(d.card_type),
+        lr: d.lrig,
+        lv: d.level,
+        c: d.color.map(compact_color),
+        cl: d.klass,
+        cs: d.cost.map(compact_cost),
+        l: d.limit,
+        pw: d.power,
+        tm: d.team,
+        tp: d.team_piece,
+        ti: d.timing,
+        r: d.rarity,
+        b: d.has_lb,
+        bt: d.lb_text,
+        sk: d.skills,
+        st: d.story,
+        fm: d.format
+    };
 };
 
 const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests: string[]): string[] => {
@@ -210,7 +299,7 @@ const parse_modern_structure = ($: any): CardData | false => {
         ({skills, has_lb} = parse_card_skills($));
     }
 
-    const story = $($cd.eq(11)).find('img[src*="dissona"]').length > 0 ? 'dissona' : '';
+    const story = $($cd.eq(11)).find('img[src*="dissona"]').length > 0 ? 'd' : '';
 
     const format: 1 | 2 | 3 = (($$: any): 1 | 2 | 3 => {
         if ($$.find('img[alt*="ディーヴァ"]').length > 0) {
@@ -225,20 +314,24 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     return {
         slug,
-        name,
+        name: name.replace(/　/ig, ' '),
         pronounce,
-        img,
+        img: img.split('/card/')[1],
         card_type,
         lrig,
-        level,
+        level: level === '-' ? '' : level,
         color,
         klass,
-        cost,
-        limit,
-        power,
-        team,
+        cost: cost.filter(c => '-' !== c),
+        limit: limit === '-' ? '' : limit,
+        power: power === '-' ? '' : power,
+        team: team.filter(t => {
+            return t !== '-';
+        }),
         team_piece,
-        timing,
+        timing: timing.filter(t => {
+            return t !== '-';
+        }),
         rarity,
         has_lb,
         lb_text,
@@ -262,7 +355,8 @@ const parse_modern_structure = ($: any): CardData | false => {
 
             const d: CardData | false = parse_modern_structure($);
             if (d) {
-                console.log(d);
+                console.log(compact(d));
+                // console.log(d);
             }
         });
     });
