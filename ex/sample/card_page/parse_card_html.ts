@@ -71,6 +71,15 @@ const replaceImgWithAlt = (html) => {
     return dom.window.document.body.innerHTML;
 };
 
+const cleanup_skill_text_line = (t: string): string => {
+    return t
+        .replace(/　/g, ' ')
+        .replace(/アイコン/g, '')
+        .replace(/（.*）/ig, '')
+        .replace(/\n/ig, '')
+        .trim();
+}
+
 const parse_card_skills = ($): {skills: string[], has_lb: boolean} => {
     const $cs = $('.cardSkill');
     let ret = [];
@@ -85,7 +94,7 @@ const parse_card_skills = ($): {skills: string[], has_lb: boolean} => {
         const skill_parsed = replaceImgWithAlt(skill_full);
         const skill_list = skill_parsed.split('<br>').map((s) => {
             has_lb = has_lb || s.indexOf('ライフバースト') === 0;
-            return s.replace(/\n/ig, '').trim();
+            return cleanup_skill_text_line(s);
         }).filter((s) => {return !!s});
         ret = [...ret, ...skill_list];
     }
