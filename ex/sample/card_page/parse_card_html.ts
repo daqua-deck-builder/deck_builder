@@ -3,201 +3,19 @@ import process from 'node:process';
 import path from 'node:path'
 import * as cheerio from 'cheerio';
 import type {CheerioAPI} from 'cheerio';
-// @ts-ignore
 import {JSDOM} from 'jsdom';
+import {
+    compact,
+    cleanup_skill_text_line,
+    drop_no_value,
+    erase_no_value,
+    trim_img_path,
+    convert_power
+} from "../../compact/functions.js";
+import {FORMAT, type CardData} from "../../types/card.js";
+import {CARD_TYPE, COMMON_WORD} from "../../constants.js";
 
-const FORMAT: Record<'all' | 'key' | 'diva', 1 | 2 | 3> = {
-    all: 1,
-    key: 2,
-    diva: 3
-};
-
-type ColorCompact = 'w' | 'u' | 'k' | 'r' | 'g' | 'l' | '';   // l -> colorless
-const compact_color = (color: string): ColorCompact => {
-    let ret = '';
-    const _ret = {
-        '白': 'w',
-        '青': 'u',
-        '黒': 'k',
-        '赤': 'r',
-        '緑': 'g',
-        '無': 'l',
-    }[color];
-    return _ret ? _ret : ret;
-};
-
-const compact_card_type = (card_type: string) => {
-    let ret = '';
-    const _ret = {
-        'シグニ': 'sg',
-        'スペル': 'sp',
-        'ルリグ': 'lr',
-        'アーツ': 'ar',
-        'キー': 'ky',
-        'ピース': 'pi',
-        'レゾナ': 're',
-        'アシストルリグ': 'al',
-        'アーツ（クラフト）': 'ac',
-        'レゾナ（クラフト）': 'rc',
-    }[card_type];
-    return _ret ? _ret : ret;
-};
-
-const compact_img = (path: string, slug: string) => {
-    return path.split(slug).join('@');
-};
-
-const compact_cost = (cost: string) => {
-    return cost.replace(/[《》]/g, '');
-};
-
-const convert_lrig_name_to_slug = (lrig_name: string): string => {
-    const _ret = {
-        'タマ': 'tam',
-        'タウィル': 'taw',
-        'リメンバ': 'rem',
-        'サシェ': 'sas',
-        'ドーナ': 'don',
-        'エマ': 'ema',
-        'リゼ': 'riz',
-        'アンジュ': 'anj',
-        'アキノ': 'akn',
-        'LION': 'lio',
-        'ノヴァ': 'nov',
-        'ゆかゆか': 'yuk',
-        '花代': 'hny',
-        'ユヅキ': 'ydk',
-        'リル': 'ril',
-        'カーニバル': 'cnv',
-        'レイラ': 'rla',
-        'ＬｏＶ': 'lov',
-        'ヒラナ': 'hrn',
-        'LOVIT': 'lvt',
-        'エクス': 'ex',
-        'ピルルク': 'prk',
-        'エルドラ': 'eld',
-        'ミルルン': 'mil',
-        'あや': 'aya',
-        'レイ': 'rei',
-        'タマゴ': 'tmg',
-        'マドカ': 'mdk',
-        'みこみこ': 'mik',
-        '緑子': 'mdr',
-        'アン': 'ann',
-        'アイヤイ': 'ayy',
-        'メル': 'mel',
-        'ママ': 'mam',
-        'アト': 'ato',
-        'WOLF': 'wlf',
-        'バン': 'ban',
-        'サンガ': 'sng',
-        'ウリス': 'urt',
-        'イオナ': 'ion',
-        'ウムル': 'umr',
-        'ミュウ': 'myu',
-        'アルフォウ': 'alf',
-        'ハナレ': 'hnr',
-        'ナナシ': 'nns',
-        'グズ子': 'gzk',
-        'とこ': 'tok',
-        'ムジカ': 'mzk',
-        'デウス': 'des',
-        'マキナ': 'mac',
-        'まほまほ': 'mah',
-        '美兎': 'mit',
-        '夢限': 'mug',
-        '？': 'may',
-        'にじさんじ': 'nij',
-
-        '＜アンシエント･サプライズ＞': 'ansp',
-        '＜ドリームチーム＞': 'drtm',
-        'チーム制限なし': 'fret'
-    }[lrig_name];
-
-    return _ret ? _ret : '特定失敗';
-}
-
-const compact_team = (_teams: string[]): string[] => {
-    let teams = _teams.map((team: string) => {
-        const token: string = team.replace(/限定/, '');
-        return convert_lrig_name_to_slug(token);
-    });
-    return teams;
-};
-
-type CardDataCompact = {
-    s: string,      // slug
-    n: string,      // name
-    p: string,      // pronounce
-    i: string,      // img
-    t: string,      // card_type
-    lr: string[],   // lrig
-    lv: string,     // level
-    c: string[],    // color
-    cl: string[],   // klass
-    cs: string[],   // cost
-    l: string,      // limit
-    pw: string,     // power
-    tm: string[],   // team
-    tp: boolean,    // team_piece
-    ti: string[],  // timing
-    r: string,      // rarity
-    b: boolean,     // has_lb
-    bt: string,     // lb_text
-    sk: string[],   // skills
-    st: 'd' | '',     // story
-    fm: 1 | 2 | 3   // format
-}
-
-type CardData = {
-    slug: string,
-    name: string,
-    pronounce: string,
-    img: string,
-    card_type: string,
-    lrig: string[],
-    level: string,
-    color: string[],
-    klass: string[],
-    cost: string[],
-    limit: string,
-    power: string,
-    team: string[],
-    team_piece: boolean,
-    timing: string[],
-    rarity: string,
-    has_lb: boolean,
-    lb_text: string,
-    skills: string[],
-    story: 'd' | '',
-    format: 1 | 2 | 3
-};
-
-const compact = (d: CardData): CardDataCompact => {
-    return {
-        s: d.slug,
-        n: d.name,
-        p: d.pronounce,
-        i: compact_img(d.img, d.slug),
-        t: compact_card_type(d.card_type),
-        lr: d.lrig,
-        lv: d.level,
-        c: d.color.map(compact_color),
-        cl: d.klass,
-        cs: d.cost.map(compact_cost),
-        l: d.limit,
-        pw: d.power,
-        tm: compact_team(d.team),
-        tp: d.team_piece,
-        ti: d.timing,
-        r: d.rarity,
-        b: d.has_lb,
-        bt: d.lb_text,
-        sk: d.skills,
-        st: d.story,
-        fm: d.format
-    };
-};
+const CHECK_FILE_PREFIX = 'sample';
 
 const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests: string[]): string[] => {
     const root_dir: string = path.dirname(endpoint);
@@ -215,7 +33,7 @@ const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests:
             }
         }
 
-        if (filename.startsWith('sample')) {
+        if (filename.startsWith(CHECK_FILE_PREFIX)) {
             let ignore_found = false;
             for (let i = 0; i < ignore_strings.length; i++) {
                 if (filename.indexOf(ignore_strings[i]) > -1) {
@@ -230,26 +48,17 @@ const get_sample_file_list = (endpoint: string, ignore_strings: string[], tests:
     });
     return files.sort();
 }
-const replaceImgWithAlt = (html: string) => {
-    const dom = new JSDOM(html);
-    const imgElements = Array.from(dom.window.document.getElementsByTagName('img'));
+const replaceImgWithAlt = (html: string): string => {
+    const dom: JSDOM = new JSDOM(html);
+    const imgElements: HTMLImageElement[] = Array.from(dom.window.document.getElementsByTagName('img'));
 
     imgElements.forEach(img => {
-        const altText = img.alt.replace(/2》/, '》');
+        const altText: string = img.alt.replace(/2》/, '》');
         img.replaceWith(altText);
     });
 
     return dom.window.document.body.innerHTML;
 };
-
-const cleanup_skill_text_line = (t: string): string => {
-    return t
-        .replace(/　/g, ' ')
-        .replace(/アイコン/g, '')
-        .replace(/（.*）/ig, '')
-        .replace(/\n/ig, '')
-        .trim();
-}
 
 const parse_card_skills = ($: any): { skills: string[], has_lb: boolean } => {
     const $cs = $('.cardSkill');
@@ -264,9 +73,9 @@ const parse_card_skills = ($: any): { skills: string[], has_lb: boolean } => {
         const skill_full = skill_html.trim();
         const skill_parsed = replaceImgWithAlt(skill_full);
         const skill_list = skill_parsed.split('<br>').map((s) => {
-            has_lb = has_lb || s.indexOf('ライフバースト') === 0;
+            has_lb = has_lb || s.indexOf(COMMON_WORD.LIFE_BURST) === 0;
             return cleanup_skill_text_line(s);
-        }).filter((s) => {
+        }).filter((s: string) => {
             return !!s
         });
         ret = [...ret, ...skill_list];
@@ -301,11 +110,11 @@ const parse_modern_structure = ($: any): CardData | false => {
     let cost: string[] = [];
     let klass: string[] = [];
     switch (card_type) {
-        case 'ルリグ':
+        case CARD_TYPE.LRIG:
             cost = $cd.eq(4).text().split('\n');    // グロウコスト
             lrig = $cd.eq(1).text().replace(/限定/, '').split('/');
             break;
-        case 'シグニ':
+        case CARD_TYPE.SIGNI:
             klass = $cd.eq(1).text().split('\n');
             break;
         default:
@@ -320,9 +129,9 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     let team: string[] = [];
     let team_piece: boolean = false;
-    if (card_type === 'ピース') {
+    if (card_type === CARD_TYPE.PIECE) {
         if ($('.cardSkill img[alt*="ドリームチーム"]').length > 0) {
-            team = ['＜ドリームチーム＞'];
+            team = [COMMON_WORD.DREAM_TEAM];
             team_piece = true;
         } else {
             const condition: string = (card_skill.split('\n')[1] || '').trim();
@@ -334,20 +143,20 @@ const parse_modern_structure = ($: any): CardData | false => {
                 team_piece = true;
             } catch (error) {
                 if (error instanceof TypeError) {
-                    team = ['チーム制限なし'];
+                    team = [COMMON_WORD.NO_TEAM];
                 } else {
                     throw(`パース失敗\n${card_skill}`);
                 }
             }
         }
-    } else if (card_type.startsWith('アーツ')) {
-        if (card_type.indexOf('クラフト') > -1) {
-            card_type = 'アーツ(クラフト)';
+    } else if (card_type.startsWith(CARD_TYPE.ARTS)) {
+        if (card_type.indexOf(CARD_TYPE.FLAG.CRAFT) > -1) {
+            card_type = CARD_TYPE.ARTS_CRAFT;
         }
         team = [$cd.eq(8).text()];
-    } else if (card_type.startsWith('シグニ')) {
-        if (card_type.indexOf('レゾナ') > -1) {    // 現状レゾナはレゾナ(クラフトしか存在しない)
-            card_type = 'レゾナ(クラフト)';
+    } else if (card_type.startsWith(CARD_TYPE.SIGNI)) {
+        if (card_type.indexOf(CARD_TYPE.RESONA) > -1) {    // 現状レゾナはレゾナ(クラフトしか存在しない)
+            card_type = CARD_TYPE.RESONA_CRAFT;
         }
         team = $cd.eq(8).text().split('/');
     } else {
@@ -358,13 +167,13 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     let lb_text: string = '';
     let skills: string[] = [];
-    let has_lb: boolean = false;
+    let has_lb!: boolean;
 
-    if (card_type === 'シグニ' || card_type.startsWith('レゾナ')) {
+    if (card_type === CARD_TYPE.SIGNI || card_type.startsWith(CARD_TYPE.RESONA)) {
         ({skills, has_lb} = parse_card_skills($));
-    } else if (card_type === 'スペル') {
+    } else if (card_type === CARD_TYPE.SPELL) {
         ({skills, has_lb} = parse_card_skills($));
-    } else if (card_type === 'ピース') {
+    } else if (card_type === CARD_TYPE.PIECE) {
         ({skills, has_lb} = parse_card_skills($));
     } else {
         // アーツ・ルリグ
@@ -387,27 +196,22 @@ const parse_modern_structure = ($: any): CardData | false => {
         }
     })($cd.eq(10));
 
-
     return {
         slug,
         name: name.replace(/　/ig, ' '),
         pronounce,
-        img: img.split('/card/')[1],
+        img: trim_img_path(img),
         card_type,
         lrig,
-        level: level === '-' ? '' : level,
+        level: erase_no_value(level),
         color,
         klass,
-        cost: cost.filter(c => '-' !== c),
-        limit: limit === '-' ? '' : limit,
-        power: power === '-' ? '' : power,
-        team: team.filter(t => {
-            return t !== '-';
-        }),
+        cost: drop_no_value(cost),
+        limit: erase_no_value(limit),
+        power: convert_power(erase_no_value(power)),
+        team: drop_no_value(team),
         team_piece,
-        timing: timing.filter(t => {
-            return t !== '-';
-        }),
+        timing: drop_no_value(timing),
         rarity,
         has_lb,
         lb_text,
