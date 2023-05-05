@@ -1,8 +1,6 @@
-const FORMAT: Record<'all' | 'key' | 'diva', 1 | 2 | 3> = {
-    all: 1,
-    key: 2,
-    diva: 3
-};
+type Story = 'd' | '';
+type Format = 1 | 2 | 3;
+
 
 type CardDataCompact = {
     s: string,      // slug
@@ -24,8 +22,8 @@ type CardDataCompact = {
     b: boolean,     // has_lb
     bt: string,     // lb_text
     sk: string[],   // skills
-    st: 'd' | '',     // story
-    fm: 1 | 2 | 3   // format
+    st: Story,     // story
+    fm: Format     // format
 };
 
 type CardData = {
@@ -48,15 +46,13 @@ type CardData = {
     has_lb: boolean,
     lb_text: string,
     skills: string[],
-    story: 'd' | '',
-    format: 1 | 2 | 3
-};
-
-export {
-    FORMAT
+    story: Story,
+    format: Format
 };
 
 export type {
+    Story,
+    Format,
     CardData,
     CardDataCompact
 };

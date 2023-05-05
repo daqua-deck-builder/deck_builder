@@ -10,10 +10,10 @@ import {
     drop_no_value,
     erase_no_value,
     trim_img_path,
-    convert_power
+    convert_power, expand
 } from "../../compact/functions.js";
-import {FORMAT, type CardData} from "../../types/card.js";
-import {CARD_TYPE, COMMON_WORD} from "../../constants.js";
+import {type CardData} from "../../types/card.js";
+import {FORMAT, CARD_TYPE, COMMON_WORD, TEAM_TYPE} from "../../constants.js";
 
 const CHECK_FILE_PREFIX = 'sample';
 
@@ -131,7 +131,7 @@ const parse_modern_structure = ($: any): CardData | false => {
     let team_piece: boolean = false;
     if (card_type === CARD_TYPE.PIECE) {
         if ($('.cardSkill img[alt*="ドリームチーム"]').length > 0) {
-            team = [COMMON_WORD.DREAM_TEAM];
+            team = [TEAM_TYPE.DREAM_TEAM];
             team_piece = true;
         } else {
             const condition: string = (card_skill.split('\n')[1] || '').trim();
@@ -143,7 +143,7 @@ const parse_modern_structure = ($: any): CardData | false => {
                 team_piece = true;
             } catch (error) {
                 if (error instanceof TypeError) {
-                    team = [COMMON_WORD.NO_TEAM];
+                    team = [TEAM_TYPE.NO_TEAM];
                 } else {
                     throw(`パース失敗\n${card_skill}`);
                 }
@@ -235,7 +235,9 @@ const parse_modern_structure = ($: any): CardData | false => {
 
             const d: CardData | false = parse_modern_structure($);
             if (d) {
-                console.log(compact(d));
+                console.log(expand(compact(d)));
+                console.log(d);
+                console.log('----------------')
                 // console.log(d);
             }
         });
