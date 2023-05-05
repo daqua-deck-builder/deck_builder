@@ -9,7 +9,8 @@
     "tsc": "tsc --watch",
     "prisma": "prisma",
     "studio": "echo $(ip addr show | grep 192); prisma studio",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "example1": "node sample/card_page/parse_card_html.js",
+    "example2": "node sample/fetch/index.js"
   },
   "author": "",
   "license": "ISC",
