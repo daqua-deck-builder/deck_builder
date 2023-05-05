@@ -13,7 +13,7 @@ const REFERER = 'https://www.takaratomy.co.jp/products/wixoss/card/index.php';
 
 const object_to_query_string = (obj: Object): string => {
     return Object.keys(obj)
-    // @ts-ignore
+        // @ts-ignore
         .map((key: string) => encodeURIComponent(key) + '=' + encodeURIComponent(obj[key]))
         .join('&');
 };
@@ -62,7 +62,7 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_anc_cache = <T>(method: string, endpoint: string, payload: T, complete: (result: string) => void) => {
+const send_request_anc_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, complete: (result: string) => void) => {
     const cache_file_name = create_cache_filename(endpoint.split('/card/')[1], payload);
     const cache_file_fullpath = path.resolve(script_dir, cache_file_name);
     const cache_hit = fs.existsSync(cache_file_fullpath);
@@ -158,7 +158,7 @@ const send_request_anc_cache = <T>(method: string, endpoint: string, payload: T,
             stream.on('end', () => {
                 const full_data: string = Buffer.concat(dataBuffer).toString('utf-8');
                 create_directory_if_not_exists(cache_file_fullpath, () => {
-                    fs.writeFile(cache_file_fullpath, cherry_pick_html(full_data, '.cardDip'), 'utf-8', (err: Error | null) => {
+                    fs.writeFile(cache_file_fullpath, cherry_pick_html(full_data, selector_to_pick), 'utf-8', (err: Error | null) => {
                         if (err) throw err;
                         console.log('write');
                         next(full_data);
@@ -175,7 +175,7 @@ const send_request_anc_cache = <T>(method: string, endpoint: string, payload: T,
             req.write(post_data_string);
         }
         req.end();
-    }
+    };
 
     if (cache_hit) {
         fs.readFile(cache_file_fullpath, 'utf-8', (err: Error | null, text: string) => {
@@ -209,7 +209,7 @@ const content = {
 
 const url = 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
 
-send_request_anc_cache('GET', url, content, (result: String) => {
+send_request_anc_cache('GET', url, content, '.cardDip', (result: String) => {
     // console.log(result);
     // console.log(true);
 });
