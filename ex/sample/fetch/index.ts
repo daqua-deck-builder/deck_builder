@@ -18,5 +18,5 @@ const search_condition = {
 
 const url = 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
 
-send_request_and_cache('GET', url, search_condition, '.cardDip', '', () => {
+send_request_and_cache('GET', url, search_condition, '.cardDip', '', (content: string, hit: boolean) => {
 });

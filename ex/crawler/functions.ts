@@ -6,6 +6,7 @@ import zlib from "zlib";
 import * as cheerio from "cheerio";
 import process from "process";
 import * as stream from "stream";
+import {SearchCondition} from "../types/crawler.js";
 
 const script_dir = path.dirname(process.argv[1]);
 
@@ -60,15 +61,16 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, complete: (result: string) => void) => {
+const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, complete: (content: string, hit: boolean) => void) => {
+    endpoint = endpoint || 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
+    referrer = referrer || DEFAULT_REFERRER;
+
     const cache_file_name = create_cache_filename(endpoint.split('/card/')[1], payload);
     const cache_file_fullpath = path.resolve(script_dir, cache_file_name);
     const cache_hit = fs.existsSync(cache_file_fullpath);
 
-    referrer = referrer || DEFAULT_REFERRER;
-
     console.log(`cache file: ${cache_file_fullpath}`)
-    const fetch_process = (next: (text: string) => void): void => {
+    const fetch_process = (next: (text: string, hit: boolean) => void): void => {
 
         const url: URL = new URL(endpoint);
 
@@ -134,7 +136,7 @@ const send_request_and_cache = <T>(method: string, endpoint: string, payload: T,
                 create_directory_if_not_exists(cache_file_fullpath, () => {
                     fs.writeFile(cache_file_fullpath, cherry_pick_html(full_data, selector_to_pick), 'utf-8', (err: Error | null) => {
                         if (err) throw err;
-                        next(full_data);
+                        next(full_data, false);
                     });
                 });
             });
@@ -153,7 +155,7 @@ const send_request_and_cache = <T>(method: string, endpoint: string, payload: T,
     if (cache_hit) {
         fs.readFile(cache_file_fullpath, 'utf-8', (err: Error | null, text: string): void => {
             console.log('cache hit');
-            complete(text);
+            complete(text, true);
         });
     } else {
         console.log('cache miss');
@@ -163,6 +165,28 @@ const send_request_and_cache = <T>(method: string, endpoint: string, payload: T,
 
 const DEFAULT_REFERRER = 'https://www.takaratomy.co.jp/products/wixoss/card/index.php';
 
+const cover_condition = (arg: Partial<SearchCondition>): SearchCondition => {
+    // @ts-ignore
+    return {
+        ...{
+            card_page: 1,
+            keyword: '',
+            product_type: 'booster',
+            product_id: '',
+            product_no: '',
+            card_kind: '',
+            card_type: '',
+            rarelity: '',
+            support_formats: '',
+            story: '',
+            level: '',
+            color: '',
+            ability: '',
+        }, ...arg
+    };
+};
+
 export {
+    cover_condition,
     send_request_and_cache
 }
