@@ -221,6 +221,36 @@ const erase_no_value = (item: string) => {
     return item === '-' ? '' : item;
 };
 
+const assert_equal_card_data = <T>(name: string, left: T, right: T): void => {
+    let pass: boolean = false;
+    // @ts-ignore
+    const left_keys: (keyof T)[] = Object.keys(left);
+    // @ts-ignore
+    const right_keys: (keyof T)[] = Object.keys(right);
+
+    if (left_keys.length !== right_keys.length) {
+        console.error(`   FAILED: ${name}`);
+        console.error(`     keys amount mismatch! ${name}`);
+        return;
+    }
+
+    for (let i = 0; i < left_keys.length; i++) {
+        pass = left[left_keys[i]] === right[left_keys[i]] || pass;
+    }
+    if (!pass) {
+        console.error(`   FAILED: ${name}`);
+        return;
+    }
+    for (let i = 0; i < right_keys.length; i++) {
+        pass = left[right_keys[i]] === right[right_keys[i]] || pass;
+    }
+    if (!pass) {
+        console.error(`   FAILED: ${name}`);
+        return;
+    }
+    console.log(` PASSED: ${name}`);
+};
+
 export {
     compact,
     expand,
@@ -234,7 +264,8 @@ export {
     cleanup_skill_text_line,
     drop_no_value,
     erase_no_value,
-    convert_power
+    convert_power,
+    assert_equal_card_data
 };
 
 

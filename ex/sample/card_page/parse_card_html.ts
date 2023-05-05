@@ -10,7 +10,7 @@ import {
     drop_no_value,
     erase_no_value,
     trim_img_path,
-    convert_power, expand
+    convert_power, expand, assert_equal_card_data
 } from "../../compact/functions.js";
 import {type CardData} from "../../types/card.js";
 import {FORMAT, CARD_TYPE, COMMON_WORD, TEAM_TYPE} from "../../constants.js";
@@ -235,10 +235,11 @@ const parse_modern_structure = ($: any): CardData | false => {
 
             const d: CardData | false = parse_modern_structure($);
             if (d) {
-                console.log(expand(compact(d)));
+                // assert_equal_card_data(d.name, expand(compact(d)), d);
+                // assert_equal_card_data(d.name, compact(d), compact(expand(compact(d))));
                 console.log(d);
-                console.log('----------------')
-                // console.log(d);
+                console.log(compact(d));
+                console.log('');
             }
         });
     });
