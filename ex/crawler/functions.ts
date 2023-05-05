@@ -32,6 +32,7 @@ const cherry_pick_html = (html: string, selector: string): string => {
 };
 
 const create_cache_filename = <T>(baseUrl: string, payload: T) => {
+    console.log({baseUrl})
     // @ts-ignore
     const keys: (keyof T)[] = Object.keys(payload).sort();
     const words: string[] = [];
@@ -61,11 +62,11 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, complete: (content: string, hit: boolean) => void) => {
+const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, complete: (content: string, hit: boolean) => void) => {
     endpoint = endpoint || 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
     referrer = referrer || DEFAULT_REFERRER;
-
-    const cache_file_name = create_cache_filename(endpoint.split('/card/')[1], payload);
+    // console.log({endpoint, url_separator})
+    const cache_file_name = create_cache_filename(endpoint.split(url_separator)[1], payload);
     const cache_file_fullpath = path.resolve(script_dir, cache_file_name);
     const cache_hit = fs.existsSync(cache_file_fullpath);
 

@@ -244,3 +244,5 @@ const parse_modern_structure = ($: any): CardData | false => {
         });
     });
 })();
+
+export {parse_modern_structure}

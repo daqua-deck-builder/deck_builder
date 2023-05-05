@@ -2,11 +2,12 @@ import * as cheerio from 'cheerio';
 import {cover_condition, send_request_and_cache} from "../../crawler/functions.js";
 import async from 'async';
 import _ from 'underscore';
+import {parse_modern_structure} from "../card_page/parse_card_html.js";
 
 const product_no = 'WXi-11';
 
 const procedure = (product_no: string) => {
-    send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', (page1: string) => {
+    send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/', (page1: string) => {
         const $ = cheerio.load(page1);
         // @ts-ignore
         const max_page = get_max_page($('.generalPager a').map(parse_href));
@@ -18,7 +19,7 @@ const procedure = (product_no: string) => {
                 send_request_and_cache('GET', '', cover_condition({
                     product_no,
                     card_page: page
-                }), '.cardDip', '', (any_page_content: string, hit: boolean) => {
+                }), '.cardDip', '', '/card/', (any_page_content: string, hit: boolean) => {
                     if (hit) {
                         done(null, any_page_content);
                     } else {
@@ -45,13 +46,39 @@ const procedure = (product_no: string) => {
 
             all_links = _.uniq(all_links);
 
-            all_links.forEach((l) => {
-                console.log(l)
+            console.log(`${all_links.length} items found.`);
+
+            const funcs = all_links.map((detail_link: string) => {
+                return (done: (err: Error | null, boolean) => void) => {
+                    const url = new URL(detail_link);
+                    // @ts-ignore
+                    const payload = search_params_to_object(url.searchParams);
+
+                    send_request_and_cache('GET', url.origin + url.pathname, payload, '.cardDetail', '', '/products/wixoss/', (content: string, hit: boolean): void => {
+                        console.log(parse_modern_structure(cheerio.load(content)));
+                        if (hit) {
+                            done(null, true);
+                        } else {
+                            setTimeout(() => {
+                                done(null, true);
+                            }, 3000);
+                        }
+                    });
+                }
             });
 
-            console.log(`${all_links.length} items.`);
+            async.series(funcs, (errors: Error | null, results: boolean[]) => {
+                console.log(`${product_no} ${results.length} items cached.`);
+            });
         });
     });
+};
+const search_params_to_object = (searchParams: URLSearchParams): Record<string, string> => {
+    const obj = {};
+    for (let [key, value] of searchParams.entries()) {
+        obj[key] = value;
+    }
+    return obj;
 };
 
 const parse_href = (index: number, elem: cheerio.Element): Record<string, string> => {
