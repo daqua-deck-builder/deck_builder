@@ -8,6 +8,10 @@ import process from "process";
 import * as stream from "stream";
 import {SearchCondition} from "../types/crawler.js";
 
+import {PrismaClient} from '@prisma/client'
+
+const prisma = new PrismaClient();
+
 const script_dir = path.dirname(process.argv[1]);
 
 const object_to_query_string = (obj: Object): string => {
@@ -187,7 +191,20 @@ const cover_condition = (arg: Partial<SearchCondition>): SearchCondition => {
     };
 };
 
+// 画像をサイトに取りに行く前に、jsonとして取得済みのスラッグであることを確認する
+const check_existing_by_slug = async (slug: string) => {
+    return new Promise<boolean>(async (resolve: (exists: boolean) => void) => {
+
+        const exists = await prisma.card.findFirst({
+            where: {slug}
+        });
+
+        resolve(!!exists);
+    });
+};
+
 export {
     cover_condition,
-    send_request_and_cache
+    send_request_and_cache,
+    check_existing_by_slug
 }

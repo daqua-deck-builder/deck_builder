@@ -2,6 +2,7 @@ import express, {Request} from "express";
 import https from 'https';
 import fs from 'node:fs';
 import path from 'path';
+import {check_existing_by_slug} from "../crawler/functions.js";
 
 const img_proxy_router = express.Router();
 
@@ -80,16 +81,22 @@ img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: s
         if (err && err.code === 'ENOENT') {
             console.log('cache miss');
 
-            // todo: そもそもキャッシュ済みのカード(WXDi...)としてDBに登録されているかをチェックする
-
-            proxy_download(official_file_url, cache_file_name, (success: boolean) => {
-                if (success) {
-                    fs.readFile(cache_file_name, (err: NodeJS.ErrnoException | null, data: Buffer) => {
-                        // todo: ブラウザにもキャッシュを依頼するヘッダを付与する
-                        res.writeHead(200, {'Content-Type': 'image/jpeg'});
-                        res.end(data, 'binary');
+            check_existing_by_slug(img_file.replace(/\..*/, '')).then((data_existing: boolean) => {
+                if (data_existing) {
+                    proxy_download(official_file_url, cache_file_name, (success: boolean) => {
+                        if (success) {
+                            fs.readFile(cache_file_name, (err: NodeJS.ErrnoException | null, data: Buffer) => {
+                                // todo: ブラウザにもキャッシュを依頼するヘッダを付与する
+                                res.writeHead(200, {'Content-Type': 'image/jpeg'});
+                                res.end(data, 'binary');
+                            });
+                        } else {
+                            res.status(503);
+                            res.send('image not found');
+                        }
                     });
                 } else {
+                    // URL直接入力の疑い
                     res.status(503);
                     res.send('image not found');
                 }
