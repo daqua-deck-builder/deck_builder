@@ -48,34 +48,33 @@ const proxy_download = (url: string, local_filepath: string, next: (success: boo
     });
 };
 
-const create_official_image_path = (filename_official: string): string => {
+const create_official_image_path = (product_no: string, filename_official: string): string => {
     // WXDi-Pxx-xxx.jpg
-    return `https://www.takaratomy.co.jp/products/wixoss/img/card/WXDi/${filename_official}`;
+    return `https://www.takaratomy.co.jp/products/wixoss/img/card/${product_no}/${filename_official}`;
 };
 
+const split_wx_format = (path_original: string): { name: string, sub_path: string } => {
+    const tokens: string[] = path_original.split('-');
+    const name: string = tokens.pop() || '';
+    const sub_path: string = tokens.join('/');
+
+    if (name === '') {
+        throw`image file name error: ${path_original}`;
+    }
+
+    return {
+        name, sub_path
+    };
+};
 
 img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: string }>, res) => {
     const cache_dir: string = req.app.locals.image_cache_dir;
     const {dir, img_file} = req.params;
-    const [sub_dir1, sub_dir2, ...file_name_tokens] = img_file.split('-');  // todo: ハイフンの数が2つとは限らない
+    const {name, sub_path} = split_wx_format(img_file);
 
-    // console.log({
-    //     img_file,
-    //     sub_dir1,
-    //     sub_dir2,
-    //     file_name_tokens
-    // })
-
-    const img_file_final_local = file_name_tokens.join('-');
-    const cache_file_name = path.resolve(cache_dir, req.params.dir, sub_dir1, sub_dir2, img_file_final_local);
-
-    // console.log(dir);
-    const official_file_url = create_official_image_path(img_file);
-    //
-    // console.log({
-    //     cache_file_name,
-    //     official_file_url
-    // })
+    const cache_file_name = path.resolve(cache_dir, req.params.dir, sub_path, name);
+    const official_file_url = create_official_image_path(dir, img_file);
+    // console.log({dir, official_file_url, cache_file_name})
 
     fs.stat(cache_file_name, {}, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
         if (err && err.code === 'ENOENT') {
