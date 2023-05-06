@@ -80,7 +80,7 @@ const filtered_cards = computed(() => {
                 td {{ c.lrig }}
                 td {{ c.level }}
                 td {{ c.klass }}
-                td {{ c.power }}
+                td(v-text="c.power.replace(/k/, '000')")
         tbody.not_found(v-if="filtered_cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
