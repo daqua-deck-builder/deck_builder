@@ -1,19 +1,35 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import type {CardData} from '../../../ex/types/card.js'
 import axios, {type AxiosResponse} from "axios";
 
 const cards = ref<CardData[]>([]);
+const filter_word = ref('');
 
 onMounted(() => {
     axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardData[] }>) => {
         cards.value = res.data.cards;
     });
 });
+
+const filtered_cards = computed(() => {
+    const fw = filter_word.value.trim().toUpperCase();
+    if (fw) {
+        return cards.value.filter((c: CardData) => {
+            return (c.name.indexOf(fw) > -1)
+                || (c.slug.indexOf(fw) > -1)
+                || (c.pronounce.indexOf(fw) > -1)
+                ;
+        });
+    } else {
+        return cards.value;
+    }
+});
 </script>
 
 <template lang="pug">
-span.amount(v-text="`${cards.length} items`")
+input(type="text" name="filter_word" v-model="filter_word")
+span.amount(v-text="`${filtered_cards.length} items`")
 table
     colgroup
         col(style="width: 140px;")
@@ -34,7 +50,7 @@ table
             th 種族
             th パワー
     tbody
-        tr(v-for="c in cards" :key="c.slug" :data-color="c.color")
+        tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color")
             td {{ c.slug }}
             td {{ c.name }}
             td {{ c.color }}
@@ -42,6 +58,9 @@ table
             td {{ c.level }}
             td {{ c.klass }}
             td {{ c.power }}
+    tbody.not_found(v-if="filtered_cards.length === 0")
+        tr
+            td(colspan="7") 検索条件に合致するカードはありません。
 </template>
 
 <style scoped lang="less">
