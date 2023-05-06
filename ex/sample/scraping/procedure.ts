@@ -124,5 +124,5 @@ const parse_list_page_to_urls = (elem: string): string[] => {
     return items;
 };
 
-const product_no = 'WX-04';
+const product_no = 'WXi-CP01';
 procedure(product_no);

@@ -118,7 +118,7 @@ const parse_modern_structure = ($: any): CardData | false => {
             klass = $cd.eq(1).text().split('\n');
             break;
         default:
-            cost = $cd.eq(5).text().split('\n');    // スペル/\/アーツのコスト
+            cost = $cd.eq(5).text().split('\n');    // スペル/アーツのコスト
             break;
     }
 
@@ -155,7 +155,7 @@ const parse_modern_structure = ($: any): CardData | false => {
         }
         team = [$cd.eq(8).text()];
     } else if (card_type.startsWith(CARD_TYPE.SIGNI)) {
-        if (card_type.indexOf(CARD_TYPE.RESONA) > -1) {    // 現状レゾナはレゾナ(クラフトしか存在しない)
+        if (card_type.indexOf(CARD_TYPE.RESONA) > -1) {    // 現状レゾナはレゾナ(クラフトしか存在しない) todo: そうではないかも
             card_type = CARD_TYPE.RESONA_CRAFT;
         }
         team = $cd.eq(8).text().split('/');
