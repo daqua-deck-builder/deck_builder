@@ -8,4 +8,4 @@ GET http://192.168.33.10:3000/g/cards.json
 POST http://192.168.33.10:3000/api/fetch_card_data.json
 Content-Type: application/json
 
-{"product_no": "WX-06"}
+{"product_no": "WX-07"}
