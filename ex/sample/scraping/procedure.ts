@@ -6,10 +6,10 @@ import {parse_modern_structure} from "../card_page/parse_card_html.js";
 import {CardData} from "../../types/card.js";
 import {insert_card_if_new} from "./store.js";
 
-const procedure = async (product_no: string) => {
+const procedure = async (product_no: string, text_cache_dir: string) => {
     return new Promise<void>((resolve, reject) => {
 
-        send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/', (page1: string) => {
+        send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/',  text_cache_dir, (page1: string) => {
             const $ = cheerio.load(page1);
 
             // @ts-ignore
@@ -26,7 +26,7 @@ const procedure = async (product_no: string) => {
                     send_request_and_cache('GET', '', cover_condition({
                         product_no,
                         card_page: page
-                    }), '.cardDip', '', '/card/', (any_page_content: string, hit: boolean) => {
+                    }), '.cardDip', '', '/card/', text_cache_dir, (any_page_content: string, hit: boolean) => {
                         if (hit) {
                             done(null, any_page_content);
                         } else {
@@ -61,7 +61,7 @@ const procedure = async (product_no: string) => {
                         // @ts-ignore
                         const payload = search_params_to_object(url.searchParams);
 
-                        send_request_and_cache('GET', url.origin + url.pathname, payload, '.cardDetail', '', '/products/wixoss/', (content: string, hit: boolean): void => {
+                        send_request_and_cache('GET', url.origin + url.pathname, payload, '.cardDetail', '', '/products/wixoss/', text_cache_dir, (content: string, hit: boolean): void => {
                             const cd: CardData | false = parse_modern_structure(cheerio.load(content));
                             if (cd) {
                                 insert_card_if_new(cd).then(() => {

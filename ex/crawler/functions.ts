@@ -4,15 +4,12 @@ import https from "https";
 import {IncomingMessage} from "http";
 import zlib from "zlib";
 import * as cheerio from "cheerio";
-import process from "process";
 import * as stream from "stream";
 import {SearchCondition} from "../types/crawler.js";
 
 import {PrismaClient} from '@prisma/client'
 
 const prisma = new PrismaClient();
-
-const script_dir = path.dirname(process.argv[1]);
 
 const object_to_query_string = (obj: Object): string => {
     return Object.keys(obj)
@@ -66,12 +63,12 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, complete: (content: string, hit: boolean) => void) => {
+const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, text_cache_dir: string, complete: (content: string, hit: boolean) => void) => {
     endpoint = endpoint || 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
     referrer = referrer || DEFAULT_REFERRER;
     // console.log({endpoint, url_separator})
     const cache_file_name = create_cache_filename(endpoint.split(url_separator)[1], payload);
-    const cache_file_fullpath = path.resolve(script_dir, cache_file_name);
+    const cache_file_fullpath = path.resolve(text_cache_dir, cache_file_name);
     const cache_hit = fs.existsSync(cache_file_fullpath);
 
     console.log(`cache file: ${cache_file_fullpath}`)
