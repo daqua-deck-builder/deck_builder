@@ -9,8 +9,13 @@ import {insert_card_if_new} from "./store.js";
 const procedure = (product_no: string) => {
     send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/', (page1: string) => {
         const $ = cheerio.load(page1);
+
         // @ts-ignore
-        const max_page = get_max_page($('.generalPager a').map(parse_href));
+        const items_amount = Number($('h3:first span').text().match(/(\d+)/)[0]);
+        const items_per_page = 3 * 7;
+
+        // @ts-ignore
+        const max_page = Math.ceil(items_amount / items_per_page);
 
         const pages = _.range(2, max_page + 1); // ここの1ページめは既にキャッシュ済みなので2から
 
@@ -87,16 +92,6 @@ const search_params_to_object = (searchParams: URLSearchParams): Record<string, 
         obj[key] = value;
     }
     return obj;
-};
-
-const parse_href = (index: number, elem: cheerio.Element): Record<string, string> => {
-    let o: Record<string, string> = {};
-    // @ts-ignore
-    (elem.attribs.href || '').replace(/^\?/, '').split('&').forEach(fragment => {
-        const [key, value] = fragment.split('=');
-        o[key] = value || '';
-    });
-    return o;
 };
 
 const get_max_page = (items: Record<string, string>[]) => {
