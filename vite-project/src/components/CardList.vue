@@ -46,11 +46,11 @@ const filtered_cards = computed(() => {
 
 <template lang="pug">
 .left_side(style="width: 781px;")
-    select(v-model.number="deck_type")
+    select.deck_type(v-model.number="deck_type")
         option(value="0") 指定しない
         option(value="1") メインデッキ
         option(value="2") ルリグデッキ
-    input(type="text" name="filter_word" v-model="filter_word")
+    input.filter_word(type="text" name="filter_word" v-model="filter_word")
     span.amount(v-text="`${filtered_cards.length} items`")
     table
         colgroup
@@ -161,4 +161,31 @@ tr {
 //.margin_left {
 //    margin-left: 5px;
 //}
+select.deck_type, input[type="text"].filter_word {
+    //font-size: 1.2rem;
+    //padding: 3px;
+    //margin: 3px;
+    //line-height: 1.3rem;
+    font-family: inherit;
+    font-size: 100%;
+    line-height: 1.15;
+    margin: 0 10px 0 0;
+    padding: 0.5em 1em;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
+}
+
+select {
+    background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='none' stroke='black' stroke-linecap='round' d='M2 1L1 3h2zm0 0L3 3H1z'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.5em center;
+    background-size: 0.65em auto;
+    &.deck_type {
+        padding-right: 2rem;
+    }
+}
 </style>

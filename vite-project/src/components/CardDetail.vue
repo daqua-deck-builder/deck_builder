@@ -75,9 +75,14 @@ img.illustration {
 }
 
 .skill {
-    margin-bottom: 1rem;
+    margin-bottom: 5px;
     line-height: 1.5rem;
     background-color: #d5d5d5;
-    border-radius: 9px;
+    border-radius: 10px;
+    padding: 10px;
+
+    &:last-child {
+        margin-bottom: 0;
+    }
 }
 </style>
