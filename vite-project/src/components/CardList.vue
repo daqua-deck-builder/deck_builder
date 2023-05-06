@@ -6,9 +6,21 @@ import CardDetail from "./CardDetail.vue";
 
 const cards = ref<CardData[]>([]);
 const filter_word = ref('');
-const deck_type = ref<1 | 2 | 0>(0);
+
+const deck_type = ref<1 | 2 | 0>(0);   // 1: メイン, 2: ルリグ,  0: 指定なし
+
 // @ts-ignore
 const target = ref<CardData>({slug: ''});
+
+const _burst = ref<0 | 1 | 2>(0);
+const burst = computed({
+    get: () => {
+        return deck_type.value === 2 ? 0 : _burst.value;
+    },
+    set: (value: 0 | 1 | 2) => {
+        _burst.value = value;
+    }
+})
 
 const set_target = (cd: CardData) => {
     target.value = cd;
@@ -22,7 +34,11 @@ onMounted(() => {
 
 const filtered_cards = computed(() => {
     const fw = filter_word.value.trim().toUpperCase();
-    const skip: boolean = fw !== '' && deck_type.value !== 0;
+    const skip: boolean = (fw !== '')
+        && (deck_type.value !== 0)
+        && (burst.value === 0)
+    ;
+
     if (skip) {
         return cards.value;
     } else {
@@ -30,14 +46,33 @@ const filtered_cards = computed(() => {
             return (c.name.indexOf(fw) > -1)
                 || (c.slug.indexOf(fw) > -1)
                 || (c.pronounce.indexOf(fw) > -1)
+                // || (c.has_lb === (burst.value === 2))
                 ;
         }).filter((c: CardData) => {
             if (deck_type.value === 1) {
-                return ['シグニ', 'スペル'].includes(c.card_type);
+                const is_main_deck_card: boolean = ['シグニ', 'スペル'].includes(c.card_type);
+
+                if (is_main_deck_card) {
+                    if (burst.value === 0) {
+                        return true;
+                    } else if (burst.value === 1) {
+                        return c.has_lb;
+                    } else {
+                        return !c.has_lb;
+                    }
+                } else {
+                    return false;
+                }
             } else if (deck_type.value === 2) {
                 return !['シグニ', 'スペル'].includes(c.card_type);
             } else {
-                return true;
+                if (burst.value === 0) {
+                    return true;
+                } else if (burst.value === 1) {
+                    return c.has_lb;
+                } else {
+                    return !c.has_lb;
+                }
             }
         });
     }
@@ -50,6 +85,10 @@ const filtered_cards = computed(() => {
         option(value="0") 指定しない
         option(value="1") メインデッキ
         option(value="2") ルリグデッキ
+    select.deck_type(v-model.number="burst")
+        option(value="0") 指定しない
+        option(value="1") バーストあり
+        option(value="2") バーストなし
     input.filter_word(type="text" name="filter_word" v-model="filter_word")
     span.amount(v-text="`${filtered_cards.length} items`")
     table
@@ -184,6 +223,7 @@ select {
     background-repeat: no-repeat;
     background-position: right 0.5em center;
     background-size: 0.65em auto;
+
     &.deck_type {
         padding-right: 2rem;
     }
