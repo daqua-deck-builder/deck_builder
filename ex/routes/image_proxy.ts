@@ -1,4 +1,4 @@
-import express, {Request} from "express";
+import express, {Request, Response} from "express";
 import https from 'https';
 import fs from 'node:fs';
 import path from 'path';
@@ -68,6 +68,20 @@ const split_wx_format = (path_original: string): { name: string, sub_path: strin
     };
 };
 
+const read_binary_file_and_response = (cache_file_name: string, res: Response): void => {
+    fs.readFile(cache_file_name, (err: NodeJS.ErrnoException | null, data: Buffer) => {
+
+        const maxAge = 60 * 60 * 24 * 30; // ブラウザ自身にも30日でキャッシュしてもらう
+
+        res.writeHead(200, {
+            'Content-Type': 'image/jpeg',
+            'Cache-Control': `public, max-age=${maxAge}`,
+            'Expires': new Date(Date.now() + maxAge * 1000).toUTCString()
+        });
+        res.end(data, 'binary');
+    });
+};
+
 img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: string }>, res) => {
     const cache_dir: string = req.app.locals.image_cache_dir;
     const {dir, img_file} = req.params;
@@ -75,6 +89,7 @@ img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: s
 
     const cache_file_name = path.resolve(cache_dir, req.params.dir, sub_path, name);
     const official_file_url = create_official_image_path(dir, img_file);
+
     // console.log({dir, official_file_url, cache_file_name})
 
     fs.stat(cache_file_name, {}, (err: NodeJS.ErrnoException | null, stats: fs.Stats) => {
@@ -85,11 +100,7 @@ img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: s
                 if (data_existing) {
                     proxy_download(official_file_url, cache_file_name, (success: boolean) => {
                         if (success) {
-                            fs.readFile(cache_file_name, (err: NodeJS.ErrnoException | null, data: Buffer) => {
-                                // todo: ブラウザにもキャッシュを依頼するヘッダを付与する
-                                res.writeHead(200, {'Content-Type': 'image/jpeg'});
-                                res.end(data, 'binary');
-                            });
+                            read_binary_file_and_response(cache_file_name, res);
                         } else {
                             res.status(503);
                             res.send('image not found');
@@ -103,10 +114,7 @@ img_proxy_router.get('/:dir/:img_file', (req: Request<{ dir: string, img_file: s
             });
         } else {
             console.log('cache hit');
-            fs.readFile(cache_file_name, (err: NodeJS.ErrnoException | null, data: Buffer) => {
-                res.writeHead(200, {'Content-Type': 'image/jpeg'});
-                res.end(data, 'binary');
-            });
+            read_binary_file_and_response(cache_file_name, res);
         }
     });
 });
