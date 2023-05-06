@@ -3,6 +3,7 @@ import {computed, onMounted, ref} from "vue";
 import type {CardDataClient} from '../../../ex/types/card.js'
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
+import useGradientBg from "../composable/multi_color_gradient_bg";
 
 const cards = ref<CardDataClient[]>([]);
 const filter_word = ref('');
@@ -97,29 +98,7 @@ const filtered_cards = computed(() => {
     // }
 });
 
-const bg_gradient_style = computed(() => {
-    return (c: CardDataClient) => {
-        if (c.color.indexOf(',') > -1) {
-            const colors = c.color.split(',');
-            const width_1 = Math.floor(100 / (colors.length - 1));
-            const gradient_code: string = colors.map((c: string, i: number) => {
-                const color_code: string = {
-                    '白': '#fff1b4',
-                    '青': '#b4ceff',
-                    '黒': '#9263f9',
-                    '赤': '#ffb4b4',
-                    '緑': '#ccffb4',
-                    '無': '#cfcfcf'
-                }[c] || '#ffffff';
-            return `${color_code} ${i * width_1}%`;
-            }).join(',');
-
-            return `background: linear-gradient(to right, ${gradient_code});`;
-        } else {
-            return '';
-        }
-    }
-});
+const {bg_gradient_style} = useGradientBg();
 </script>
 
 <template lang="pug">
@@ -141,6 +120,7 @@ const bg_gradient_style = computed(() => {
             option(value="赤") 赤
             option(value="緑") 緑
             option(value="無") 無
+            option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model="filter_word")
         span.amount(v-text="`${filtered_cards.length} items`")
     table
@@ -183,6 +163,8 @@ const bg_gradient_style = computed(() => {
 </template>
 
 <style scoped lang="less">
+@import "../composable/colored_table_row.less";
+
 table {
     table-layout: fixed;
     border-collapse: collapse;
@@ -211,29 +193,7 @@ th {
 }
 
 tr {
-    &[data-color="白"] {
-        background-color: #fff1b4;
-    }
-
-    &[data-color="青"] {
-        background-color: #b4ceff;
-    }
-
-    &[data-color="黒"] {
-        background-color: #9263f9;
-    }
-
-    &[data-color="赤"] {
-        background-color: #ffb4b4;
-    }
-
-    &[data-color="緑"] {
-        background-color: #ccffb4;
-    }
-
-    &[data-color="無"] {
-        background-color: #cfcfcf;
-    }
+    .colored_table_row();
 }
 
 .left_side, .right_side {

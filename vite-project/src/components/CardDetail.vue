@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type {CardData} from '../../../ex/types/card.js';
+import type {CardDataClient} from '../../../ex/types/card.js';
 import {computed} from "vue";
+import useGradientBg from "../composable/multi_color_gradient_bg";
 
 const props = defineProps<{
     card: {
@@ -8,12 +9,10 @@ const props = defineProps<{
         img: string;
         card_type: string;
         skills: string,
-        type: CardData, required: true
+        color: string
+        type: CardDataClient, required: true
     },
-    is_owner: {
-        type: boolean,
-        default: false
-    }
+    is_owner: boolean
 }>();
 
 const img_path = computed(() => {
@@ -25,8 +24,12 @@ const img_path = computed(() => {
 });
 
 const skills = computed(() => {
-    return props.card.skills.split('@@').filter((text: string) => {return !!text});
-})
+    return props.card.skills.split('@@').filter((text: string) => {
+        return !!text
+    });
+});
+
+const {bg_gradient_style} = useGradientBg();
 
 </script>
 
@@ -35,9 +38,9 @@ table.card_detail(style="width: 502px;")
     colgroup
         col(style="width: 250px;")
         col(style="width: 250px;")
-    tr
-        td {{ props.card.slug }}
-        td {{ props.card.name }}
+    tr.card_name(:style="bg_gradient_style(props.card)" :data-color="props.card.color")
+        td.no_right_border {{ props.card.slug }}
+        td.no_left_border {{ props.card.name }}
     tr(v-if="is_owner")
         td.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
@@ -50,6 +53,8 @@ table.card_detail(style="width: 502px;")
 </template>
 
 <style scoped lang="less">
+@import "../composable/colored_table_row.less";
+
 table.card_detail {
     table-layout: fixed;
     border-collapse: collapse;
@@ -60,6 +65,22 @@ th, td {
     background-color: white;
     color: black;
     border: 1px solid #494949;
+}
+
+tr {
+    .colored_table_row();
+}
+
+tr.card_name td {
+    background-color: transparent;
+
+    &.no_right_border {
+        border-right-width: 0;
+    }
+
+    &.no_left_border {
+        border-left-width: 0;
+    }
 }
 
 td.image_wrapper {
