@@ -1,26 +1,16 @@
-import express, {type Request, Response} from 'express'
-import {PrismaClient} from '@prisma/client'
-const prisma = new PrismaClient();
+import express from 'express'
+import {api_router} from "./routes/index.js";
 
 const port = 3000;
 
 const app = express();
 
-const router = express.Router();
-router.get('/', (req: Request, res: Response) => {
-    res.json({hello: 'world'})
-});
-
-router.get('/users', async (req: Request, res: Response) => {
-    const users = await prisma.user.findMany()
-    res.json({users});
-});
-
 app.use(express.static('../vite-project/dist'));
+app.use('/g', express.static('./static/generated'));
 
-app.use('/api', router);
+app.use('/api', api_router);
 
 
 app.listen(port, () => {
     console.log(`start listening on port ${port}`);
-})
+});

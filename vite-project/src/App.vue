@@ -3,6 +3,7 @@
 import axios, {type AxiosResponse} from "axios";
 import {ref, type Ref} from "vue";
 import {onMounted} from "vue";
+import CardList from "./components/CardList.vue";
 
 const message: Ref<string> = ref('');
 
@@ -17,7 +18,8 @@ onMounted(() => {
 </script>
 
 <template lang="pug">
-HelloWorld(:msg="message")
+CardList
+//HelloWorld(:msg="message")
 </template>
 
 <style scoped>

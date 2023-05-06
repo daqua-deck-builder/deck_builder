@@ -6,3 +6,4 @@ vite-project/.vscode
 /ex/prisma/db.sqlite
 /ex/.env
 /ex/prisma/db.sqlite-journal
+/ex/static/generated/cards.json
