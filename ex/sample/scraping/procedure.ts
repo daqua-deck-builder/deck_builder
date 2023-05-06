@@ -6,8 +6,6 @@ import {parse_modern_structure} from "../card_page/parse_card_html.js";
 import {CardData} from "../../types/card.js";
 import {insert_card_if_new} from "./store.js";
 
-const product_no = 'WXi-11';
-
 const procedure = (product_no: string) => {
     send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/', (page1: string) => {
         const $ = cheerio.load(page1);
@@ -51,7 +49,7 @@ const procedure = (product_no: string) => {
             console.log(`${all_links.length} items found.`);
 
             const funcs = all_links.map((detail_link: string) => {
-                return (done: (err: Error | null, boolean) => void) => {
+                return (done: (err: Error | null, result: boolean) => void) => {
                     const url = new URL(detail_link);
                     // @ts-ignore
                     const payload = search_params_to_object(url.searchParams);
@@ -75,6 +73,7 @@ const procedure = (product_no: string) => {
                 }
             });
 
+            // @ts-ignore
             async.series(funcs, (errors: Error | null, results: boolean[]) => {
                 console.log(`${product_no} ${results.length} items cached.`);
             });
@@ -84,6 +83,7 @@ const procedure = (product_no: string) => {
 const search_params_to_object = (searchParams: URLSearchParams): Record<string, string> => {
     const obj = {};
     for (let [key, value] of searchParams.entries()) {
+        // @ts-ignore
         obj[key] = value;
     }
     return obj;
@@ -124,4 +124,5 @@ const parse_list_page_to_urls = (elem: string): string[] => {
     return items;
 };
 
+const product_no = 'WX-04';
 procedure(product_no);

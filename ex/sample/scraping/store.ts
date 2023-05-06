@@ -49,30 +49,30 @@ const insert_card_if_new = async (data: CardData) => {
 
 export {insert_card_if_new}
 
-insert_card_if_new({
-    slug: 'WXDi-P00-036',
-    name: '紅魔姫 シュブニグラ',
-    pronounce: 'コウマキシュブニグラ',
-    img: 'WXDi/WXDi-P00-036.jpg',
-    card_type: 'シグニ',
-    lrig: [],
-    level: '3',
-    color: ['赤'],
-    klass: ['奏像：悪魔'],
-    cost: [],
-    limit: '',
-    power: '12k',
-    team: ['-'],
-    team_piece: false,
-    timing: ['-'],
-    rarity: 'SR',
-    has_lb: false,
-    lb_text: '',
-    skills: [
-        '【チーム】＜アンシエント・サプライズ＞',
-        '【チーム自】：このシグニがアタックしたとき、あなたの場にあるすべてのシグニが赤の場合、対戦相手のパワー１２０００以 下のシグニ１体を対象とし、《赤》《赤》を支払ってもよい。そうした場合、それをバニッシュする。',
-        '【出】《赤》《赤》《赤》：ターン終了時まで、このシグニは【ダブルクラッシュ】を得る。'
-    ],
-    story: '',
-    format: 3
-})
+// insert_card_if_new({
+//     slug: 'WXDi-P00-036',
+//     name: '紅魔姫 シュブニグラ',
+//     pronounce: 'コウマキシュブニグラ',
+//     img: 'WXDi/WXDi-P00-036.jpg',
+//     card_type: 'シグニ',
+//     lrig: [],
+//     level: '3',
+//     color: ['赤'],
+//     klass: ['奏像：悪魔'],
+//     cost: [],
+//     limit: '',
+//     power: '12k',
+//     team: ['-'],
+//     team_piece: false,
+//     timing: ['-'],
+//     rarity: 'SR',
+//     has_lb: false,
+//     lb_text: '',
+//     skills: [
+//         '【チーム】＜アンシエント・サプライズ＞',
+//         '【チーム自】：このシグニがアタックしたとき、あなたの場にあるすべてのシグニが赤の場合、対戦相手のパワー１２０００以 下のシグニ１体を対象とし、《赤》《赤》を支払ってもよい。そうした場合、それをバニッシュする。',
+//         '【出】《赤》《赤》《赤》：ターン終了時まで、このシグニは【ダブルクラッシュ】を得る。'
+//     ],
+//     story: '',
+//     format: 3
+// })
