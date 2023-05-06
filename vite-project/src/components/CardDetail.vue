@@ -44,6 +44,9 @@ table.card_detail(style="width: 502px;")
     tr(v-if="skills.length > 0")
         td(colspan="2")
             .skill(v-for="skill in skills" v-text="skill")
+    tr(v-else)
+        td(colspan="2")
+            .skill (効果を持っていません)
 </template>
 
 <style scoped lang="less">
