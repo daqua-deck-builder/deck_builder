@@ -3,6 +3,8 @@ import {cover_condition, send_request_and_cache} from "../../crawler/functions.j
 import async from 'async';
 import _ from 'underscore';
 import {parse_modern_structure} from "../card_page/parse_card_html.js";
+import {CardData} from "../../types/card.js";
+import {insert_card_if_new} from "./store.js";
 
 const product_no = 'WXi-11';
 
@@ -55,13 +57,19 @@ const procedure = (product_no: string) => {
                     const payload = search_params_to_object(url.searchParams);
 
                     send_request_and_cache('GET', url.origin + url.pathname, payload, '.cardDetail', '', '/products/wixoss/', (content: string, hit: boolean): void => {
-                        console.log(parse_modern_structure(cheerio.load(content)));
-                        if (hit) {
-                            done(null, true);
+                        const cd: CardData | false = parse_modern_structure(cheerio.load(content));
+                        if (cd) {
+                            insert_card_if_new(cd).then(() => {
+                                if (hit) {
+                                    done(null, true);
+                                } else {
+                                    setTimeout(() => {
+                                        done(null, true);
+                                    }, 3000);
+                                }
+                            });
                         } else {
-                            setTimeout(() => {
-                                done(null, true);
-                            }, 3000);
+                            done(null, true);
                         }
                     });
                 }

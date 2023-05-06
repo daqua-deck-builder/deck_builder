@@ -11,44 +11,49 @@ datasource db {
 }
 
 model User {
-  id      Int      @id @default(autoincrement())
-  name    String?
-  password  String @default("")
+  id       Int     @id @default(autoincrement())
+  name     String?
+  password String  @default("")
 }
 
 model Product {
-  id Int @id @default(autoincrement())
+  id   Int    @id @default(autoincrement())
   name String
   slug String @unique
 }
 
 model Color {
-  id Int @id @unique
-  slug  String
+  id   Int    @id @unique
+  slug String
 }
 
 model Card {
-  id  Int @id @default(autoincrement())
-  name  String
-  pronounce String
-  img String?
-  type  String
-  slug  String
-  story String?
-  format  Int
-  cost String
-  burst String
-  power Int
-  text  String?
-  level Int?
-  lrig  String?
-  timing String?
-  rarerity  String
-  color_card  Int
+  id         Int     @id @default(autoincrement())
+  slug       String  @unique
+  name       String
+  pronounce  String
+  img        String
+  card_type  String
+  lrig       String
+  level      String
+  color      String
+  klass      String
+  cost       String
+  limit      String
+  power      String
+  team       String
+  team_piece Boolean
+  timing     String
+  rarity     String
+  has_lb     Boolean
+  lb_text    String?
+  skills     String
+  story      String
+  format     Int
 }
 
 model ColorCard {
-  id Int @id @default(autoincrement())
-  card Int
+  id    Int @id @default(autoincrement())
+  card  Int
   color Int
 }
