@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
-import type {CardData} from '../../../ex/types/card.js'
+import type {CardDataClient} from '../../../ex/types/card.js'
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
 
-const cards = ref<CardData[]>([]);
+const cards = ref<CardDataClient[]>([]);
 const filter_word = ref('');
 
 const deck_type = ref<1 | 2 | 0>(0);   // 1: メイン, 2: ルリグ,  0: 指定なし
@@ -23,17 +23,17 @@ const burst = computed({
     }
 })
 
-const set_target = (cd: CardData) => {
+const set_target = (cd: CardDataClient) => {
     target.value = cd;
 };
 
 onMounted(() => {
-    axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardData[] }>) => {
+    axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
         cards.value = res.data.cards;
     });
 });
 
-const filter_single_shortcircuit = (c: CardData): boolean => {
+const filter_single_shortcircuit = (c: CardDataClient): boolean => {
     const fw = filter_word.value;
     const color_matches: boolean = (c.color.indexOf(color.value) > -1);
     const word_matches: boolean = (c.name.indexOf(fw) > -1);
@@ -93,8 +93,32 @@ const filtered_cards = computed(() => {
     // if (skip) {
     //     return cards.value;
     // } else {
-        return cards.value.filter(filter_single_shortcircuit);
+    return cards.value.filter(filter_single_shortcircuit);
     // }
+});
+
+const bg_gradient_style = computed(() => {
+    return (c: CardDataClient) => {
+        if (c.color.indexOf(',') > -1) {
+            const colors = c.color.split(',');
+            const width_1 = Math.floor(100 / (colors.length - 1));
+            const gradient_code: string = colors.map((c: string, i: number) => {
+                const color_code: string = {
+                    '白': '#fff1b4',
+                    '青': '#b4ceff',
+                    '黒': '#9263f9',
+                    '赤': '#ffb4b4',
+                    '緑': '#ccffb4',
+                    '無': '#cfcfcf'
+                }[c] || '#ffffff';
+            return `${color_code} ${i * width_1}%`;
+            }).join(',');
+
+            return `background: linear-gradient(to right, ${gradient_code});`;
+        } else {
+            return '';
+        }
+    }
 });
 </script>
 
@@ -138,7 +162,7 @@ const filtered_cards = computed(() => {
                 th 種族
                 th パワー
         tbody
-            tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color")
+            tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
                     span {{ c.name }}

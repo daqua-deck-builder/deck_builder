@@ -50,9 +50,14 @@ type CardData = {
     format: Format
 };
 
+type CardDataClient = CardData & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
+    color: string
+};
+
 export type {
     Story,
     Format,
     CardData,
+    CardDataClient,
     CardDataCompact
 };
