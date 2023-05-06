@@ -124,7 +124,11 @@ const filtered_cards = computed(() => {
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
 .right_side.margin_left
-    CardDetail(:card="target" v-if="target.slug")
+    CardDetail(
+        v-if="target.slug"
+        :card="target"
+        :is_owner="true"
+    )
 </template>
 
 <style scoped lang="less">

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type {CardData} from '../../../ex/types/card.js';
-import {computed, onMounted} from "vue";
+import {computed} from "vue";
 
 const props = defineProps<{
     card: {
@@ -9,6 +9,10 @@ const props = defineProps<{
         card_type: string;
         skills: string,
         type: CardData, required: true
+    },
+    is_owner: {
+        type: boolean,
+        default: false
     }
 }>();
 
@@ -34,7 +38,7 @@ table.card_detail(style="width: 502px;")
     tr
         td {{ props.card.slug }}
         td {{ props.card.name }}
-    tr
+    tr(v-if="is_owner")
         td.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
     tr(v-if="skills.length > 0")
