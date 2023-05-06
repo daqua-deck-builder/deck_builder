@@ -8,6 +8,7 @@ const cards = ref<CardData[]>([]);
 const filter_word = ref('');
 
 const deck_type = ref<1 | 2 | 0>(0);   // 1: メイン, 2: ルリグ,  0: 指定なし
+const color = ref<string>('');
 
 // @ts-ignore
 const target = ref<CardData>({slug: ''});
@@ -32,65 +33,92 @@ onMounted(() => {
     });
 });
 
+const filter_single_shortcircuit = (c: CardData): boolean => {
+    const fw = filter_word.value;
+    const color_matches: boolean = (c.color.indexOf(color.value) > -1);
+    const word_matches: boolean = (c.name.indexOf(fw) > -1);
+    const slug_matches: boolean = (c.slug.indexOf(fw) > -1);
+    const pronounce_matches: boolean = (c.pronounce.indexOf(fw) > -1);
+    const burst_matches: boolean = (() => {
+        if (burst.value === 0) {
+            return true;
+        } else if (burst.value === 1) {
+            return c.has_lb;
+        } else {
+            return !c.has_lb;
+        }
+    })();
+    // const deck_type_matches: boolean = (() => {
+    //     if (deck_type.value === 1) {
+    //         const is_main_deck_card: boolean = ['シグニ', 'スペル'].includes(c.card_type);
+    //
+    //         if (is_main_deck_card) {
+    //             if (burst.value === 0) {
+    //                 return true;
+    //             } else if (burst.value === 1) {
+    //                 return c.has_lb;
+    //             } else {
+    //                 return !c.has_lb;
+    //             }
+    //         } else {
+    //             return false;
+    //         }
+    //     } else if (deck_type.value === 2) {
+    //         return !['シグニ', 'スペル'].includes(c.card_type);
+    //     } else {
+    //         if (burst.value === 0) {
+    //             return true;
+    //         } else if (burst.value === 1) {
+    //             return c.has_lb;
+    //         } else {
+    //             return !c.has_lb;
+    //         }
+    //     }
+    // })();
+    return color_matches
+        && (word_matches || slug_matches || pronounce_matches)
+        && burst_matches
+        // || deck_type_matches
+        ;
+};
+
 const filtered_cards = computed(() => {
     const fw = filter_word.value.trim().toUpperCase();
     const skip: boolean = (fw !== '')
-        && (deck_type.value !== 0)
+        // && (deck_type.value !== 0)
         && (burst.value === 0)
+        && (color.value === '')
     ;
 
-    if (skip) {
-        return cards.value;
-    } else {
-        return cards.value.filter((c: CardData) => {
-            return (c.name.indexOf(fw) > -1)
-                || (c.slug.indexOf(fw) > -1)
-                || (c.pronounce.indexOf(fw) > -1)
-                // || (c.has_lb === (burst.value === 2))
-                ;
-        }).filter((c: CardData) => {
-            if (deck_type.value === 1) {
-                const is_main_deck_card: boolean = ['シグニ', 'スペル'].includes(c.card_type);
-
-                if (is_main_deck_card) {
-                    if (burst.value === 0) {
-                        return true;
-                    } else if (burst.value === 1) {
-                        return c.has_lb;
-                    } else {
-                        return !c.has_lb;
-                    }
-                } else {
-                    return false;
-                }
-            } else if (deck_type.value === 2) {
-                return !['シグニ', 'スペル'].includes(c.card_type);
-            } else {
-                if (burst.value === 0) {
-                    return true;
-                } else if (burst.value === 1) {
-                    return c.has_lb;
-                } else {
-                    return !c.has_lb;
-                }
-            }
-        });
-    }
+    // if (skip) {
+    //     return cards.value;
+    // } else {
+        return cards.value.filter(filter_single_shortcircuit);
+    // }
 });
 </script>
 
 <template lang="pug">
 .left_side(style="width: 781px;")
-    select.deck_type(v-model.number="deck_type")
-        option(value="0") 指定しない
-        option(value="1") メインデッキ
-        option(value="2") ルリグデッキ
-    select.deck_type(v-model.number="burst")
-        option(value="0") 指定しない
-        option(value="1") バーストあり
-        option(value="2") バーストなし
-    input.filter_word(type="text" name="filter_word" v-model="filter_word")
-    span.amount(v-text="`${filtered_cards.length} items`")
+    .conditions
+        select.deck_type(v-model.number="deck_type")
+            option(value="0") 枠色
+            option(value="1") メインデッキ
+            option(value="2") ルリグデッキ
+        select.deck_type(v-model.number="burst")
+            option(value="0") LB有無
+            option(value="1") バーストあり
+            option(value="2") バーストなし
+        select.deck_type(v-model="color")
+            option(value="") 色
+            option(value="白") 白
+            option(value="青") 青
+            option(value="黒") 黒
+            option(value="赤") 赤
+            option(value="緑") 緑
+            option(value="無") 無
+        input.filter_word(type="text" name="filter_word" v-model="filter_word")
+        span.amount(v-text="`${filtered_cards.length} items`")
     table
         colgroup
             col(style="width: 140px;")
@@ -100,7 +128,6 @@ const filtered_cards = computed(() => {
             col(style="width: 60px;")
             col(style="width: 120px;")
             col(style="width: 60px;")
-
         thead
             tr
                 th No.
@@ -165,7 +192,7 @@ tr {
     }
 
     &[data-color="青"] {
-        background-color: #ffb4b4;
+        background-color: #b4ceff;
     }
 
     &[data-color="黒"] {
@@ -201,14 +228,18 @@ tr {
     left: 820px;
 }
 
-//.margin_left {
-//    margin-left: 5px;
-//}
+.conditions {
+    margin-bottom: 12px;
+}
+
+span.amount {
+    display: inline-block;
+    line-height: 1rem;
+    font-size: 1rem;
+    width: 100px;
+}
+
 select.deck_type, input[type="text"].filter_word {
-    //font-size: 1.2rem;
-    //padding: 3px;
-    //margin: 3px;
-    //line-height: 1.3rem;
     font-family: inherit;
     font-size: 100%;
     line-height: 1.15;
