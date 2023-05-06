@@ -221,28 +221,31 @@ const parse_modern_structure = ($: any): CardData | false => {
     };
 };
 
-(() => {
-    const tests: string[] = process.argv.slice(2);
+if (process.argv[1].indexOf('parse_card_html') > -1) {
+    (() => {
+        const tests: string[] = process.argv.slice(2);
 
-    get_sample_file_list(process.argv[1], [], tests).forEach((card_file: string) => {
-        fs.readFile(card_file, (err: Error | null, _data: Buffer) => {
-            if (err) throw err;
-            const html: string = _data.toString();
+        get_sample_file_list(process.argv[1], [], tests).forEach((card_file: string) => {
+            console.log({card_file});
+            fs.readFile(card_file, (err: Error | null, _data: Buffer) => {
+                if (err) throw err;
+                const html: string = _data.toString();
 
-            const $: CheerioAPI = cheerio.load(html);
+                const $: CheerioAPI = cheerio.load(html);
 
-            console.log(card_file);
+                console.log(card_file);
 
-            const d: CardData | false = parse_modern_structure($);
-            if (d) {
-                // assert_equal_card_data(d.name, expand(compact(d)), d);
-                // assert_equal_card_data(d.name, compact(d), compact(expand(compact(d))));
-                console.log(d);
-                console.log(compact(d));
-                console.log('');
-            }
+                const d: CardData | false = parse_modern_structure($);
+                if (d) {
+                    // assert_equal_card_data(d.name, expand(compact(d)), d);
+                    // assert_equal_card_data(d.name, compact(d), compact(expand(compact(d))));
+                    console.log(d);
+                    console.log(compact(d));
+                    console.log('');
+                }
+            });
         });
-    });
-})();
+    }) ();
+}
 
 export {parse_modern_structure}

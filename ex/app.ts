@@ -10,6 +10,9 @@ const port = 3000;
 
 const app = express();
 app.locals.image_cache_dir = path.resolve(EXPRESS_ROOT, 'image_cache');
+app.locals.text_cache_dir = path.resolve(EXPRESS_ROOT, 'text_cache');
+
+app.use(express.json());
 
 app.use(express.static('../vite-project/dist'));
 
