@@ -21,7 +21,7 @@ const img_path = computed(() => {
 });
 
 const skills = computed(() => {
-    return props.card.skills.split('@@');
+    return props.card.skills.split('@@').filter((text: string) => {return !!text});
 })
 
 </script>
@@ -37,7 +37,7 @@ table.card_detail(style="width: 502px;")
     tr
         td.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
-    tr
+    tr(v-if="skills.length > 0")
         td(colspan="2")
             .skill(v-for="skill in skills" v-text="skill")
 </template>
@@ -75,6 +75,7 @@ img.illustration {
 }
 
 .skill {
+    text-align: left;
     margin-bottom: 5px;
     line-height: 1.5rem;
     background-color: #d5d5d5;
