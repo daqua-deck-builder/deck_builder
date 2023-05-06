@@ -17,12 +17,18 @@ api_router.get('/users', async (req: Request, res: Response) => {
 });
 
 api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
-    const cards = await prisma.card.findMany();
+    const cards = await prisma.card.findMany({
+        orderBy: [
+            {
+                slug: 'desc',
+            },
+        ]
+    });
+
     console.log('publishing start');
 
-    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards}), {encoding: 'utf-8'}, (a: any) => {
+    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards}), {encoding: 'utf-8'}, () => {
         console.log('publishing complete');
-        console.log(a);
         res.json({
             success: true
         });
