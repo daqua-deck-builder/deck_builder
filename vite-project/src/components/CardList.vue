@@ -5,6 +5,7 @@ import axios, {type AxiosResponse} from "axios";
 
 const cards = ref<CardData[]>([]);
 const filter_word = ref('');
+const deck_type = ref<1 | 2 | 0>(0);
 
 onMounted(() => {
     axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardData[] }>) => {
@@ -14,20 +15,33 @@ onMounted(() => {
 
 const filtered_cards = computed(() => {
     const fw = filter_word.value.trim().toUpperCase();
-    if (fw) {
+    const skip: boolean = fw !== '' && deck_type.value !== 0;
+    if (skip) {
+        return cards.value;
+    } else {
         return cards.value.filter((c: CardData) => {
             return (c.name.indexOf(fw) > -1)
                 || (c.slug.indexOf(fw) > -1)
                 || (c.pronounce.indexOf(fw) > -1)
                 ;
+        }).filter((c: CardData) => {
+            if (deck_type.value === 1) {
+                return ['シグニ', 'スペル'].includes(c.card_type);
+            } else if (deck_type.value === 2) {
+                return !['シグニ', 'スペル'].includes(c.card_type);
+            } else {
+                return true;
+            }
         });
-    } else {
-        return cards.value;
     }
 });
 </script>
 
 <template lang="pug">
+select(name="deck_type" v-model.number="deck_type")
+    option(value="0") 指定しない
+    option(value="1") メインデッキ
+    option(value="2") ルリグデッキ
 input(type="text" name="filter_word" v-model="filter_word")
 span.amount(v-text="`${filtered_cards.length} items`")
 table
