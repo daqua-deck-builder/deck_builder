@@ -8,8 +8,9 @@ const props = defineProps<{
         slug: string;
         img: string;
         card_type: string;
-        skills: string,
-        color: string
+        skills: string;
+        color: string;
+        coin: string;
         type: CardDataClient, required: true
     },
     is_owner: boolean
@@ -44,12 +45,16 @@ table.card_detail(style="width: 502px;")
     tr(v-if="is_owner")
         td.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
-    tr(v-if="skills.length > 0")
-        td(colspan="2")
-            .skill(v-for="skill in skills" v-text="skill")
-    tr(v-else)
-        td(colspan="2")
-            .skill (効果を持っていません)
+    tr.coin(v-if="props.card.coin")
+        th コイン
+        td {{ props.card.coin }}
+    tbody
+        tr(v-if="skills.length > 0")
+            td(colspan="2")
+                .skill(v-for="skill in skills" v-text="skill")
+        tr(v-else)
+            td(colspan="2")
+                .skill (効果を持っていません)
 </template>
 
 <style scoped lang="less">
@@ -80,6 +85,13 @@ tr.card_name td {
 
     &.no_left_border {
         border-left-width: 0;
+    }
+}
+
+tr.coin {
+    background-color: orange;
+    th, td {
+        background-color: transparent;
     }
 }
 

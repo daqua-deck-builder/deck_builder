@@ -156,7 +156,7 @@ const {bg_gradient_style} = useGradientBg();
                 td(colspan="7") 検索条件に合致するカードはありません。
 .right_side.margin_left
     CardDetail(
-        v-if="target.slug"
+        v-if="target.slug !== ''"
         :card="target"
         :is_owner="true"
     )

@@ -50,6 +50,7 @@ model Card {
   skills     String
   story      String
   format     Int
+  coin       String @default("")
 }
 
 model ColorCard {
