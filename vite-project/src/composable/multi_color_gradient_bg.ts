@@ -1,11 +1,13 @@
 import {computed} from 'vue';
 import type {CardDataClient} from '../../../ex/types/card.js'
 
+type StringMaybeContainComma = string;
+
 export default function useGradientBg() {
     const bg_gradient_style = computed(() => {
-        return (c: CardDataClient) => {
-            if (c.color.indexOf(',') > -1) {
-                const colors = c.color.split(',');
+        return (color: StringMaybeContainComma) => {
+            if (color.indexOf(',') > -1) {
+                const colors = color.split(',');
                 const offset: number = 10;  // 20 - 80 の間を等分する
                 const width_1 = Math.floor((100 - (offset * 2)) / (colors.length - 1));
                 const gradient_code: string = colors.map((c: string, i: number) => {

@@ -142,7 +142,7 @@ const {bg_gradient_style} = useGradientBg();
                 th 種族
                 th パワー
         tbody
-            tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c)")
+            tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
                     span {{ c.name }}

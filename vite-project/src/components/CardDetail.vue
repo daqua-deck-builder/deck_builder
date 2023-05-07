@@ -46,7 +46,7 @@ table.card_detail(style="width: 502px;")
     colgroup
         col(style="width: 250px;")
         col(style="width: 250px;")
-    tr.card_name(:style="bg_gradient_style(props.card)" :data-color="props.card.color")
+    tr.card_name(:style="bg_gradient_style(props.card.color)" :data-color="props.card.color")
         td.no_right_border {{ props.card.slug }}
         td.no_left_border.label(@click="show_name = !show_name") {{ label }}
     tr(v-if="is_owner")
