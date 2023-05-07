@@ -50,7 +50,14 @@ model Card {
   skills     String
   story      String
   format     Int
-  coin       String @default("")
+  coin       String  @default("")
+}
+
+model ExtendParameterSetting {
+  id     Int    @id @default(autoincrement())
+  slug   String @unique
+  json   String
+  method String
 }
 
 model ColorCard {

@@ -2,6 +2,7 @@ import express, {Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
 import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
+import {CardDataClient, CardDataCompact} from "../types/card.js";
 
 const prisma = new PrismaClient();
 
@@ -17,7 +18,7 @@ api_router.get('/users', async (req: Request, res: Response) => {
 });
 
 api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
-    const cards = await prisma.card.findMany({
+    const cards: CardDataClient[] = await prisma.card.findMany({
         orderBy: [
             {
                 slug: 'desc',
@@ -25,9 +26,23 @@ api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
         ]
     });
 
+    const ep_settings = await prisma.ExtendParameterSetting.findMany();
+
     console.log('publishing start');
 
-    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards}), {encoding: 'utf-8'}, () => {
+    const cards_modified: CardDataClient[] = cards.map((c: CardDataClient) => {
+        for (let i = 0; i < ep_settings.length; i++) {
+            if (ep_settings[i].slug === c.slug) {
+                if (ep_settings[i].method === 'extend') {
+                    c = {...c, ...JSON.parse(ep_settings[i].json)};
+                    console.log(`extend setting applied. slug: ${c.slug} data: ${ep_settings[i].json} `);
+                }
+            }
+        }
+        return c;
+    });
+
+    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, () => {
         console.log('publishing complete');
         res.json({
             success: true
@@ -50,6 +65,37 @@ api_router.post('/force_update_db.json', (req: Request<any, any, { product_no: s
     fetch_product_data(req.body.product_no, req.app.locals.text_cache_dir, true).then(() => {
         res.json({success: true});
     });
+});
+
+api_router.post('/create_extend_parameter_setting.json', async (req: Request<any, any, { slug: string, json: string, method: string }, any>, res: Response<{ success: boolean }>) => {
+    let data!: Object;
+    try {
+        data = JSON.parse(req.body.json);
+    } catch (err) {
+        if (err instanceof SyntaxError) {
+            console.error('json parse error');
+            res.status(503);
+            res.json({success: false})
+            return;
+        } else {
+            console.log('unknown error')
+            res.status(503);
+            res.json({success: false})
+        }
+    }
+
+    console.log(data);
+    const result = await prisma.ExtendParameterSetting.create({
+        data: {
+            method: req.body.method,
+            slug: req.body.slug,
+            json: req.body.json
+        }
+    });
+
+    console.log(result);
+
+    res.json({success: true});
 });
 
 export {

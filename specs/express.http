@@ -8,12 +8,17 @@ GET http://192.168.33.10:3000/g/cards.json
 POST http://192.168.33.10:3000/api/fetch_card_data.json
 Content-Type: application/json
 
-{"product_no": "WXi-07"}
+{"product_no": "WXK-03"}
 
 
 ### force update card
 POST http://192.168.33.10:3000/api/force_update_db.json
 Content-Type: application/json
 
-{"product_no": "WXi-07"}
+{"product_no": "WXDi-CP01"}
 
+### append data extend parameter setting
+POST http://192.168.33.10:3000/api//create_extend_parameter_setting.json
+Content-Type: application/json
+
+{"slug": "WX22-Re12", "json": "{\"img\": \"WD12/WD12-007.jpg\"}", "method": "extend"}
