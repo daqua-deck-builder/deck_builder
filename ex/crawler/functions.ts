@@ -68,7 +68,7 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, text_cache_dir: string, complete: (content: string, hit: boolean) => void) => {
+const send_request_and_cache = <T>(method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, text_cache_dir: string, force_update: boolean,  complete: (content: string, hit: boolean) => void) => {
     endpoint = endpoint || 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
     referrer = referrer || DEFAULT_REFERRER;
     // console.log({endpoint, url_separator})

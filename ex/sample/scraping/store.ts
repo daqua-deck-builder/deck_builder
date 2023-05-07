@@ -23,7 +23,21 @@ const convert_ad_hoc = (cd: CardData): any => {
         timing,
         skills
     };
-}
+};
+
+const update_card = async (data: CardData) => {
+    return new Promise<void>(async (resolve) => {
+        const converted = convert_ad_hoc(data);
+        const updated = await prisma.card.update({
+            where: {slug: data.slug},
+            data: converted
+        });
+
+        console.log({updated})
+        resolve();
+    });
+};
+
 const insert_card_if_new = async (data: CardData) => {
     return new Promise<void>(async (resolve) => {
         const converted = convert_ad_hoc(data);
@@ -47,7 +61,10 @@ const insert_card_if_new = async (data: CardData) => {
     });
 };
 
-export {insert_card_if_new}
+export {
+    update_card,
+    insert_card_if_new
+}
 
 // insert_card_if_new({
 //     slug: 'WXDi-P00-036',

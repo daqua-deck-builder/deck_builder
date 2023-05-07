@@ -40,7 +40,14 @@ api_router.use('/g', express.static('../static/generated'));
 
 api_router.post('/fetch_card_data.json', (req: Request<any, any, { product_no: string }, any>, res: Response) => {
     console.log(req.body)
-    fetch_product_data(req.body.product_no, req.app.locals.text_cache_dir).then(() => {
+    fetch_product_data(req.body.product_no, req.app.locals.text_cache_dir, false).then(() => {
+        res.json({success: true});
+    });
+});
+
+api_router.post('/force_update_db.json', (req: Request<any, any, { product_no: string }, any>, res: Response) => {
+    console.log(req.body)
+    fetch_product_data(req.body.product_no, req.app.locals.text_cache_dir, true).then(() => {
         res.json({success: true});
     });
 });
