@@ -175,7 +175,8 @@ const compact = (d: CardData): CardDataCompact => {
         bt: d.lb_text,
         sk: d.skills,
         st: d.story,
-        fm: d.format
+        fm: d.format,
+        co: d.coin
     };
 };
 
@@ -201,7 +202,8 @@ const expand = (c: CardDataCompact): CardData => {
         lb_text: c.bt,
         skills: c.sk,
         story: c.st,
-        format: c.fm
+        format: c.fm,
+        coin: c.co
     };
 };
 const cleanup_skill_text_line = (t: string): string => {

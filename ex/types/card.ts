@@ -22,8 +22,9 @@ type CardDataCompact = {
     b: boolean,     // has_lb
     bt: string,     // lb_text
     sk: string[],   // skills
-    st: Story,     // story
-    fm: Format     // format
+    st: Story,      // story
+    fm: Format,     // format
+    co: string      // coin
 };
 
 type CardData = {
@@ -47,7 +48,8 @@ type CardData = {
     lb_text: string,
     skills: string[],
     story: Story,
-    format: Format
+    format: Format,
+    coin: string
 };
 
 type CardDataClient = CardData & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる

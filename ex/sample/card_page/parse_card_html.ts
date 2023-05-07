@@ -163,7 +163,6 @@ const parse_modern_structure = ($: any): CardData | false => {
         team = [$cd.eq(8).text()];
     }
 
-    const timing: string[] = $cd.eq(9).text().split('\n');
 
     let lb_text: string = '';
     let skills: string[] = [];
@@ -196,6 +195,26 @@ const parse_modern_structure = ($: any): CardData | false => {
         }
     })($cd.eq(10));
 
+    // この項目はフレキシブル
+    const $cdt = $('.cardData dt');
+    const dt9_text = $cdt.eq(9).text(); // ガード,コイン,使用タイミング
+    const dd9_value = $cd.eq(9).text()
+
+    let coin: string = '';
+    let timing: string[] = [];
+
+    console.log({dt9_text, value: $cd.eq(9).text()});
+
+    if (dt9_text.indexOf('コイン') > -1) {
+        coin = $cd.eq(9).text().replace(/\-/, '');
+    // } else if (dt9_text.indexOf('タイミング') > -1) { // 使用タイミングを「ガード」の項目名で記述しているカードが存在するので↓のように値から逆順で処理する
+    //     timing = $cd.eq(9).text().split('\n');
+    }
+
+    if ((dd9_value.indexOf('フェイズ') > -1) || (dd9_value.indexOf('スペルカットイン') > -1)) {
+        timing = dd9_value.split('\n');
+    }
+
     return {
         slug,
         name: name.replace(/　/ig, ' '),
@@ -217,7 +236,8 @@ const parse_modern_structure = ($: any): CardData | false => {
         lb_text,
         skills,
         story,
-        format
+        format,
+        coin
     };
 };
 
@@ -239,9 +259,10 @@ if (process.argv[1].indexOf('parse_card_html') > -1) {
                 if (d) {
                     // assert_equal_card_data(d.name, expand(compact(d)), d);
                     // assert_equal_card_data(d.name, compact(d), compact(expand(compact(d))));
-                    console.log(d);
+
+                    // console.log(d);
+                    // console.log(compact(d));
                     console.log(compact(d));
-                    console.log('');
                 }
             });
         });
