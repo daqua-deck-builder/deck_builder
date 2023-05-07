@@ -8,7 +8,7 @@ export default function useGradientBg() {
         return (color: StringMaybeContainComma) => {
             if (color.indexOf(',') > -1) {
                 const colors = color.split(',');
-                const offset: number = 10;  // 20 - 80 の間を等分する
+                const offset: number = 10;  // グラデーションで塗る領域の両外側の幅
                 const width_1 = Math.floor((100 - (offset * 2)) / (colors.length - 1));
                 const gradient_code: string = colors.map((c: string, i: number) => {
                     const color_code: string = {
