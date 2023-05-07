@@ -6,12 +6,15 @@ import {parse_modern_structure} from "../card_page/parse_card_html.js";
 import {CardData} from "../../types/card.js";
 import {insert_card_if_new, update_card} from "./store.js";
 
-const procedure = async (product_no: string, text_cache_dir: string, force_update: boolean) => {
+type SearchCondition = {}
+
+const procedure = async (search_condition: Partial<SearchCondition> & {product_no: string}, text_cache_dir: string, force_update: boolean) => {
+
     return new Promise<void>((resolve, reject) => {
         const arg = {
             method: 'GET',
             endpoint: '',
-            payload: cover_condition({product_no}),
+            payload: cover_condition(search_condition),
             selector_to_pick: '.cardDip',
             referrer: '',
             url_separator: '/card/',
@@ -37,8 +40,8 @@ const procedure = async (product_no: string, text_cache_dir: string, force_updat
                         method: 'GET',
                         endpoint: '',
                         payload: cover_condition({
-                            product_no,
-                            card_page: page
+                            ...search_condition,
+                            ...{card_page: page}
                         }),
                         selector_to_pick: '.cardDip',
                         referrer: '',
@@ -62,7 +65,7 @@ const procedure = async (product_no: string, text_cache_dir: string, force_updat
 
             // @ts-ignore
             async.series(funcs, (errors: Error[] | null, page_contents: string[]) => {
-                console.log(`fetching index of [${product_no}] completed.`);
+                console.log(`fetching index of [${search_condition.product_no}] completed.`);
 
                 const all_contents = [page1, ...page_contents];
                 let all_links: string[] = [];
@@ -126,7 +129,7 @@ const procedure = async (product_no: string, text_cache_dir: string, force_updat
 
                 // @ts-ignore
                 async.series(funcs, (errors: Error | null, results: boolean[]) => {
-                    console.log(`${product_no} ${results.length} items cached.`);
+                    console.log(`${search_condition.product_no} ${results.length} items cached.`);
                     resolve();
                 });
             });

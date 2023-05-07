@@ -8,7 +8,7 @@ GET http://192.168.33.10:3000/g/cards.json
 POST http://192.168.33.10:3000/api/fetch_card_data.json
 Content-Type: application/json
 
-{"product_no": "WXK-03"}
+{"product_no": "WXD-12", "product_type": "starter"}
 
 
 ### force update card
