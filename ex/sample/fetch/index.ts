@@ -1,5 +1,6 @@
 import {send_request_and_cache} from "../../crawler/functions.js";
 import path from "path";
+import {SendRequestAndCacheOption} from "../../types/crawler.js";
 
 const search_condition = {
     card_page: 1,
@@ -19,7 +20,7 @@ const search_condition = {
 
 const url = 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
 const text_cache_dir = path.resolve(path.dirname(process.argv[1]), '../..', 'text_cache');
-const arg = {
+const arg: SendRequestAndCacheOption<typeof search_condition> = {
     method: 'GET',
     endpoint: url,
     payload: search_condition,

@@ -5,13 +5,14 @@ import _ from 'underscore';
 import {parse_modern_structure} from "../card_page/parse_card_html.js";
 import {CardData} from "../../types/card.js";
 import {insert_card_if_new, update_card} from "./store.js";
+import {SendRequestAndCacheOption} from "../../types/crawler.js";
 
 type SearchCondition = {}
 
-const procedure = async (search_condition: Partial<SearchCondition> & {product_no: string}, text_cache_dir: string, force_update: boolean) => {
+const procedure = async (search_condition: Partial<SearchCondition> & { product_no: string }, text_cache_dir: string, force_update: boolean) => {
 
     return new Promise<void>((resolve, reject) => {
-        const arg = {
+        const arg: SendRequestAndCacheOption<any> = {
             method: 'GET',
             endpoint: '',
             payload: cover_condition(search_condition),
@@ -36,7 +37,7 @@ const procedure = async (search_condition: Partial<SearchCondition> & {product_n
 
             const funcs = pages.map((page: number) => {
                 return (done: Function) => {
-                    const arg = {
+                    const arg: SendRequestAndCacheOption<any> = {
                         method: 'GET',
                         endpoint: '',
                         payload: cover_condition({
@@ -85,7 +86,7 @@ const procedure = async (search_condition: Partial<SearchCondition> & {product_n
                         // @ts-ignore
                         const payload = search_params_to_object(url.searchParams);
 
-                        const arg = {
+                        const arg: SendRequestAndCacheOption<typeof payload> = {
                             method: 'GET',
                             endpoint: url.origin + url.pathname,
                             payload,

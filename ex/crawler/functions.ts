@@ -5,7 +5,7 @@ import {IncomingMessage} from "http";
 import zlib from "zlib";
 import * as cheerio from "cheerio";
 import * as stream from "stream";
-import {SearchCondition} from "../types/crawler.js";
+import {SearchCondition, SendRequestAndCacheOption} from "../types/crawler.js";
 
 import {PrismaClient} from '@prisma/client'
 
@@ -32,7 +32,7 @@ const cherry_pick_html = (html: string, selector: string): string => {
     return extracted_html;
 };
 
-const create_cache_filename = <T>(baseUrl: string, payload: T) => {
+const create_cache_filename = <T>(baseUrl: string, payload: T, virtual_product_no?: string) => {
     console.log({baseUrl})
     // @ts-ignore
     const keys: (keyof T)[] = Object.keys(payload).sort();
@@ -50,6 +50,8 @@ const create_cache_filename = <T>(baseUrl: string, payload: T) => {
                 product_no = payload[keys[i]].split('-')[0] || '-';
                 // @ts-ignore
                 words.push(`${keys[i]}_${payload[keys[i]]}`);
+            } else if (virtual_product_no) {
+                product_no = virtual_product_no;
             } else {
                 // @ts-ignore
                 words.push(`${keys[i]}_${payload[keys[i]]}`);
@@ -68,12 +70,23 @@ const create_directory_if_not_exists = (file_path: string, callback: Function) =
     callback();
 };
 
-const send_request_and_cache = <T>(options: { method: string, endpoint: string, payload: T, selector_to_pick: string, referrer: string, url_separator: string, text_cache_dir: string, force_update: boolean }, complete: (content: string, hit: boolean) => void) => {
-    let {method, endpoint, payload, selector_to_pick, referrer, url_separator, text_cache_dir, force_update} = options;
+const send_request_and_cache = <T>(options: SendRequestAndCacheOption<T>, complete: (content: string, hit: boolean) => void) => {
+    let {
+        method,
+        endpoint,
+        payload,
+        selector_to_pick,
+        referrer,
+        url_separator,
+        text_cache_dir,
+        force_update,
+        virtual_product_no
+    } = options;
+    virtual_product_no = virtual_product_no ? virtual_product_no : '';
     endpoint = endpoint || 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
     referrer = referrer || DEFAULT_REFERRER;
     // console.log({endpoint, url_separator})
-    const cache_file_name = create_cache_filename(endpoint.split(url_separator)[1], payload);
+    const cache_file_name = create_cache_filename(endpoint.split(url_separator)[1], payload, virtual_product_no);
     const cache_file_fullpath = path.resolve(text_cache_dir, cache_file_name);
     const cache_hit = fs.existsSync(cache_file_fullpath);
 

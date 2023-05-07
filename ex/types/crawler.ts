@@ -14,4 +14,19 @@ type SearchCondition = {
     ability: string,
 };
 
-export {SearchCondition};
+type SendRequestAndCacheOption<T> = {
+    method: string,
+    endpoint: string,
+    payload: T,
+    selector_to_pick: string,
+    referrer: string,
+    url_separator: string,
+    text_cache_dir: string,
+    force_update: boolean,
+    virtual_product_no?: string
+}
+
+export {
+    SearchCondition,
+    SendRequestAndCacheOption
+};
