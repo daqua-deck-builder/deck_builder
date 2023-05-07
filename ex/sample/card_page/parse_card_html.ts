@@ -129,7 +129,12 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     let team: string[] = [];
     let team_piece: boolean = false;
-    if (card_type === CARD_TYPE.PIECE) {
+    if (card_type.startsWith(CARD_TYPE.PIECE)) {
+
+        if (card_type.indexOf('リレー')) {
+            card_type = CARD_TYPE.PIECE_RELAY;
+        }
+
         if ($('.cardSkill img[alt*="ドリームチーム"]').length > 0) {
             team = [TEAM_TYPE.DREAM_TEAM];
             team_piece = true;
@@ -172,7 +177,7 @@ const parse_modern_structure = ($: any): CardData | false => {
         ({skills, has_lb} = parse_card_skills($));
     } else if (card_type === CARD_TYPE.SPELL) {
         ({skills, has_lb} = parse_card_skills($));
-    } else if (card_type === CARD_TYPE.PIECE) {
+    } else if ((card_type === CARD_TYPE.PIECE) || (card_type === CARD_TYPE.PIECE_RELAY)) {
         ({skills, has_lb} = parse_card_skills($));
     } else {
         // アーツ・ルリグ

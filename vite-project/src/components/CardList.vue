@@ -8,7 +8,8 @@ import useGradientBg from "../composable/multi_color_gradient_bg";
 const cards = ref<CardDataClient[]>([]);
 const filter_word = ref('');
 
-const deck_type = ref<1 | 2 | 0>(0);   // 1: メイン, 2: ルリグ,  0: 指定なし
+const card_type = ref<string>('');
+
 const color = ref<string>('');
 
 // @ts-ignore
@@ -17,7 +18,7 @@ const target = ref<CardData>({slug: ''});
 const _burst = ref<0 | 1 | 2>(0);
 const burst = computed({
     get: () => {
-        return deck_type.value === 2 ? 0 : _burst.value;
+        return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : _burst.value ;
     },
     set: (value: 0 | 1 | 2) => {
         _burst.value = value;
@@ -49,6 +50,14 @@ const filter_single_shortcircuit = (c: CardDataClient): boolean => {
             return !c.has_lb;
         }
     })();
+    const card_type_matches: boolean = (() => {
+        if (card_type.value === 'センター') {
+            return c.card_type === 'ルリグ';
+        } else {
+            return (c.card_type.indexOf(card_type.value) > -1);
+        }
+    })();
+
     // const deck_type_matches: boolean = (() => {
     //     if (deck_type.value === 1) {
     //         const is_main_deck_card: boolean = ['シグニ', 'スペル'].includes(c.card_type);
@@ -79,6 +88,7 @@ const filter_single_shortcircuit = (c: CardDataClient): boolean => {
     return color_matches
         && (word_matches || slug_matches || pronounce_matches)
         && burst_matches
+        && card_type_matches
         // || deck_type_matches
         ;
 };
@@ -104,15 +114,23 @@ const {bg_gradient_style} = useGradientBg();
 <template lang="pug">
 .left_side(style="width: 781px;")
     .conditions
-        select.deck_type(v-model.number="deck_type")
-            option(value="0") 枠色
-            option(value="1") メインデッキ
-            option(value="2") ルリグデッキ
-        select.deck_type(v-model.number="burst")
+        select.card_type.filter_select(v-model="card_type")
+            option(value="") カードタイプ
+            option(value="シグニ") シグニ
+            option(value="ルリグ") ルリグ
+            option(value="センター") センタールリグ
+            option(value="アシスト") アシストルリグ
+            option(value="ピース") ピース
+            option(value="キー") キー
+            option(value="アーツ") アーツ
+            option(value="レゾナ") レゾナ
+            option(value="リレー") ピース（リレー）
+            option(value="クラフト") レゾナ（クラフト）/アーツ（クラフト）
+        select.burst_type.filter_select(v-model.number="burst")
             option(value="0") LB有無
             option(value="1") バーストあり
             option(value="2") バーストなし
-        select.deck_type(v-model="color")
+        select.color_type.filter_select(v-model="color")
             option(value="") 色
             option(value="白") 白
             option(value="青") 青
@@ -223,7 +241,7 @@ span.amount {
     width: 100px;
 }
 
-select.deck_type, input[type="text"].filter_word {
+select.filter_select, input[type="text"].filter_word {
     font-family: inherit;
     font-size: 100%;
     line-height: 1.15;
@@ -235,6 +253,10 @@ select.deck_type, input[type="text"].filter_word {
     -webkit-appearance: none;
     -moz-appearance: none;
     appearance: none;
+}
+
+select.card_type {
+    width: 8rem;
 }
 
 select {

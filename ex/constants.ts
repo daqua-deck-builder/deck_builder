@@ -15,6 +15,7 @@ const CARD_TYPE = {
     RESONA: 'レゾナ',
     PIECE: 'ピース',
     ASSIST: 'アシストルリグ',
+    PIECE_RELAY: 'ピース(リレー)',
     ARTS_CRAFT: 'アーツ(クラフト)',
     RESONA_CRAFT: 'レゾナ(クラフト)',
     UNKNOWN_CARD_TYPE: 'UNKNOWN CARD TYPE',
