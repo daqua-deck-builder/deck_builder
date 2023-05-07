@@ -46,7 +46,7 @@ const create_cache_filename = <T>(baseUrl: string, payload: T) => {
                 // @ts-ignore
                 product_no = payload[keys[i]];
             } else if (keys[i] === 'card_no') {
-                 //@ts-ignore
+                //　@ts-ignore
                 product_no = payload[keys[i]].split('-')[0] || '-';
                 // @ts-ignore
                 words.push(`${keys[i]}_${payload[keys[i]]}`);

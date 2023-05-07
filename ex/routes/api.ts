@@ -18,6 +18,7 @@ api_router.get('/users', async (req: Request, res: Response) => {
 });
 
 api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
+    // @ts-ignore
     const cards: CardDataClient[] = await prisma.card.findMany({
         orderBy: [
             {
@@ -26,6 +27,7 @@ api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
         ]
     });
 
+    // @ts-ignore
     const ep_settings = await prisma.ExtendParameterSetting.findMany();
 
     console.log('publishing start');
@@ -85,6 +87,7 @@ api_router.post('/create_extend_parameter_setting.json', async (req: Request<any
     }
 
     console.log(data);
+    // @ts-ignore
     const result = await prisma.ExtendParameterSetting.create({
         data: {
             method: req.body.method,
