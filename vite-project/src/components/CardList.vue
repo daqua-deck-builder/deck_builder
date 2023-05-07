@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
-import type {CardDataClient} from '../../../ex/types/card.js'
+import type {CardDataClient, Format} from '../../../ex/types/card.js'
+import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
@@ -9,6 +10,17 @@ const cards = ref<CardDataClient[]>([]);
 const filter_word = ref('');
 
 const card_type = ref<string>('');
+const _format = ref<Format>(FORMAT.all);
+
+const format = computed({
+    get: () => {
+        return _format.value;
+    },
+    set: (value: Format) => {
+        localStorage.setItem('saved.format', '' + value);
+        _format.value = value;
+    }
+})
 
 const color = ref<string>('');
 
@@ -18,7 +30,7 @@ const target = ref<CardData>({slug: ''});
 const _burst = ref<0 | 1 | 2>(0);
 const burst = computed({
     get: () => {
-        return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : _burst.value ;
+        return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : _burst.value;
     },
     set: (value: 0 | 1 | 2) => {
         _burst.value = value;
@@ -30,6 +42,14 @@ const set_target = (cd: CardDataClient) => {
 };
 
 onMounted(() => {
+    const _f: number = parseInt(localStorage.getItem('saved.format'), 10);
+    if (isNaN(_f)) {
+        _format.value = FORMAT.all;
+    } else {
+        // @ts-ignore
+        _format.value = Math.max(Math.min(_f, 3), 1);
+    }
+
     axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
         cards.value = res.data.cards;
     });
@@ -57,6 +77,7 @@ const filter_single_shortcircuit = (c: CardDataClient): boolean => {
             return (c.card_type.indexOf(card_type.value) > -1);
         }
     })();
+    const format_matches: boolean = c.format >= format.value;
 
     // const deck_type_matches: boolean = (() => {
     //     if (deck_type.value === 1) {
@@ -89,6 +110,7 @@ const filter_single_shortcircuit = (c: CardDataClient): boolean => {
         && (word_matches || slug_matches || pronounce_matches)
         && burst_matches
         && card_type_matches
+        && format_matches
         // || deck_type_matches
         ;
 };
@@ -114,6 +136,10 @@ const {bg_gradient_style} = useGradientBg();
 <template lang="pug">
 .left_side(style="width: 781px;")
     .conditions
+        select.format.filter_select(v-model.number="format")
+            option(value="1") オールスター
+            option(value="2") キー
+            option(value="3") ディーヴァ
         select.card_type.filter_select(v-model="card_type")
             option(value="") カードタイプ
             option(value="シグニ") シグニ
