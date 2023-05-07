@@ -1,11 +1,13 @@
 <script setup lang="ts">
 import type {CardDataClient} from '../../../ex/types/card.js';
-import {computed} from "vue";
+import {computed, ref} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 
 const props = defineProps<{
     card: {
         slug: string;
+        name: string;
+        pronounce: string;
         img: string;
         card_type: string;
         skills: string;
@@ -32,6 +34,11 @@ const skills = computed(() => {
 
 const {bg_gradient_style} = useGradientBg();
 
+const show_name = ref<boolean>(true);
+const label = computed(() => {
+    return show_name.value ? props.card.name : props.card.pronounce;
+});
+
 </script>
 
 <template lang="pug">
@@ -41,7 +48,7 @@ table.card_detail(style="width: 502px;")
         col(style="width: 250px;")
     tr.card_name(:style="bg_gradient_style(props.card)" :data-color="props.card.color")
         td.no_right_border {{ props.card.slug }}
-        td.no_left_border {{ props.card.name }}
+        td.no_left_border.label(@click="show_name = !show_name") {{ label }}
     tr(v-if="is_owner")
         td.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
@@ -85,6 +92,11 @@ tr.card_name td {
 
     &.no_left_border {
         border-left-width: 0;
+    }
+
+    &.label {
+        text-decoration: underline;
+        cursor: pointer;
     }
 }
 
