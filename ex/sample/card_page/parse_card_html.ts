@@ -213,7 +213,7 @@ const parse_modern_structure = ($: any): CardData | false => {
     const skills_combined = skills.join('@@');
 
     if (skills_combined.indexOf('《コイン》') > -1) {
-        coin = ((text: string) => { // 自動コイン獲得と効果内での獲得は現状排他であるので、テキスト中に「コインを得る」を発見したら上書きする
+        coin = ((text: string, coin_ever: string) => {
             const pattern = /(《コイン》)+(《コイン》)?を得る/;
             const match = text.match(pattern);
             let count = 0;
@@ -222,8 +222,9 @@ const parse_modern_structure = ($: any): CardData | false => {
                 const coins = [...match[0].matchAll(coinPattern)];
                 count = coins.length;
             }
-            return `${count}*`;
-        })(skills_combined);
+
+            return coin_ever ? [coin_ever, `${count}*`].join(' / ') : `${count}*`;
+        })(skills_combined, coin);
     }
 
 
