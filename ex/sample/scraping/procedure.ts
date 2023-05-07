@@ -8,8 +8,18 @@ import {insert_card_if_new, update_card} from "./store.js";
 
 const procedure = async (product_no: string, text_cache_dir: string, force_update: boolean) => {
     return new Promise<void>((resolve, reject) => {
+        const arg = {
+            method: 'GET',
+            endpoint: '',
+            payload: cover_condition({product_no}),
+            selector_to_pick: '.cardDip',
+            referrer: '',
+            url_separator: '/card/',
+            text_cache_dir,
+            force_update
+        };
 
-        send_request_and_cache('GET', '', cover_condition({product_no}), '.cardDip', '', '/card/', text_cache_dir, force_update, (page1: string) => {
+        send_request_and_cache(arg, (page1: string) => {
             const $ = cheerio.load(page1);
 
             // @ts-ignore
@@ -23,10 +33,21 @@ const procedure = async (product_no: string, text_cache_dir: string, force_updat
 
             const funcs = pages.map((page: number) => {
                 return (done: Function) => {
-                    send_request_and_cache('GET', '', cover_condition({
-                        product_no,
-                        card_page: page
-                    }), '.cardDip', '', '/card/', text_cache_dir, false, (any_page_content: string, hit: boolean) => {
+                    const arg = {
+                        method: 'GET',
+                        endpoint: '',
+                        payload: cover_condition({
+                            product_no,
+                            card_page: page
+                        }),
+                        selector_to_pick: '.cardDip',
+                        referrer: '',
+                        url_separator: '/card/',
+                        text_cache_dir,
+                        force_update: false
+                    };
+
+                    send_request_and_cache(arg, (any_page_content: string, hit: boolean) => {
                         if (hit) {
                             done(null, any_page_content);
                         } else {
@@ -61,7 +82,18 @@ const procedure = async (product_no: string, text_cache_dir: string, force_updat
                         // @ts-ignore
                         const payload = search_params_to_object(url.searchParams);
 
-                        send_request_and_cache('GET', url.origin + url.pathname, payload, '.cardDetail', '', '/products/wixoss/', text_cache_dir, force_update, (content: string, hit: boolean): void => {
+                        const arg = {
+                            method: 'GET',
+                            endpoint: url.origin + url.pathname,
+                            payload,
+                            selector_to_pick: '.cardDetail',
+                            referrer: '',
+                            url_separator: '/products/wixoss/',
+                            text_cache_dir,
+                            force_update
+                        };
+
+                        send_request_and_cache(arg, (content: string, hit: boolean): void => {
                             const cd: CardData | false = parse_modern_structure(cheerio.load(content));
                             if (cd) {
                                 if (force_update) {

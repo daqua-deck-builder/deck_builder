@@ -19,6 +19,16 @@ const search_condition = {
 
 const url = 'https://www.takaratomy.co.jp/products/wixoss/card/card_list.php';
 const text_cache_dir = path.resolve(path.dirname(process.argv[1]), '../..', 'text_cache');
+const arg = {
+    method: 'GET',
+    endpoint: url,
+    payload: search_condition,
+    selector_to_pick: '.cardDip',
+    referrer: '',
+    url_separator: '/card/',
+    text_cache_dir,
+    force_update: false
+};
 
-send_request_and_cache('GET', url, search_condition, '.cardDip', '', '/card/', text_cache_dir, false, (content: string, hit: boolean) => {
+send_request_and_cache(arg, (content: string, hit: boolean) => {
 });
