@@ -176,10 +176,6 @@ const parse_modern_structure = ($: any): CardData | false => {
         ({skills, has_lb} = parse_card_skills($));
     } else {
         // アーツ・ルリグ
-        // @ts-ignore
-        $card_skills.each((index, elem) => {
-            skills.push($(elem).text().trim().replace(/\s/ig, '').replace(/\n+/ig, '\n'));
-        });
         ({skills, has_lb} = parse_card_skills($));
     }
 
@@ -203,17 +199,33 @@ const parse_modern_structure = ($: any): CardData | false => {
     let coin: string = '';
     let timing: string[] = [];
 
-    console.log({dt9_text, value: $cd.eq(9).text()});
+    // console.log({dt9_text, value: $cd.eq(9).text()});
 
     if (dt9_text.indexOf('コイン') > -1) {
         coin = $cd.eq(9).text().replace(/\-/, '');
-    // } else if (dt9_text.indexOf('タイミング') > -1) { // 使用タイミングを「ガード」の項目名で記述しているカードが存在するので↓のように値から逆順で処理する
-    //     timing = $cd.eq(9).text().split('\n');
+        // } else if (dt9_text.indexOf('タイミング') > -1) { // 使用タイミングを「ガード」の項目名で記述しているカードが存在するので↓のように値から逆順で処理する
+        //     timing = $cd.eq(9).text().split('\n');
     }
 
     if ((dd9_value.indexOf('フェイズ') > -1) || (dd9_value.indexOf('スペルカットイン') > -1)) {
         timing = dd9_value.split('\n');
     }
+    const skills_combined = skills.join('@@');
+
+    if (skills_combined.indexOf('《コイン》') > -1) {
+        coin = ((text: string) => { // 自動コイン獲得と効果内での獲得は現状排他であるので、テキスト中に「コインを得る」を発見したら上書きする
+            const pattern = /(《コイン》)+(《コイン》)?を得る/;
+            const match = text.match(pattern);
+            let count = 0;
+            if (match) {
+                const coinPattern = /《コイン》/g;
+                const coins = [...match[0].matchAll(coinPattern)];
+                count = coins.length;
+            }
+            return `${count}*`;
+        })(skills_combined);
+    }
+
 
     return {
         slug,
@@ -262,11 +274,11 @@ if (process.argv[1].indexOf('parse_card_html') > -1) {
 
                     // console.log(d);
                     // console.log(compact(d));
-                    console.log(compact(d));
+                    console.log(compact(d).co);
                 }
             });
         });
-    }) ();
+    })();
 }
 
 export {parse_modern_structure}
