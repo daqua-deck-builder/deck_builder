@@ -18,7 +18,30 @@ Content-Type: application/json
 {"product_no": "WXDi-CP01"}
 
 ### append data extend parameter setting
-POST http://192.168.33.10:3000/api//create_extend_parameter_setting.json
+POST http://192.168.33.10:3000/api/create_extend_parameter_setting.json
 Content-Type: application/json
 
 {"slug": "WX22-Re12", "json": "{\"img\": \"WD12/WD12-007.jpg\"}", "method": "extend"}
+
+
+### login success
+POST http://192.168.33.10:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "login_id": "user1",
+  "password": "password"
+}
+
+
+### login failure
+POST http://192.168.33.10:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "login_id": "users",
+  "password": "wrong password"
+}
+
+### who are you
+GET http://192.168.33.10:3000/api/auth/

@@ -3,6 +3,7 @@ import {PrismaClient} from "@prisma/client";
 import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 import {CardDataClient, CardDataCompact} from "../types/card.js";
+import {auth_router} from "./api_auth.js";
 
 const prisma = new PrismaClient();
 
@@ -119,6 +120,8 @@ api_router.post('/create_extend_parameter_setting.json', async (req: Request<any
 
     res.json({success: true});
 });
+
+api_router.use('/auth', auth_router);
 
 export {
     api_router

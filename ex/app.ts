@@ -1,4 +1,5 @@
 import express from 'express'
+import cookieParser from 'cookie-parser';
 import {api_router} from "./routes/api.js";
 import {img_proxy_router} from "./routes/image_proxy.js";
 import process from 'process';
@@ -13,7 +14,7 @@ app.locals.image_cache_dir = path.resolve(EXPRESS_ROOT, 'image_cache');
 app.locals.text_cache_dir = path.resolve(EXPRESS_ROOT, 'text_cache');
 
 app.use(express.json());
-
+app.use(cookieParser());
 app.use(express.static('../vite-project/dist'));
 
 app.use('/g', express.static('./static/generated'));
