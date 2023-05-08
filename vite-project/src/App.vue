@@ -8,7 +8,6 @@ import UserInfo from "./components/UserInfo.vue";
 
 const message: Ref<string> = ref('');
 
-
 onMounted(() => {
     axios.get('/api').then((res: AxiosResponse<{ hello: string }>) => {
         console.log(res.data);
@@ -19,24 +18,32 @@ onMounted(() => {
 </script>
 
 <template lang="pug">
-UserInfo
-CardList
-//HelloWorld(:msg="message")
+
+#top-fixed
+    UserInfo
+#main-pain
+    CardList
+
 </template>
 
 <style scoped>
-.logo {
-    height: 6em;
-    padding: 1.5em;
-    will-change: filter;
-    transition: filter 300ms;
+#top-fixed {
+    z-index: 2;
+    position: fixed;
+    top: 0;
+    width: 100vw;
+    height: 3rem;
 }
 
-.logo:hover {
-    filter: drop-shadow(0 0 2em #646cffaa);
-}
+#main-pain {
+    z-index: 1;
+    margin-left: 10px;
+    padding-top: 60px;
+    position: fixed;
+    top: 0;
 
-.logo.vue:hover {
-    filter: drop-shadow(0 0 2em #42b883aa);
+    width: 99vw;
+    max-height: 99vh;
+    overflow-y: auto;
 }
 </style>

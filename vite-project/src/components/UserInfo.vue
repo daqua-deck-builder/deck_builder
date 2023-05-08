@@ -2,6 +2,8 @@
 import {onMounted, ref} from "vue";
 import axios, {type AxiosResponse} from "axios";
 
+const first_loaded = ref<boolean>(false);
+
 const username = ref<string>('');
 const login_id = ref<string>('');
 const password = ref<string>('');
@@ -12,39 +14,41 @@ const submit = () => {
             login_id: login_id.value,
             password: password.value
         }).then((res: AxiosResponse<{ username: string }>) => {
-            console.log(res.data.username)
             if (res.data.username) {
                 login_id.value = '';
                 password.value = '';
             }
-            username.value = res.data.username
+            username.value = res.data.username;
         });
     } else {
         alert('ログインIDとパスワードを入力してください');
     }
-}
+};
 
 const dispatch_logout = () => {
     axios.post('/api/auth/logout').then(() => {
         login_id.value = '';
         password.value = '';
         username.value = '';
-    })
-}
+    });
+};
 
 onMounted(() => {
     axios.get('/api/auth/').then((res: AxiosResponse<{ username: string }>) => {
         username.value = res.data.username;
+        first_loaded.value = true;
     });
 });
 
 </script>
 
 <template lang="pug">
-.bar(v-if="username")
+.bar(v-if="!first_loaded")
+    span &nbsp;
+.bar(v-if="username && first_loaded")
     span {{ username }}
     a(href="#" @click.prevent="dispatch_logout") ログアウト
-.bar(v-else)
+.bar(v-if="!username && first_loaded")
     form(action="/api/login" method="POST" @submit.prevent="submit")
         label
             span ID:
@@ -57,7 +61,18 @@ onMounted(() => {
 
 <style scoped lang="less">
 .bar {
+    padding: 10px;
     background-color: #313131;
     color: white;
+
+    label {
+        span {
+            display: inline-block;
+            margin-right: 5px;
+        }
+
+        display: inline-block;
+        margin-right: 2rem;
+    }
 }
 </style>

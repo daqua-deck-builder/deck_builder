@@ -165,7 +165,7 @@ const {bg_gradient_style} = useGradientBg();
             option(value="緑") 緑
             option(value="無") 無
             option(value=",") 多色
-        input.filter_word(type="text" name="filter_word" v-model="filter_word")
+        input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
         span.amount(v-text="`${filtered_cards.length} items`")
     table
         colgroup
