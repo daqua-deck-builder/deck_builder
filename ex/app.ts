@@ -1,17 +1,25 @@
-import express from 'express'
+import express from 'express';
 import cookieParser from 'cookie-parser';
 import {api_router} from "./routes/api.js";
 import {img_proxy_router} from "./routes/image_proxy.js";
 import process from 'process';
-import path from 'path'
+import path from 'path';
+import dotenv from 'dotenv';
+import type {Env} from "./types/app.js";
+
+// @ts-ignore
+const {TEXT_CACHE_DIR, IMAGE_CACHE_DIR, DATABASE_URL}: Env = dotenv.config().parsed;
+
+if (!DATABASE_URL) {
+    console.error('DATABASE_URL not found in .env.');
+    process.exit(1);
+}
 
 const EXPRESS_ROOT = path.dirname(process.argv[1]);
 
-const port = 3000;
-
 const app = express();
-app.locals.image_cache_dir = path.resolve(EXPRESS_ROOT, 'image_cache');
-app.locals.text_cache_dir = path.resolve(EXPRESS_ROOT, 'text_cache');
+app.locals.image_cache_dir = IMAGE_CACHE_DIR || path.resolve(EXPRESS_ROOT, 'image_cache');
+app.locals.text_cache_dir = TEXT_CACHE_DIR ||  path.resolve(EXPRESS_ROOT, 'text_cache');
 
 app.use(express.json());
 app.use(cookieParser());
@@ -21,6 +29,8 @@ app.use('/g', express.static('./static/generated'));
 app.use('/c', img_proxy_router);
 app.use('/api', api_router);
 
+
+const port = 3000;
 
 app.listen(port, () => {
     console.log(`start listening on port ${port}`);

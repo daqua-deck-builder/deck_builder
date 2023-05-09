@@ -7,3 +7,6 @@ vite-project/.vscode
 /ex/.env
 /ex/prisma/db.sqlite-journal
 /ex/static/generated/cards.json
+
+data/cache/image_cache/*
+data/cache/text_cache/*
