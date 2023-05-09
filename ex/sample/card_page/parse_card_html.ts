@@ -228,7 +228,11 @@ const parse_modern_structure = ($: any): CardData | false => {
                 count = coins.length;
             }
 
-            return coin_ever ? [coin_ever, `${count}*`].join(' / ') : `${count}*`;
+            if (count > 0) {
+                return coin_ever ? [coin_ever, `${count}*`].join(' / ') : `${count}*`;
+            } else {
+                return '';
+            }
         })(skills_combined, coin);
     }
 
