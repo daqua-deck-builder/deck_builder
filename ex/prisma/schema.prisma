@@ -11,9 +11,16 @@ datasource db {
 }
 
 model User {
-  id       Int     @id @default(autoincrement())
-  name     String?
-  password String  @default("")
+  id                Int      @id @default(autoincrement())
+  login_id          String   @unique
+  name              String
+  password          String
+  theme             String   @default("default")
+  last_login        DateTime
+  created_at        DateTime
+  is_admin          Boolean  @default(false)
+  use_allstar       Boolean  @default(true)
+  use_key_selection Boolean  @default(true)
 }
 
 model Product {

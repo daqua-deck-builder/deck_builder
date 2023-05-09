@@ -13,12 +13,17 @@ const submit = () => {
         axios.post('/api/auth/login', {
             login_id: login_id.value,
             password: password.value
-        }).then((res: AxiosResponse<{ username: string }>) => {
-            if (res.data.username) {
+        }).then((res: AxiosResponse<{ login_id: string, is_admin: boolean }>) => {
+            console.log(
+                res.data
+            )
+            if (res.data.login_id) {
                 login_id.value = '';
                 password.value = '';
+            } else {
+                alert('ログインに失敗しました。ログインIDまたはパスワードが不正です。')
             }
-            username.value = res.data.username;
+            username.value = res.data.login_id;
         });
     } else {
         alert('ログインIDとパスワードを入力してください');
@@ -34,8 +39,9 @@ const dispatch_logout = () => {
 };
 
 onMounted(() => {
-    axios.get('/api/auth/').then((res: AxiosResponse<{ username: string }>) => {
-        username.value = res.data.username;
+    axios.get('/api/auth/').then((res: AxiosResponse<{ login_id: string }>) => {
+        console.log(res.data);
+        username.value = res.data.login_id;
         first_loaded.value = true;
     });
 });
@@ -45,10 +51,10 @@ onMounted(() => {
 <template lang="pug">
 .bar(v-if="!first_loaded")
     span &nbsp;
-.bar(v-if="username && first_loaded")
+.bar.authenticated(v-if="username && first_loaded")
     span {{ username }}
     a(href="#" @click.prevent="dispatch_logout") ログアウト
-.bar(v-if="!username && first_loaded")
+.bar.not_authenticated(v-if="!username && first_loaded")
     form(action="/api/login" method="POST" @submit.prevent="submit")
         label
             span ID:
@@ -61,8 +67,18 @@ onMounted(() => {
 
 <style scoped lang="less">
 .bar {
-    padding: 10px;
     background-color: #313131;
+
+    &.authenticated {
+        background-color: #313131;
+    }
+
+    &.not_authenticated {
+        background-color: #797979;
+        color: black;
+    }
+
+    padding: 10px;
     color: white;
 
     label {

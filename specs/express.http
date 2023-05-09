@@ -29,7 +29,7 @@ POST http://192.168.33.10:3000/api/auth/login
 Content-Type: application/json
 
 {
-  "login_id": "user1",
+  "login_id": "taro",
   "password": "password"
 }
 
@@ -39,9 +39,20 @@ POST http://192.168.33.10:3000/api/auth/login
 Content-Type: application/json
 
 {
-  "login_id": "users",
+  "login_id": "taro",
   "password": "wrong password"
 }
 
 ### who are you
 GET http://192.168.33.10:3000/api/auth/
+
+
+### create user
+POST http://192.168.33.10:3000/api/auth/create_user
+Content-Type: application/json
+
+{
+  "name": "taro",
+  "login_id": "taro",
+  "password": "password"
+}
