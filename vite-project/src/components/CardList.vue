@@ -189,7 +189,7 @@ const {bg_gradient_style} = useGradientBg();
             tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
-                    span {{ c.name }}
+                    span(:data-lb="c.has_lb") {{ c.name }}
                 td {{ c.color }}
                 td {{ c.lrig }}
                 td {{ c.level }}
@@ -225,6 +225,32 @@ table {
             color: blue;
         }
     }
+
+    span {
+        &:before {
+            display: inline-block;
+            width: 1rem;
+            height: 1rem;
+            position: relative;
+            top: 2px;
+            margin-left: 2px;
+            margin-right: 4px;
+        }
+
+        &[data-lb="false"] {
+            &:before {
+                content: '　';
+            }
+        }
+
+        &[data-lb="true"] {
+            &:before {
+                content: url('/lb.svg');
+            }
+        }
+
+    }
+
 }
 
 th, td {

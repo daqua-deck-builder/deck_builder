@@ -2,6 +2,7 @@
 import type {CardDataClient} from '../../../ex/types/card.js';
 import {computed, ref} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
+import SkillBox from "./SkillBox.vue";
 
 const props = defineProps<{
     card: {
@@ -58,7 +59,7 @@ table.card_detail(style="width: 502px;")
     tbody
         tr(v-if="skills.length > 0")
             td(colspan="2")
-                .skill(v-for="skill in skills" v-text="skill")
+                skill-box(v-for="skill in skills" :skill="skill")
         tr(v-else)
             td(colspan="2")
                 .skill (効果を持っていません)
@@ -126,16 +127,4 @@ img.illustration {
     }
 }
 
-.skill {
-    text-align: left;
-    margin-bottom: 5px;
-    line-height: 1.5rem;
-    background-color: #d5d5d5;
-    border-radius: 10px;
-    padding: 10px;
-
-    &:last-child {
-        margin-bottom: 0;
-    }
-}
 </style>
