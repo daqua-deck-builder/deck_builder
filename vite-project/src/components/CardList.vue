@@ -25,7 +25,7 @@ const format = computed({
 const color = ref<string>('');
 
 // @ts-ignore
-const target = ref<CardData>({slug: ''});
+const target = ref<CardData>({slug: '', skills: ''});
 
 const _burst = ref<0 | 1 | 2>(0);
 const burst = computed({
