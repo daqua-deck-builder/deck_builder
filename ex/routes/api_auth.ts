@@ -97,28 +97,28 @@ auth_router.post('/create_user', async (req: Request<{ name: string, login_id: s
 
 auth_router.post('/login', (req: Request<{ login_id: string, password: string }>, res: Response<{ login_id: string, is_admin: boolean }>): void => {
     auth_check(req.body).then((user: User): void => {
+        req.app.locals.redis_data.del(`/sid:${req.cookies.sid}`).then(() => {   // セッションIDを携えてきたらそちらはログアウト
 
-        // todo: 既に別のユーザーとしてログインしている場合はそちらをログアウトさせる
-
-        const sid = generate_random();
-        const expires = 86400000;
-        req.app.locals.redis_data.set(`/sid:${sid}`, user.login_id, 'ex', expires).then((): void => {
-            prisma.user.update({
-                where: {
-                    login_id: user.login_id
-                },
-                data: {
-                    last_login: new Date()
-                }
-            }).then((): void => {
-                res.cookie(
-                    "sid", sid,
-                    {
-                        maxAge: expires,
-                        httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
-                        secure: false, // HTTPSを必要とするかどうか
-                    });
-                res.json({login_id: user.login_id, is_admin: user.is_admin});
+            const sid = generate_random();
+            const expires = 86400000;
+            req.app.locals.redis_data.set(`/sid:${sid}`, user.login_id, 'ex', expires).then((): void => {
+                prisma.user.update({
+                    where: {
+                        login_id: user.login_id
+                    },
+                    data: {
+                        last_login: new Date()
+                    }
+                }).then((): void => {
+                    res.cookie(
+                        "sid", sid,
+                        {
+                            maxAge: expires,
+                            httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
+                            secure: false, // HTTPSを必要とするかどうか
+                        });
+                    res.json({login_id: user.login_id, is_admin: user.is_admin});
+                });
             });
         });
     }).catch((): void => {
