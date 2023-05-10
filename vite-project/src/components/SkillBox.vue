@@ -50,7 +50,7 @@ const skill_trimmed = computed(() => {
 
         &:before {
             display: inline-block;
-            content: url('/lb.svg');
+            content: url('/lb_white_wrapped.svg');
             width: 1rem;
             height: 1rem;
             position: relative;
