@@ -130,6 +130,18 @@ const filtered_cards = computed(() => {
     // }
 });
 
+const icon = computed(() => {
+    return (c: CardDataClient): string => {
+        if (c.has_lb) {
+            return 'lb';
+        } else if (c.team_piece) {
+            return 'tp';
+        } else {
+            return '';
+        }
+    }
+});
+
 const {bg_gradient_style} = useGradientBg();
 </script>
 
@@ -189,11 +201,11 @@ const {bg_gradient_style} = useGradientBg();
             tr.card(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
-                    span(:data-lb="c.has_lb") {{ c.name }}
+                    span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
                 td.center {{ c.color }}
                 td.center {{ c.lrig }}
                 td.center {{ c.level }}
-                td {{ c.klass }}
+                td.center(v-html=" c.klass.replace(/,/, '<br>') ")
                 td.right
                     span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
         tbody.not_found(v-if="filtered_cards.length === 0")
@@ -223,7 +235,7 @@ table {
     &:hover {
         span {
             text-decoration: underline;
-            color: blue;
+            //color: blue;
         }
     }
 
@@ -238,15 +250,21 @@ table {
             margin-right: 4px;
         }
 
-        &[data-lb="false"] {
+        &[data-icon] {
             &:before {
                 content: '　';
             }
         }
 
-        &[data-lb="true"] {
+        &[data-icon="lb"] {
             &:before {
                 content: url('/lb.svg');
+            }
+        }
+
+        &[data-icon="tp"] {
+            &:before {
+                content: url('/team_piece.svg');
             }
         }
 
@@ -320,6 +338,19 @@ select {
 
     &.deck_type {
         padding-right: 2rem;
+    }
+}
+
+span[data-rarity="SR"] {
+    color: gold;
+    pointer-events: none;
+    text-shadow: 1px 1px 0 rgba(0, 0, 0, 1),
+        -1px -1px 0 rgba(0, 0, 0, 1),
+        1px -1px 0 rgba(0, 0, 0, 1),
+    -1px 1px 0 rgba(0, 0, 0, 1);
+
+    &:hover {
+        color: black;
     }
 }
 </style>
