@@ -131,7 +131,7 @@ const parse_modern_structure = ($: any): CardData | false => {
     let team_piece: boolean = false;
     if (card_type.startsWith(CARD_TYPE.PIECE)) {
 
-        if (card_type.indexOf('リレー')) {
+        if (card_type.indexOf('リレー') > -1) {
             card_type = CARD_TYPE.PIECE_RELAY;
         }
 
