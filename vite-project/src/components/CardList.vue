@@ -194,7 +194,8 @@ const {bg_gradient_style} = useGradientBg();
                 td.center {{ c.lrig }}
                 td.center {{ c.level }}
                 td {{ c.klass }}
-                td.right(v-text="c.power.replace(/k/, '000')")
+                td.right
+                    span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
         tbody.not_found(v-if="filtered_cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
@@ -264,17 +265,6 @@ th {
 
 tr {
     .colored_table_row();
-}
-
-tr.card {
-    td {
-        &.center {
-            text-align: center;
-        }
-        &.right {
-            text-align: right;
-        }
-    }
 }
 
 .left_side, .right_side {
