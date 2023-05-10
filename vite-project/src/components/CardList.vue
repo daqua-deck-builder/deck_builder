@@ -186,15 +186,15 @@ const {bg_gradient_style} = useGradientBg();
                 th 種族
                 th パワー
         tbody
-            tr(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
+            tr.card(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
                     span(:data-lb="c.has_lb") {{ c.name }}
-                td {{ c.color }}
-                td {{ c.lrig }}
-                td {{ c.level }}
+                td.center {{ c.color }}
+                td.center {{ c.lrig }}
+                td.center {{ c.level }}
                 td {{ c.klass }}
-                td(v-text="c.power.replace(/k/, '000')")
+                td.right(v-text="c.power.replace(/k/, '000')")
         tbody.not_found(v-if="filtered_cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
@@ -264,6 +264,17 @@ th {
 
 tr {
     .colored_table_row();
+}
+
+tr.card {
+    td {
+        &.center {
+            text-align: center;
+        }
+        &.right {
+            text-align: right;
+        }
+    }
 }
 
 .left_side, .right_side {
