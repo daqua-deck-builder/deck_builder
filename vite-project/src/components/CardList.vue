@@ -50,7 +50,7 @@ onMounted(() => {
         _format.value = Math.max(Math.min(_f, 3), 1);
     }
 
-    axios.get('/g/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
+    axios.get('/generated/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
         cards.value = res.data.cards;
     });
 });

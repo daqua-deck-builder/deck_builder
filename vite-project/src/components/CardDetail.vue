@@ -21,7 +21,7 @@ const props = defineProps<{
 
 const img_path = computed(() => {
     try {
-        return `/c/${props.card.img.replace(/@/, props.card.slug)}`;
+        return `/image/${props.card.img.replace(/@/, props.card.slug)}`;
     } catch {
         return '';
     }

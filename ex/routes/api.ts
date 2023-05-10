@@ -53,9 +53,6 @@ api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
     });
 });
 
-
-api_router.use('/g', express.static('../static/generated'));
-
 api_router.post('/fetch_card_data.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {
     const payload = {
         ...{

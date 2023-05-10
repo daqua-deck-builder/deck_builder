@@ -12,11 +12,11 @@ export default defineConfig({
                 target: 'http://192.168.33.10:3000',
                 changeOrigin: true,
             },
-            '/g': { // generated file
+            '/generated': { // generated file
                 target: 'http://192.168.33.10:3000',
                 changeOrigin: true,
             },
-            '/c': { // image proxy
+            '/image': { // image proxy
                 target: 'http://192.168.33.10:3000',
                 changeOrigin: true,
             },

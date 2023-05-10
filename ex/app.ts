@@ -30,8 +30,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('../vite-project/dist'));
 
-app.use('/g', express.static('./static/generated'));
-app.use('/c', img_proxy_router);
+app.use('/generated', express.static('./static/generated'));
+app.use('/image', img_proxy_router);
 app.use('/api', api_router);
 
 
