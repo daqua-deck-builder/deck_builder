@@ -5,22 +5,29 @@ const props = defineProps({
     skill: String
 });
 
-const lb = computed(() => {
-    return (props.skill || '').indexOf('ライフバースト') === 0 ? 'yes' : '';
+const skill_type = computed(() => {
+    const skill = (props.skill || '');
+    if (skill.indexOf('ライフバースト') === 0) {
+        return 'lb';
+    } else if (skill.indexOf('【出】') === 0) {
+        return 'cip';
+    } else if (skill.indexOf('【自】') === 0) {
+        return 'passive';
+    } else if (skill.indexOf('【常】') === 0) {
+        return 'auto';
+    } else if (skill.indexOf('【起】') === 0) {
+        return 'trigger';
+    }
 });
 
 const skill_trimmed = computed(() => {
-    if (lb.value === 'yes') {
-        return props.skill.replace(/^ライフバースト/, '');
-    } else {
-        return props.skill;
-    }
+    return (props.skill || '').replace(/^(ライフバースト|【出】|【自】|【常】|【起】)/, '');
 })
 
 </script>
 
 <template lang="pug">
-.skill(:data-lb="lb") {{ skill_trimmed }}
+.skill(:data-skill-type="skill_type") {{ skill_trimmed }}
 
 </template>
 
@@ -37,7 +44,7 @@ const skill_trimmed = computed(() => {
         margin-bottom: 0;
     }
 
-    &[data-lb="yes"] {
+    &[data-skill-type="lb"] {
         background-color: #1a1a1a;
         color: white;
 
@@ -49,6 +56,54 @@ const skill_trimmed = computed(() => {
             position: relative;
             top: 2px;
             margin-right: -2px;
+        }
+    }
+
+    &[data-skill-type="cip"] {
+        &:before {
+            display: inline-block;
+            content: url('/cip.svg');
+            width: 1.4rem;
+            height: 1.4rem;
+            position: relative;
+            top: 3px;
+            margin-right: 0;
+        }
+    }
+
+    &[data-skill-type="passive"] {
+        &:before {
+            display: inline-block;
+            content: url('/passive.svg');
+            width: 1.4rem;
+            height: 1.4rem;
+            position: relative;
+            top: 3px;
+            margin-right: 0;
+        }
+    }
+
+    &[data-skill-type="auto"] {
+        &:before {
+            display: inline-block;
+            content: url('/auto.svg');
+            width: 1.4rem;
+            height: 1.4rem;
+            position: relative;
+            top: 3px;
+            margin-right: 0;
+        }
+    }
+
+    &[data-skill-type="trigger"] {
+        &:before {
+            display: inline-block;
+            content: url('/trigger.svg');
+            width: 1.4rem;
+            height: 1.4rem;
+            position: relative;
+            top: 3px;
+            margin-right: 0;
         }
     }
 }
