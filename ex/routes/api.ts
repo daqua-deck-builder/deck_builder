@@ -10,10 +10,6 @@ const prisma = new PrismaClient();
 
 const api_router = express.Router();
 
-api_router.get('/', (req: Request, res: Response) => {
-    res.json({hello: 'world'})
-});
-
 api_router.get('/users', async (req: Request, res: Response) => {
     const users = await prisma.user.findMany()
     res.json({users});

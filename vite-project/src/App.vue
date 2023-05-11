@@ -1,19 +1,6 @@
 <script setup lang="ts">
-
-import axios, {type AxiosResponse} from "axios";
-import {ref, type Ref} from "vue";
-import {onMounted} from "vue";
 import CardList from "./components/CardList.vue";
 import UserInfo from "./components/UserInfo.vue";
-
-const message: Ref<string> = ref('');
-
-onMounted(() => {
-    axios.get('/api').then((res: AxiosResponse<{ hello: string }>) => {
-        console.log(res.data);
-        message.value = res.data.hello;
-    });
-});
 
 </script>
 
