@@ -8,14 +8,14 @@ GET http://192.168.33.10:3000/g/cards.json
 POST http://192.168.33.10:3000/api/fetch_card_data.json
 Content-Type: application/json
 
-{"product_no": "", "product_type": "promotion_card"}
+{"product_no": "WXi-09", "product_type": "booster"}
 
 
 ### force update card
 POST http://192.168.33.10:3000/api/force_update_db.json
 Content-Type: application/json
 
-{"product_no": "WXDi-CP01"}
+{"product_no": "WXi-09"}
 
 ### append data extend parameter setting
 POST http://192.168.33.10:3000/api/create_extend_parameter_setting.json
@@ -56,3 +56,7 @@ Content-Type: application/json
   "login_id": "taro",
   "password": "password"
 }
+
+
+### card detail
+GET http://192.168.33.10:3000/api/admin/card_detail/WXDi-P00-036

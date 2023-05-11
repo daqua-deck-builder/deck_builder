@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 import {CardDataClient, CardDataCompact} from "../types/card.js";
 import {auth_router} from "./api_auth.js";
+import {admin_router} from "./api_admin.js";
 
 const prisma = new PrismaClient();
 
@@ -119,6 +120,7 @@ api_router.post('/create_extend_parameter_setting.json', async (req: Request<any
 });
 
 api_router.use('/auth', auth_router);
+api_router.use('/admin', admin_router);
 
 export {
     api_router
