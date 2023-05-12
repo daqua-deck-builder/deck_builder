@@ -76,12 +76,11 @@ const submit_eps = (index: number): void => {
     });
 };
 
-
 const new_eps = () => {
     epss.value = [...epss.value, {
         id: -1,
         json: "{}",
-        slug: card.value.slug!,
+        slug: card.value!.slug,
         method: 'extend'
     }];
 };
