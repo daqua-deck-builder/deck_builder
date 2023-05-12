@@ -310,7 +310,7 @@ select {
     }
 }
 
-span[data-rarity="SR"] {
+span[data-rarity*="SR"] {
     color: gold;
     pointer-events: none;
     text-shadow: 1px 1px 0 rgba(0, 0, 0, 1),
