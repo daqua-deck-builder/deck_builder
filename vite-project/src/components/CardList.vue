@@ -163,6 +163,7 @@ const {bg_gradient_style} = useGradientBg();
             tr.card(v-for="c in cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
+                    span(:data-story="c.story")
                     span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
                 td.center {{ c.color }}
                 td.center {{ c.lrig }}
@@ -227,6 +228,12 @@ table {
         &[data-icon="tp"] {
             &:before {
                 content: url('/team_piece.svg');
+            }
+        }
+
+        &[data-story="d"] {
+            &:before {
+                content: url('/dissona_black_wrapped.svg');
             }
         }
 
