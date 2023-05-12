@@ -40,6 +40,7 @@ admin_router.post('/update_eps', (req: Request<{ eps: EPS }>, res) => {
         create: data_id_removed,
         update: data
     }).then(() => {
+        // @ts-ignore
         prisma.ExtendParameterSetting.findMany({
             where: {slug: data.slug}
         }).then((epss: EPS[]) => {
