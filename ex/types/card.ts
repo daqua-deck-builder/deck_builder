@@ -52,14 +52,23 @@ type CardData = {
     coin: string
 };
 
-type CardDataClient = CardData & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
-    color: string
+type CardDataClient = Omit<CardData, 'color' | 'skills'> & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
+    color: string,
+    skills: string
 };
+
+type EPS = {
+    id: number,
+    slug: string,
+    json: string,
+    method: string
+}
 
 export type {
     Story,
     Format,
     CardData,
     CardDataClient,
-    CardDataCompact
+    CardDataCompact,
+    EPS
 };

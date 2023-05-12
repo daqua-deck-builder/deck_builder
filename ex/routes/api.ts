@@ -2,7 +2,7 @@ import express, {Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
 import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
-import {CardDataClient, CardDataCompact} from "../types/card.js";
+import {CardDataClient, CardDataCompact, EPS} from "../types/card.js";
 import {auth_router} from "./api_auth.js";
 import {admin_router} from "./api_admin.js";
 
@@ -26,7 +26,7 @@ api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
     });
 
     // @ts-ignore
-    const ep_settings = await prisma.ExtendParameterSetting.findMany();
+    const ep_settings: EPS[] = await prisma.ExtendParameterSetting.findMany();
 
     console.log('publishing start');
 

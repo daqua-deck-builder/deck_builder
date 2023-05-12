@@ -40,6 +40,11 @@ const label = computed(() => {
     return show_name.value ? props.card.name : props.card.pronounce;
 });
 
+const open_admin = (slug: string) => {
+    // todo: 管理者チェック
+    window.open(`/admin.html?slug=${slug}`, '_blank');
+}
+
 </script>
 
 <template lang="pug">
@@ -48,7 +53,7 @@ table.card_detail(style="width: 502px;")
         col(style="width: 250px;")
         col(style="width: 250px;")
     tr.card_name(:style="bg_gradient_style(props.card.color)" :data-color="props.card.color")
-        td.no_right_border.center {{ props.card.slug }}
+        td.no_right_border.center(@click="open_admin(props.card.slug)") {{ props.card.slug }}
         td.no_left_border.label.center(@click="show_name = !show_name") {{ label }}
     tr(v-if="is_owner")
         td.center.image_wrapper(colspan="2")
