@@ -1,15 +1,40 @@
 <script setup lang="ts">
-import {computed, onMounted, ref} from "vue";
+import {computed, onMounted, ref, inject} from "vue";
 import type {CardDataClient, Format} from '../../../ex/types/card.js'
 import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 
-const cards = ref<CardDataClient[]>([]);
-const filter_word = ref('');
+let worker = inject('worker');
+worker.onmessage = (event: MessageEvent<{ type: string, payload: CardDataClient[] }>) => {
+    cards.value = event.data.payload;
+};
 
-const card_type = ref<string>('');
+
+const cards = ref<CardDataClient[]>([]);
+const _filter_word = ref('');
+const filter_word = computed({
+    get: () => {
+        return _filter_word.value;
+    },
+    set: (value: string) => {
+        worker.postMessage({type: 'filter_word', payload: value});
+        _filter_word.value = value;
+    },
+})
+
+const _card_type = ref<string>('');
+const card_type = computed({
+    get: () => {
+        return _card_type.value;
+    },
+    set: (value: string) => {
+        worker.postMessage({type: 'card_type', payload: value});
+        _card_type.value = value;
+    }
+})
+
 const _format = ref<Format>(FORMAT.all);
 
 const format = computed({
@@ -18,21 +43,32 @@ const format = computed({
     },
     set: (value: Format) => {
         localStorage.setItem('saved.format', '' + value);
+        worker.postMessage({type: 'format', payload: value});
         _format.value = value;
     }
-})
+});
 
-const color = ref<string>('');
+const _color = ref<string>('');
+const color = computed({
+    get: () => {
+        return _color.value;
+    },
+    set: (value: string) => {
+        worker.postMessage({type: 'color', payload: value})
+        _color.value = value
+    },
+})
 
 // @ts-ignore
 const target = ref<CardData>({slug: '', skills: ''});
 
-const _burst = ref<0 | 1 | 2>(0);
+const _burst = ref<0 | 1 | 2>(0);   // 0指定なし　1なし　2あり
 const burst = computed({
     get: () => {
         return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : _burst.value;
     },
     set: (value: 0 | 1 | 2) => {
+        worker.postMessage({type: 'has_lb', payload: value === 1});
         _burst.value = value;
     }
 })
@@ -52,82 +88,8 @@ onMounted(() => {
 
     axios.get('/generated/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
         cards.value = res.data.cards;
+        worker.postMessage({type: 'set', payload: res.data.cards});
     });
-});
-
-const filter_single_shortcircuit = (c: CardDataClient): boolean => {
-    const fw = filter_word.value;
-    const color_matches: boolean = (c.color.indexOf(color.value) > -1);
-    const word_matches: boolean = (c.name.indexOf(fw) > -1);
-    const slug_matches: boolean = (c.slug.indexOf(fw) > -1);
-    const pronounce_matches: boolean = (c.pronounce.indexOf(fw) > -1);
-    const burst_matches: boolean = (() => {
-        if (burst.value === 0) {
-            return true;
-        } else if (burst.value === 1) {
-            return c.has_lb;
-        } else {
-            return !c.has_lb;
-        }
-    })();
-    const card_type_matches: boolean = (() => {
-        if (card_type.value === 'センター') {
-            return c.card_type === 'ルリグ';
-        } else {
-            return (c.card_type.indexOf(card_type.value) > -1);
-        }
-    })();
-    const format_matches: boolean = c.format >= format.value;
-
-    // const deck_type_matches: boolean = (() => {
-    //     if (deck_type.value === 1) {
-    //         const is_main_deck_card: boolean = ['シグニ', 'スペル'].includes(c.card_type);
-    //
-    //         if (is_main_deck_card) {
-    //             if (burst.value === 0) {
-    //                 return true;
-    //             } else if (burst.value === 1) {
-    //                 return c.has_lb;
-    //             } else {
-    //                 return !c.has_lb;
-    //             }
-    //         } else {
-    //             return false;
-    //         }
-    //     } else if (deck_type.value === 2) {
-    //         return !['シグニ', 'スペル'].includes(c.card_type);
-    //     } else {
-    //         if (burst.value === 0) {
-    //             return true;
-    //         } else if (burst.value === 1) {
-    //             return c.has_lb;
-    //         } else {
-    //             return !c.has_lb;
-    //         }
-    //     }
-    // })();
-    return color_matches
-        && (word_matches || slug_matches || pronounce_matches)
-        && burst_matches
-        && card_type_matches
-        && format_matches
-        // || deck_type_matches
-        ;
-};
-
-const filtered_cards = computed(() => {
-    const fw = filter_word.value.trim().toUpperCase();
-    const skip: boolean = (fw !== '')
-        // && (deck_type.value !== 0)
-        && (burst.value === 0)
-        && (color.value === '')
-    ;
-
-    // if (skip) {
-    //     return cards.value;
-    // } else {
-    return cards.value.filter(filter_single_shortcircuit);
-    // }
 });
 
 const icon = computed(() => {
@@ -178,7 +140,7 @@ const {bg_gradient_style} = useGradientBg();
             option(value="無") 無
             option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
-        span.amount(v-text="`${filtered_cards.length} items`")
+        span.amount(v-text="`${cards.length} items`")
     table
         colgroup
             col(style="width: 140px;")
@@ -198,7 +160,7 @@ const {bg_gradient_style} = useGradientBg();
                 th 種族
                 th パワー
         tbody
-            tr.card(v-for="c in filtered_cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
+            tr.card(v-for="c in cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
                     span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
@@ -208,7 +170,7 @@ const {bg_gradient_style} = useGradientBg();
                 td.center(v-html=" c.klass.replace(/,/, '<br>') ")
                 td.right
                     span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
-        tbody.not_found(v-if="filtered_cards.length === 0")
+        tbody.not_found(v-if="cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
 .right_side.margin_left
