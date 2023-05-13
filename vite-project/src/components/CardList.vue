@@ -1,96 +1,68 @@
 <script setup lang="ts">
-import {computed, onMounted, ref, inject} from "vue";
+import {computed, ref, inject} from "vue";
 import type {CardDataClient, Format} from '../../../ex/types/card.js'
 import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
+import {useCardStore} from "../stores/cards";
 
-let worker = inject('worker');
-worker.onmessage = (event: MessageEvent<{ type: string, payload: CardDataClient[] }>) => {
-    cards.value = event.data.payload;
-};
+const card_store = useCardStore();
+let worker = <Worker>inject('worker');
 
-
-const cards = ref<CardDataClient[]>([]);
-const _filter_word = ref('');
 const filter_word = computed({
     get: () => {
-        return _filter_word.value;
+        return card_store.filter_word;
     },
     set: (value: string) => {
-        worker.postMessage({type: 'filter_word', payload: value});
-        _filter_word.value = value;
+        card_store.set_filter_word(value);
     },
 })
 
-const _card_type = ref<string>('');
 const card_type = computed({
     get: () => {
-        return _card_type.value;
+        return card_store.card_type;
     },
     set: (value: string) => {
-        worker.postMessage({type: 'card_type', payload: value});
-        _card_type.value = value;
+        card_store.set_card_type(value);
     }
 })
-
-const _format = ref<Format>(FORMAT.all);
 
 const format = computed({
     get: () => {
-        return _format.value;
+        return card_store.format;
     },
     set: (value: Format) => {
         localStorage.setItem('saved.format', '' + value);
-        worker.postMessage({type: 'format', payload: value});
-        _format.value = value;
+        card_store.set_format(value);
     }
 });
 
-const _color = ref<string>('');
 const color = computed({
     get: () => {
-        return _color.value;
+        return card_store.color;
     },
     set: (value: string) => {
-        worker.postMessage({type: 'color', payload: value})
-        _color.value = value
+        card_store.set_color(value);
     },
 })
 
 // @ts-ignore
 const target = ref<CardData>({slug: '', skills: ''});
 
-const _burst = ref<0 | 1 | 2>(0);   // 0指定なし　1なし　2あり
 const burst = computed({
     get: () => {
-        return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : _burst.value;
+        return card_store.has_lb;
+        // return !['シグニ', 'スペル', ''].includes(card_type.value) ? 0 : card_store.has_lb;
     },
     set: (value: 0 | 1 | 2) => {
-        worker.postMessage({type: 'has_lb', payload: value === 1});
-        _burst.value = value;
+        card_store.set_has_lb(value);
     }
-})
+});
 
 const set_target = (cd: CardDataClient) => {
     target.value = cd;
 };
-
-onMounted(() => {
-    const _f: number = parseInt(localStorage.getItem('saved.format'), 10);
-    if (isNaN(_f)) {
-        _format.value = FORMAT.all;
-    } else {
-        // @ts-ignore
-        _format.value = Math.max(Math.min(_f, 3), 1);
-    }
-
-    axios.get('/generated/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
-        cards.value = res.data.cards;
-        worker.postMessage({type: 'set', payload: res.data.cards});
-    });
-});
 
 const icon = computed(() => {
     return (c: CardDataClient): string => {
@@ -102,6 +74,20 @@ const icon = computed(() => {
             return '';
         }
     }
+});
+
+card_store.install_worker(worker).then(() => {
+    const _f: number = parseInt(localStorage.getItem('saved.format'), 10);
+
+    let format = FORMAT.all;
+    if (!isNaN(_f)) {
+        // @ts-ignore
+        format = Math.max(Math.min(_f, 3), 1)
+    }
+
+    axios.get('/generated/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
+        card_store.initialize_cards(res.data.cards, format);
+    });
 });
 
 const {bg_gradient_style} = useGradientBg();
@@ -140,7 +126,7 @@ const {bg_gradient_style} = useGradientBg();
             option(value="無") 無
             option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
-        span.amount(v-text="`${cards.length} items`")
+        span.amount(v-text="`${card_store.cards.length} items`")
     table
         colgroup
             col(style="width: 140px;")
@@ -160,7 +146,7 @@ const {bg_gradient_style} = useGradientBg();
                 th 種族
                 th パワー
         tbody
-            tr.card(v-for="c in cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
+            tr.card(v-for="c in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
                     span(:data-story="c.story")
@@ -171,7 +157,7 @@ const {bg_gradient_style} = useGradientBg();
                 td.center(v-html=" c.klass.replace(/,/, '<br>') ")
                 td.right
                     span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
-        tbody.not_found(v-if="cards.length === 0")
+        tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
 .right_side.margin_left

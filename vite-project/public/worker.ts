@@ -29,10 +29,16 @@ const return_filtered = () => {
     });
 };
 
-self.addEventListener('message', (info: MessageEvent<{ type: string, payload: any }>): void => {
+self.addEventListener('message', (info: MessageEvent<{ type: string, silent?: boolean, payload: any, format?: 1 | 2 | 3 | null }>): void => {
     switch (info.data.type) {
-        case 'set':
+        case 'initialize-cards':
+            let f = info.data.format;
+            if (info.data.format === null) {
+                f = 3;
+            }
             cards = info.data.payload;
+            format = f;
+            return_filtered();
             break;
         case 'filter_word':
             filter_word = info.data.payload;
@@ -52,9 +58,16 @@ self.addEventListener('message', (info: MessageEvent<{ type: string, payload: an
             break;
         case 'format':
             format = info.data.payload;
+            if (!info.data.silent) {
+                return_filtered();
+            }
+            break;
+        case 'refresh':
             return_filtered();
             break;
         default:
+            console.error(`unknown message type: ${info.data.type}`);
+            console.error(info);
             break;
     }
 });
