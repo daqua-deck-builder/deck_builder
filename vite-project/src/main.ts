@@ -1,5 +1,5 @@
 import {createApp, provide} from 'vue'
-import './style.css'
+import './style.less'
 import App from './App.vue'
 
 // Web Workerの作成と起動

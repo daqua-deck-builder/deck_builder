@@ -77,6 +77,7 @@ const submit_eps = (index: number): void => {
     const post_data: EPS = epss.value[index];
     axios.post('/api/admin/update_eps', {eps: post_data}).then((res: AxiosResponse<{ epss: EPS[] }>) => {
         epss.value = res.data.epss;
+        alert('保存されました');
     });
 };
 
