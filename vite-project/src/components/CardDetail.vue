@@ -18,8 +18,7 @@ const props = defineProps<{
         color: string;
         coin: string;
         type: CardDataClient, required: true
-    },
-    is_owner: boolean
+    }
 }>();
 
 const img_path = computed(() => {

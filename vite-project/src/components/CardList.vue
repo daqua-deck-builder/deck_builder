@@ -178,7 +178,6 @@ const {bg_gradient_style} = useGradientBg();
     CardDetail(
         v-if="target.slug !== ''"
         :card="target"
-        :is_owner="true"
     )
 </template>
 
