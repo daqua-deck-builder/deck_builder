@@ -17,11 +17,13 @@ const skill_type = computed(() => {
         return 'auto';
     } else if (skill.indexOf('【起】') === 0) {
         return 'trigger';
+    } else if (skill.indexOf('gs[') === 0) {
+        return 'gain';
     }
 });
 
 const skill_trimmed = computed(() => {
-    return (props.skill || '').replace(/^(ライフバースト|【出】|【自】|【常】|【起】)/, '');
+    return (props.skill || '').replace(/^(ライフバースト|【出】|【自】|【常】|【起】|gs\[)/, '');
 })
 
 </script>
@@ -105,6 +107,11 @@ const skill_trimmed = computed(() => {
             top: 3px;
             margin-right: 0;
         }
+    }
+
+    &[data-skill-type="gain"] {
+        border: 2px solid black;
+        border-radius: 0;
     }
 }
 </style>
