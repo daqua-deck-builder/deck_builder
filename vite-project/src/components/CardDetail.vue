@@ -3,6 +3,9 @@ import type {CardDataClient} from '../../../ex/types/card.js';
 import {computed, ref} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import SkillBox from "./SkillBox.vue";
+import {useAuthStore} from "../stores/auth";
+
+const auth_store = useAuthStore();
 
 const props = defineProps<{
     card: {
@@ -41,8 +44,9 @@ const label = computed(() => {
 });
 
 const open_admin = (slug: string) => {
-    // todo: 管理者チェック
-    window.open(`/admin.html?slug=${slug}`, '_blank');
+    if (auth_store.is_admin) {
+        window.open(`/admin.html?slug=${slug}`, '_blank');
+    }
 }
 
 </script>
@@ -108,6 +112,7 @@ tr.card_name td {
 
 tr.coin {
     background-color: orange;
+
     th, td {
         background-color: transparent;
     }
