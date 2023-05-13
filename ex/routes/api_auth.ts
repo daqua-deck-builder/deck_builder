@@ -24,7 +24,11 @@ const create_default_user = (): Omit<User, 'id'> => {
     };
 };
 
-const create_user = async ({name, login_id, password}: { name: string, login_id: string, password: string }): Promise<Omit<User, 'id'>> => {
+const create_user = async ({
+                               name,
+                               login_id,
+                               password
+                           }: { name: string, login_id: string, password: string }): Promise<Omit<User, 'id'>> => {
     return new Promise<Omit<User, 'id'>>(async (resolve): Promise<any> => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const new_user: Omit<User, 'id'> = {...create_default_user(), ...{name, login_id, password: hashedPassword}};
@@ -95,7 +99,7 @@ auth_router.post('/create_user', async (req: Request<{ name: string, login_id: s
     }
 });
 
-auth_router.post('/login', (req: Request<{ login_id: string, password: string }>, res: Response<{ login_id: string, is_admin: boolean }>): void => {
+auth_router.post('/login', (req: Request<{ login_id: string, password: string }>, res: Response<{ username: string, login_id: string, is_admin: boolean }>): void => {
     auth_check(req.body).then((user: User): void => {
         req.app.locals.redis_data.del(`/sid:${req.cookies.sid}`).then(() => {   // セッションIDを携えてきたらそちらはログアウト
 
@@ -117,12 +121,12 @@ auth_router.post('/login', (req: Request<{ login_id: string, password: string }>
                             httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
                             secure: false, // HTTPSを必要とするかどうか
                         });
-                    res.json({login_id: user.login_id, is_admin: user.is_admin});
+                    res.json({username: user.name, login_id: user.login_id, is_admin: user.is_admin});
                 });
             });
         });
     }).catch((): void => {
-        res.json({login_id: "", is_admin: false});
+        res.json({username: '', login_id: "", is_admin: false});
     });
 });
 
@@ -132,7 +136,7 @@ auth_router.post('/logout', (req: Request<any, any, { sid: string }>, res: Respo
     });
 });
 
-auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Response<{ login_id: string, is_admin: boolean }>): void => {
+auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Response<{ username: string, login_id: string, is_admin: boolean }>): void => {
     find_user_by_sid(req.app.locals.redis_data, req.cookies.sid).then(async (login_id: string): Promise<void> => {
         const user_origin: User | null = await prisma.user.findFirst({
             where: {
@@ -140,12 +144,12 @@ auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Respons
             }
         });
         if (user_origin) {
-            res.json({login_id: login_id, is_admin: user_origin.is_admin});
+            res.json({username: user_origin.name, login_id: login_id, is_admin: user_origin.is_admin});
         } else {
-            res.json({login_id: '', is_admin: false});
+            res.json({username: '', login_id: '', is_admin: false});
         }
     }).catch(() => {
-        res.json({login_id: '', is_admin: false});
+        res.json({username: '', login_id: '', is_admin: false});
     });
 });
 
