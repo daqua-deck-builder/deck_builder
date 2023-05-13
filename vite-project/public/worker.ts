@@ -8,17 +8,23 @@ let has_lb: boolean = false;
 let format: 1 | 2 | 3 = 3;
 
 const return_filtered = () => {
+    const _filter_word = filter_word;
+    const _color = color;
+    const _card_type = card_type;
+    const _has_lb = has_lb;
+    const _format = format;
+
     self.postMessage({
         type: 'filtered', payload: cards.filter((c: CardDataClient) => {
-            return c.name.indexOf(filter_word) > -1;
+            return c.name.indexOf(_filter_word) > -1;
         }).filter((c: CardDataClient) => {
-            return c.color.indexOf(color) > -1;
+            return c.color.indexOf(_color) > -1;
         }).filter((c: CardDataClient) => {
-            return c.card_type.indexOf(card_type) > -1;
+            return c.card_type.indexOf(_card_type) > -1;
         }).filter((c: CardDataClient) => {
-            return c.has_lb === has_lb;
+            return c.has_lb === _has_lb;
         }).filter((c: CardDataClient) => {
-            return c.format >= format;
+            return c.format >= _format;
         })
     });
 };
