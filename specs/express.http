@@ -52,8 +52,8 @@ POST http://192.168.33.10:3000/api/auth/create_user
 Content-Type: application/json
 
 {
-  "name": "taro",
-  "login_id": "taro",
+  "name": "次郎一般ユーザー二郎",
+  "login_id": "jiro",
   "password": "password"
 }
 

@@ -1,6 +1,7 @@
 import express from 'express';
 import cookieParser from 'cookie-parser';
 import {api_router} from "./routes/api.js";
+import {check_is_admin} from "./routes/api_auth.js";
 import {img_proxy_router} from "./routes/image_proxy.js";
 import process from 'process';
 import path from 'path';
@@ -31,7 +32,7 @@ app.use(cookieParser());
 app.use(express.static('../vite-project/dist'));
 
 app.use('/generated', express.static('./static/generated'));
-app.use('/image', img_proxy_router);
+app.use('/image', check_is_admin, img_proxy_router);
 app.use('/api', api_router);
 
 
