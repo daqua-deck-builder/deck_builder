@@ -15,6 +15,9 @@
             tr
                 th name
                 td {{ card.name }}
+            tr
+                th card_type
+                td {{ card.card_type }}
             tr.skills(v-for="(skill, $index) in skill_list")
                 th skill {{ $index + 1 }}
                 td {{ skill }}

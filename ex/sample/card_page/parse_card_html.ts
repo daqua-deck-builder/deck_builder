@@ -113,6 +113,7 @@ const parse_modern_structure = ($: any): CardData | false => {
         case CARD_TYPE.LRIG:
             cost = $cd.eq(4).text().split('\n');    // グロウコスト
             lrig = $cd.eq(1).text().replace(/限定/, '').split('/');
+            card_type = 'センタールリグ';  // アシストの場合は最初から「アシストルリグ」が取得されている
             break;
         case CARD_TYPE.SIGNI:
             klass = $cd.eq(1).text().split('\n');
