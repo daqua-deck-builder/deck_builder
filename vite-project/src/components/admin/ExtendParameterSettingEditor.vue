@@ -22,7 +22,11 @@
     .actions
         a.button(href="#" @click.prevent="new_eps") 新規
 
-    table(v-if="epss.length > 0")
+    table(v-if="epss.length > 0" style="width: 600px;")
+        colgroup
+            col(style="width: 30px;")
+            col(style="width: 500px;")
+            col(style="width: 70px;")
         thead
             tr
                 th ID
@@ -30,10 +34,10 @@
                 th
         tbody
             tr(v-for="(eps, $index) in epss")
-                td {{ eps.id }}
-                td
-                    textarea(@blur="update_eps($index, $event)") {{ eps.json }}
-                td
+                td.center {{ eps.id }}
+                td.center
+                    textarea.eps_skill(@blur="update_eps($index, $event)") {{ eps.json }}
+                td.center
                     a.button(href="#" @click.prevent="submit_eps($index)") 保存
 </template>
 
@@ -122,5 +126,10 @@ th {
     width: 380px;
     height: 80px;
     line-height: 1.2rem;
+}
+
+textarea.eps_skill {
+    width: 480px;
+    height: 90px;
 }
 </style>
