@@ -59,7 +59,7 @@ table.card_detail(style="width: 502px;")
     tr.card_name(:style="bg_gradient_style(props.card.color)" :data-color="props.card.color")
         td.no_right_border.center(@click="open_admin(props.card.slug)") {{ props.card.slug }}
         td.no_left_border.label.center(@click="show_name = !show_name") {{ label }}
-    tr(v-if="is_owner")
+    tr(v-if="auth_store.is_admin")
         td.center.image_wrapper(colspan="2")
             img.illustration(:data-type="props.card.card_type" :src="img_path")
     tr.coin(v-if="props.card.coin")
