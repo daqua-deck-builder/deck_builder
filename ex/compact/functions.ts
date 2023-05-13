@@ -17,6 +17,7 @@ const CARDTYPE_PAIR = [
     [CARD_TYPE.ARTS, 'ar'],
     [CARD_TYPE.KEY, 'ky'],
     [CARD_TYPE.PIECE, 'pi'],
+    [CARD_TYPE.PIECE_RELAY, 'rp'],
     [CARD_TYPE.RESONA, 're'],
     [CARD_TYPE.ASSIST, 'al'],
     [CARD_TYPE.ARTS_CRAFT, 'ac'],

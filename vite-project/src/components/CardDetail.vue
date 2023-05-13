@@ -126,7 +126,7 @@ img.illustration {
         outline-color: white;
     }
 
-    &[data-type="ピース"], &[data-type="キー"] {
+    &[data-type*="ピース"], &[data-type="キー"] {
         outline: 2px solid white;
         width: 480px;
     }
