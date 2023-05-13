@@ -1,6 +1,13 @@
-import { createApp } from 'vue'
-import './style.less'
-import App from './Admin.vue'
+import {createApp} from 'vue';
+import './style.less';
+import App from './Admin.vue';
+import axios, {type AxiosResponse} from "axios";
 
-createApp(App).mount('#app')
-
+axios.get('/api/auth/').then((res: AxiosResponse<{ username: string, login_id: string, is_admin: boolean }>): void => {
+    if (res.data.is_admin) {
+        const app = createApp(App);
+        app.mount('#app');
+    } else {
+        alert('閲覧権限がありません');
+    }
+});
