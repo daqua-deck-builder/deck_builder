@@ -192,7 +192,7 @@ const {bg_gradient_style} = useGradientBg();
 
 table {
     table-layout: fixed;
-    border-collapse: collapse;
+    //border-collapse: collapse;
     background-color: white;
     color: black;
 }
@@ -269,6 +269,16 @@ th {
 
 tr {
     .colored_table_row();
+}
+
+tr {
+
+    &:hover {
+        td.card_name {
+            outline: 3px solid #000000;
+            //outline: 3px solid #202dff;
+        }
+    }
 }
 
 .left_side, .right_side {
