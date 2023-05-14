@@ -37,6 +37,7 @@ self.addEventListener('message', (info: MessageEvent<{ type: string, silent?: bo
                 f = 3;
             }
             cards = info.data.payload;
+            // @ts-ignore
             format = f;
             return_filtered();
             break;
