@@ -1,0 +1,80 @@
+<script setup lang="ts">
+import {useKeepStore} from "../stores/keep";
+import {computed} from "vue";
+import useGradientBg from "../composable/multi_color_gradient_bg";
+
+const keep_store = useKeepStore();
+
+const increase = (slug: string, delta: 1 | -1): void => {
+    keep_store.increase(slug, delta);
+};
+
+const trim = () => {
+    const do_trim = confirm('枚数が"×"になっているカードをリストから除去してもよろしいですか？');
+    if (do_trim) {
+        keep_store.trim();
+    }
+};
+
+const amount = computed(() => {
+    return (amount: number): string => {
+        if (amount === -1) {
+            return '×';
+        } else if (amount === 0) {
+            return '-';
+        } else {
+            return '' + amount;
+        }
+    }
+});
+
+const {bg_gradient_style} = useGradientBg();
+</script>
+
+<template lang="pug">
+.title キープリスト
+.actions
+    a.button(href="#" @click.prevent="trim") トリム
+table.keep_list
+    colgroup
+        col(style="width: 40px;")
+        col(style="width: 200px;")
+        col(style="width: 100px;")
+    thead
+        tr
+            th 数
+            th 名前
+            th 操作
+    tbody
+        tr(v-if="keep_store" v-for="card of keep_store.cards" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
+            td.right
+                span.amount(v-text="amount(card.amount)")
+            td
+                span {{ card.name }}
+            td
+                a.button.increase(href="#" @click.prevent="increase(card.slug, 1)") 増
+                a.button.decrease(href="#" @click.prevent="increase(card.slug, -1)") 減
+</template>
+
+<style scoped lang="less">
+@import "../composable/colored_table_row.less";
+
+.title {
+    font-weight: bolder;
+}
+
+table {
+    table-layout: fixed;
+    border-collapse: collapse;
+}
+
+tr {
+    color: black;
+    .colored_table_row();
+}
+
+span.amount {
+    margin-right: 0.3rem;
+}
+
+</style>

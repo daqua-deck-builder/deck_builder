@@ -6,8 +6,10 @@ import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import {useCardStore} from "../stores/cards";
+import {useKeepStore} from "../stores/keep";
 
 const card_store = useCardStore();
+const keep_store = useKeepStore();
 let worker = <Worker>inject('worker');
 
 const filter_word = computed({
@@ -61,6 +63,11 @@ const burst = computed({
 });
 
 const set_target = (cd: CardDataClient) => {
+    if (keep_direct.value) {
+        keep_store.append(cd);
+    } else if (target.value.slug === cd.slug) {
+        keep_store.append(cd);
+    }
     target.value = cd;
 };
 
@@ -76,6 +83,10 @@ const icon = computed(() => {
     }
 });
 
+const append_to_keep = (index: number): void => {
+    keep_store.append(card_store.cards[index]);
+};
+
 card_store.install_worker(worker).then(() => {
     const _f: number = parseInt(localStorage.getItem('saved.format'), 10);
 
@@ -89,6 +100,8 @@ card_store.install_worker(worker).then(() => {
         card_store.initialize_cards(res.data.cards, format);
     });
 });
+
+const keep_direct = ref<boolean>(false);
 
 const {bg_gradient_style} = useGradientBg();
 </script>
@@ -126,37 +139,44 @@ const {bg_gradient_style} = useGradientBg();
             option(value="無") 無
             option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
-        span.amount(v-text="`${card_store.cards.length} items`")
+        span.amount(v-if="card_store.cards" v-text="`${card_store.cards.length} items`")
+    .actions
+        a.check(href="#" @click.prevent="keep_direct = !keep_direct" :data-keep-direct="keep_direct" alt="カード名を1クリックでカードをキープリストに投入する") ダイレクトキープ
     table
         colgroup
             col(style="width: 140px;")
             col(style="width: 240px;")
             col(style="width: 60px;")
-            col(style="width: 100px;")
+            //col(style="width: 100px;")
             col(style="width: 60px;")
             col(style="width: 120px;")
             col(style="width: 60px;")
+            col(style="width: 100px;")
         thead
             tr
                 th No.
                 th 名前
                 th 色
-                th ルリグ
+                //th ルリグ
                 th レベル
                 th 種族
                 th パワー
+                th 操作
         tbody
-            tr.card(v-for="c in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
+            tr.card(v-for="(c, $index) in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 td {{ c.slug }}
                 td.card_name(@click="set_target(c)")
-                    span(:data-story="c.story")
-                    span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
+                    span.name
+                        span(:data-story="c.story")
+                        span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
                 td.center {{ c.color }}
-                td.center {{ c.lrig }}
+                //td.center {{ c.lrig }}
                 td.center {{ c.level }}
                 td.center(v-html=" c.klass.replace(/,/, '<br>') ")
                 td.right
                     span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
+                td.center(style="vertical-align: middle;")
+                    button(@click="append_to_keep($index)") +
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
@@ -188,6 +208,18 @@ table {
     }
 
     span {
+
+        &.name {
+            display: block;
+            float: left;
+            user-select: none;
+            transition: transform 0.1s ease-in-out;
+
+            &:active {
+                transform: translateY(-2px);
+            }
+        }
+
         &:before {
             display: inline-block;
             width: 1rem;
@@ -305,6 +337,42 @@ span[data-rarity*="SR"] {
 
     &:hover {
         color: black;
+    }
+}
+
+.actions {
+    margin-bottom: 10px;
+}
+
+a.check {
+    cursor: pointer;
+    padding: 3px 10px 3px 5px;
+    border-radius: 3px;
+    text-decoration: none;
+
+    &:before {
+        display: inline-block;
+        width: 1rem;
+        font-size: 1rem;
+        line-height: 1rem;
+    }
+
+    &[data-keep-direct="true"] {
+        color: #0c7251;
+        background-color: lightgreen;
+        border: 1px solid green;
+        &:before {
+            content: '✓';
+        }
+    }
+
+    &[data-keep-direct="false"] {
+        color: black;
+        background-color: grey;
+        border: 1px solid #232323;
+        &:before {
+            content: ' ';
+        }
     }
 }
 </style>

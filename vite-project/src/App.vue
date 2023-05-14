@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import CardList from "./components/CardList.vue";
 import UserInfo from "./components/UserInfo.vue";
+import KeepList from "./components/KeepList.vue";
 
 </script>
 
@@ -10,6 +11,8 @@ import UserInfo from "./components/UserInfo.vue";
     UserInfo
 #main-pain
     CardList
+    #keep_list_wrapper
+        KeepList
 
 </template>
 
@@ -32,5 +35,13 @@ import UserInfo from "./components/UserInfo.vue";
     width: 99vw;
     max-height: 99vh;
     overflow-y: auto;
+}
+
+#keep_list_wrapper {
+    position: fixed;
+    right: 0;
+    top: 60px;
+    width: 400px;
+    float: right;
 }
 </style>
