@@ -3,55 +3,76 @@ import type {CardDataClient} from '../../../ex/types/card.js';
 
 type KeptCard = {
     amount: number,
-    order: number
 } & CardDataClient;
 
-type State = {
-    cards: Record<string, KeptCard>,
+
+type Group = 'main_lb' | 'main_no_lb' | 'white' | 'others';
+
+type State = {} & Record<Group, KeptCard[]>;
+
+const judge_card_group = (card: CardDataClient): Group => {
+    if (['シグニ', 'スペル'].includes(card.card_type)) {
+        return card.has_lb ? 'main_lb' : 'main_no_lb';
+    } else if (['ルリグ', 'ルリグ(アシスト)', 'レゾナ', 'ピース', 'キー'].includes(card.card_type)) {
+        return 'white';
+    } else {
+        return 'others';
+    }
 };
 
 const useKeepStore = defineStore('keep', {
     state(): State {
         return {
-            cards: {},
-        }
+            main_lb: [],
+            main_no_lb: [],
+            white: [],
+            others: []
+        };
     },
     actions: {
         append(card: CardDataClient): void {
-            if (card.slug in this.cards) {
-                this.cards[card.slug].amount = Math.min(4, Math.max(-1, this.cards[card.slug].amount + 1));
-            } else {
-                this.cards[card.slug] = {
-                    ...card,
-                    order: 0,
-                    amount: 1
-                };
-            }
-        },
-        increase(slug: string, delta): void {
-            if (slug in this.cards) {
-                this.cards[slug].amount = Math.min(4, Math.max(-1, this.cards[slug].amount + delta));
-            } else {
-                // do nothing
-            }
-        },
-        trim(): void {
-            const slugs_to_delete: string[] = [];
-            const keys = Object.keys(this.cards);
-
-            for (let i: number = 0; i < keys.length; i++) {
-                if (this.cards.hasOwnProperty(keys[i])) {
-                    const card = this.cards[keys[i]];
-                    if (card.amount < 0) {
-                        slugs_to_delete.push(card.slug);
-                    }
-                    card.amount = Math.min(4, Math.max(0, card.amount));
+            const group: Group = judge_card_group(card);
+            const target_group = this[group];
+            let found: boolean = false;
+            for (let i = 0; i < target_group.length; i++) {
+                if (target_group[i].pronounce === card.pronounce) {
+                    target_group[i].amount = Math.min(4, Math.max(-1, target_group[i].amount + 1));
+                    found = true;
+                    break;
                 }
             }
-            slugs_to_delete.forEach(slug => {
-                delete this.cards[slug];
-            });
-            this.cards = {...this.cards};
+
+            if (!found) {
+                target_group.push({amount: 1, ...card});
+            }
+
+            this[group] = [...target_group];
+        },
+        increase(pronounce: string, group: Group, delta): void {
+            const target_group = this[group];
+
+            for (let i = 0; i < target_group.length; i++) {
+                if (target_group[i].pronounce === pronounce) {
+                    target_group[i].amount = Math.min(4, Math.max(-1, target_group[i].amount + delta));
+                    break;
+                }
+            }
+
+            this[group] = [...target_group];
+        },
+        trim(): void {
+            const groups: Group[] = ['main_lb', 'main_no_lb', 'white', 'others'];
+
+            for (let group of groups) {
+                let trimmed: KeptCard[] = [];
+                this[group].forEach((c: KeptCard) => {
+                    if (c.amount > -1) {
+                        c.amount = Math.min(4, Math.max(0, c.amount));
+                        trimmed.push(c);
+                    }
+                });
+                this[group] = trimmed;
+            }
         }
     },
     getters: {}
