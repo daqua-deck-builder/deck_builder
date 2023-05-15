@@ -14,18 +14,40 @@ const return_filtered = () => {
     const _has_lb = has_lb;
     const _format = format;
 
+    let lb_card_type_filter!: (c: CardDataClient) => boolean;
+
+    if (_has_lb === 0) {
+        // LB指定なし
+        lb_card_type_filter = (c: CardDataClient): boolean => {
+            return c.card_type.indexOf(_card_type) > -1;
+        };
+    } else if (_has_lb === 1) {
+        // LBありを指定
+        if (['シグニ', 'スペル'].includes(_card_type)) {
+            lb_card_type_filter = (c: CardDataClient): boolean => {
+                return c.has_lb && c.card_type.indexOf(_card_type) > -1;
+            };
+        } else {
+            lb_card_type_filter = (c: CardDataClient): boolean => {
+                return c.card_type.indexOf(_card_type) > -1;
+            };
+        }
+    } else {    // _has_lb === 2
+        // LBなしを指定
+        lb_card_type_filter = (c: CardDataClient): boolean => {
+            return (!c.has_lb) && c.card_type.indexOf(_card_type) > -1;
+        }
+    }
+
     self.postMessage({
         type: 'filtered', payload: cards.filter((c: CardDataClient) => {
             return c.name.indexOf(_filter_word) > -1;
         }).filter((c: CardDataClient) => {
             return c.color.indexOf(_color) > -1;
-        }).filter((c: CardDataClient) => {
-            return c.card_type.indexOf(_card_type) > -1;
-        }).filter((c: CardDataClient) => {
-            return c.has_lb === _has_lb;
-        }).filter((c: CardDataClient) => {
-            return c.format >= _format;
-        })
+        }).filter(lb_card_type_filter)
+            .filter((c: CardDataClient) => {
+                return c.format >= _format;
+            })
     });
 };
 
