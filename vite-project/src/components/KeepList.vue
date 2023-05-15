@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {useKeepStore} from "../stores/keep";
+import {useKeepStore, type KeptCard} from "../stores/keep";
 import {computed} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 
@@ -28,6 +28,29 @@ const amount = computed(() => {
     }
 });
 
+const total = computed(() => {
+    return (cards: KeptCard[]): number => {
+        return (cards || []).reduce((t: number, c: KeptCard) => {
+            return Math.max(0, c.amount) + t;
+        }, 0);
+    };
+});
+
+const lrig_deck_over = computed((): 'over' | '' => {
+    let lv0_amount = 0;
+    const _total = (keep_store.white || []).reduce((t: number, c: KeptCard) => {
+        if (c.level === '0') {
+            lv0_amount = lv0_amount + 1;
+        }
+        return Math.max(0, c.amount) + t;
+    }, 0);
+    if (lv0_amount === 3) {
+        return _total > 12 ? 'over' : '';
+    } else {
+        return _total > 10 ? 'over' : '';
+    }
+})
+
 const {bg_gradient_style} = useGradientBg();
 </script>
 
@@ -47,7 +70,9 @@ table.keep_list
             th 操作
     tbody
         tr
-            th(colspan="3") ルリグデッキ
+            th.center
+                span.amount(:data-over="lrig_deck_over" v-text="total(keep_store.white)")
+            th(colspan="2") ルリグデッキ
         tr(v-if="keep_store" v-for="card of keep_store.white" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
             td.right
                 span.amount(v-text="amount(card.amount)")
@@ -59,7 +84,9 @@ table.keep_list
 
     tbody
         tr
-            th(colspan="3") メインデッキ(LBあり)
+            th.center
+                span.amount(:data-over="total(keep_store.main_lb) > 20 ? 'over': ''" v-text="total(keep_store.main_lb)")
+            th(colspan="2") メインデッキ(LBあり)
         tr(v-if="keep_store" v-for="card of keep_store.main_lb" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
             td.right
                 span.amount(v-text="amount(card.amount)")
@@ -68,11 +95,11 @@ table.keep_list
             td
                 a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'main_lb', 1)") 増
                 a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'main_lb', -1)") 減
-
-
     tbody
         tr
-            th(colspan="3") メインデッキ(LBなし)
+            th.center
+                span.amount(v-text="total(keep_store.main_no_lb)")
+            th(colspan="2") メインデッキ(LBなし)
         tr(v-if="keep_store" v-for="card of keep_store.main_no_lb" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
             td.right
                 span.amount(v-text="amount(card.amount)")
@@ -115,6 +142,11 @@ tr {
 
 span.amount {
     margin-right: 0.3rem;
+
+    &[data-over="over"] {
+        color: #ff4949;
+    }
 }
+
 
 </style>
