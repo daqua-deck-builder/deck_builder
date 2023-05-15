@@ -13,7 +13,7 @@ type State = {} & Record<Group, KeptCard[]>;
 const judge_card_group = (card: CardDataClient): Group => {
     if (['シグニ', 'スペル'].includes(card.card_type)) {
         return card.has_lb ? 'main_lb' : 'main_no_lb';
-    } else if (['ルリグ', 'ルリグ(アシスト)', 'レゾナ', 'ピース', 'キー'].includes(card.card_type)) {
+    } else if (['ルリグ', 'センタールリグ', 'アシストルリグ', 'レゾナ', 'ピース', 'キー'].includes(card.card_type)) {
         return 'white';
     } else {
         return 'others';
@@ -82,4 +82,4 @@ const useKeepStore = defineStore('keep', {
     getters: {}
 });
 
-export {useKeepStore};
+export {useKeepStore, KeptCard};
