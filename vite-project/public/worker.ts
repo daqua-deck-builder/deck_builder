@@ -4,7 +4,7 @@ let cards: CardDataClient[] = [];
 let filter_word: string = '';
 let color: string = '';
 let card_type: string = '';
-let has_lb: boolean = false;
+let has_lb: 0 | 1 | 2 = 0;
 let format: 1 | 2 | 3 = 3;
 
 const return_filtered = () => {

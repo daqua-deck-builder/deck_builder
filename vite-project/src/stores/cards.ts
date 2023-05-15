@@ -20,7 +20,7 @@ const useCardStore = defineStore('card', {
             color: '',
             card_type: '',
             format: 3,
-            has_lb: 1,
+            has_lb: 0,
             worker: null
         }
     },
@@ -58,7 +58,7 @@ const useCardStore = defineStore('card', {
         },
         set_has_lb(payload: 0 | 1 | 2) {
             this.has_lb = payload;
-            this.worker?.postMessage({type: 'has_lb', payload: payload === 1});
+            this.worker?.postMessage({type: 'has_lb', payload});
         },
     }
 });
