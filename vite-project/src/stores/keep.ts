@@ -34,9 +34,10 @@ const useKeepStore = defineStore('keep', {
             const group: Group = judge_card_group(card);
             const target_group = this[group];
             let found: boolean = false;
+            const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
             for (let i = 0; i < target_group.length; i++) {
                 if (target_group[i].pronounce === card.pronounce) {
-                    target_group[i].amount = Math.min(4, Math.max(-1, target_group[i].amount + 1));
+                    target_group[i].amount = Math.min(max_amount, Math.max(-1, target_group[i].amount + 1));
                     found = true;
                     break;
                 }
@@ -50,10 +51,11 @@ const useKeepStore = defineStore('keep', {
         },
         increase(pronounce: string, group: Group, delta): void {
             const target_group = this[group];
+            const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
 
             for (let i = 0; i < target_group.length; i++) {
                 if (target_group[i].pronounce === pronounce) {
-                    target_group[i].amount = Math.min(4, Math.max(-1, target_group[i].amount + delta));
+                    target_group[i].amount = Math.min(max_amount, Math.max(-1, target_group[i].amount + delta));
                     break;
                 }
             }
@@ -63,11 +65,13 @@ const useKeepStore = defineStore('keep', {
         trim(): void {
             const groups: Group[] = ['main_lb', 'main_no_lb', 'white', 'others'];
 
-            for (let group of groups) {
-                let trimmed: KeptCard[] = [];
+            for (const group of groups) {
+                const trimmed: KeptCard[] = [];
+                const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
+
                 this[group].forEach((c: KeptCard) => {
                     if (c.amount > -1) {
-                        c.amount = Math.min(4, Math.max(0, c.amount));
+                        c.amount = Math.min(max_amount, Math.max(0, c.amount));
                         trimmed.push(c);
                     }
                 });
