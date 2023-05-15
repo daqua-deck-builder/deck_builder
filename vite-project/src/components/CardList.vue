@@ -116,6 +116,7 @@ const {bg_gradient_style} = useGradientBg();
         select.card_type.filter_select(v-model="card_type")
             option(value="") カードタイプ
             option(value="シグニ") シグニ
+            option(value="スペル") スペル
             option(value="ルリグ") ルリグ
             option(value="センター") センタールリグ
             option(value="アシスト") アシストルリグ
