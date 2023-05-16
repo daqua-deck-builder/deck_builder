@@ -137,7 +137,22 @@ auth_router.post('/logout', (req: Request<any, any, { sid: string }>, res: Respo
 });
 
 const check_is_admin = (req: Request<any, any, { sid: string }, any>, res: Response, next: NextFunction) => {
-
+    find_user_by_sid(req.app.locals.redis_data, req.cookies.sid).then(async (login_id: string): Promise<void> => {
+        const user_origin: User | null = await prisma.user.findFirst({
+            where: {
+                login_id
+            }
+        });
+        if (user_origin && user_origin.is_admin) {
+            next();
+        } else {
+            res.status(403);
+            next(403)
+        }
+    }).catch(() => {
+        res.status(403);
+        next(403)
+    });
 };
 
 auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Response<{ username: string, login_id: string, is_admin: boolean }>): void => {
