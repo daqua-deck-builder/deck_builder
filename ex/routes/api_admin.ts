@@ -1,6 +1,8 @@
 import express, {NextFunction, Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
-import {CardData, CardDataClient, EPS} from "../types/card.js";
+import {CardDataClient, EPS} from "../types/card.js";
+import {Product} from "../types/app.js";
+import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 
 const prisma = new PrismaClient();
 
@@ -49,5 +51,53 @@ admin_router.post('/update_eps', (req: Request<{ eps: EPS }>, res) => {
     });
 });
 
+admin_router.get('/products', async (req: Request, res: Response<{ products: Product[] }>) => {
+    // @ts-ignore
+    const products = await prisma["product"].findMany({});
+    res.json({
+        products
+    });
+});
+
+admin_router.post('/update_product', async (req, res) => {
+    const product: Product = {...req.body["product"]};
+    const new_product = (() => {
+        const p: Product = {...product};
+        delete p.id;
+        delete p.last_converted;
+        delete p.last_fetched;
+        return p;
+    })();
+    await prisma["product"].upsert({
+        where: {
+            id: product.id
+        },
+        update: product,
+        create: new_product
+    });
+    res.json({success: true});
+});
+
+admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
+    const product: Product = await prisma["product"].findFirst({
+        where: {
+            id: req.body.id
+        }
+    });
+
+    const payload = {
+        product_no: product.product_no,
+        product_type: product.product_type,
+        virtual_product_no: ''
+    };
+
+    // payload.virtual_product_no = req.body.virtual_product_no || '';
+
+    console.log(payload);
+
+    fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
+        res.json({success: true});
+    });
+})
 
 export {admin_router}

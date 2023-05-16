@@ -25,8 +25,13 @@ model User {
 
 model Product {
   id   Int    @id @default(autoincrement())
-  name String
-  slug String @unique
+  name  String
+  product_no String
+  product_type String
+  last_fetched  DateTime?
+  last_converted  DateTime?
+  sort  Int
+  processing  Boolean
 }
 
 model Color {

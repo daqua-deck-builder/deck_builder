@@ -25,8 +25,20 @@ type LoginInfo = {
     password: string
 }
 
+type Product = {
+    id: number,
+    name: string,
+    product_no: string,
+    product_type: string,
+    last_fetched?: Date,
+    last_converted?: Date,
+    sort: number,
+    processing: boolean
+}
+
 export type {
     Env,
     User,
+    Product,
     LoginInfo
 }
