@@ -53,7 +53,20 @@ const lrig_deck_over = computed((): 'over' | '' => {
     } else {
         return _total > 10 ? 'over' : '';
     }
-})
+});
+
+const name = computed({
+    get: () => {
+        return keep_store.name;
+    },
+    set: (value: string) => {
+        keep_store.name = value;
+    }
+});
+
+const save = () => {
+    keep_store.save_deck(100);
+};
 
 const {bg_gradient_style} = useGradientBg();
 </script>
@@ -61,7 +74,10 @@ const {bg_gradient_style} = useGradientBg();
 <template lang="pug">
 .keep_list(v-if="keep_store")
     .title キープリスト
+    .info
+        input(type="text" v-model.lazy="name")
     .actions
+        a.button(href="#" @click.prevent="save") 保存
         a.button(href="#" @click.prevent="trim") トリム
     .top
         table.keep_list
@@ -176,6 +192,7 @@ const {bg_gradient_style} = useGradientBg();
 table {
     table-layout: fixed;
     border-collapse: collapse;
+
     &:first-child {
         margin-right: 4px;
     }
@@ -202,6 +219,7 @@ a.button {
     border-radius: 4px;
     background-color: white;
     margin-right: 2px;
+
     &:last-child {
         margin-right: 0;
     }
@@ -218,26 +236,32 @@ a.button {
         position: relative;
         top: 2px;
     }
+
     &.increase {
         &:hover {
             background-color: #d6ffd6;
         }
+
         &:before {
             content: url('/plus.svg');
         }
     }
+
     &.decrease {
         &:hover {
             background-color: pink;
         }
+
         &:before {
             content: url('/minus.svg');
         }
     }
+
     &.remove {
         &:hover {
             background-color: #6d6d6d;
         }
+
         &:before {
             content: url('/remove.svg');
         }

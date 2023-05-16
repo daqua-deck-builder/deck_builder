@@ -72,3 +72,19 @@ model ColorCard {
   card  Int
   color Int
 }
+
+model Deck {
+  id          Int      @id @default(autoincrement())
+  name        String
+  source      String
+  is_deck     Boolean
+  lrig        String
+  assists     String
+  is_public   Boolean
+  ancestor   Int?
+  owner       Int
+  format      Int
+  tags        String
+  description String
+  created_at  DateTime
+}

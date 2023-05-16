@@ -1,10 +1,11 @@
-import express, {Request, Response} from "express";
+import express, {NextFunction, Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
 import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
-import {CardDataClient, CardDataCompact, EPS} from "../types/card.js";
-import {auth_router} from "./api_auth.js";
+import {CardDataClient, CardDataCompact, Deck, EPS} from "../types/card.js";
+import {auth_router, find_user_by_sid} from "./api_auth.js";
 import {admin_router} from "./api_admin.js";
+import {User} from "../types/app.js";
 
 const prisma = new PrismaClient();
 
@@ -113,6 +114,47 @@ api_router.post('/create_extend_parameter_setting.json', async (req: Request<any
     console.log(result);
 
     res.json({success: true});
+});
+
+api_router.post('/save_deck', (req: Request<{ deck: Deck }, any, { sid: string }>, res: Response<{ success: boolean }>, next: NextFunction): void => {
+    find_user_by_sid(req.app.locals.redis_data, req.cookies.sid).then(async (login_id: string): Promise<void> => {
+        const user_origin: User | null = await prisma.user.findFirst({
+            where: {
+                login_id
+            }
+        });
+
+        if (user_origin) {
+            // @ts-ignore
+            const deck: Deck = {...req.body.deck};
+            deck.owner = user_origin.id;
+
+            let deck_new!: Deck;
+            if (deck.id < 0) {
+                // new
+                deck_new = {
+                    ...deck,
+                    ...{id: -1}
+                };
+            }
+            // @t-s-ignore
+            await prisma.deck.upsert({
+                where: {id: deck.id},
+                create: deck_new,
+                update: deck
+            })
+
+            res.json({
+                success: true
+            });
+        } else {
+            res.status(403);
+            next(403)
+        }
+    }).catch(() => {
+        res.status(403);
+        next(403)
+    });
 });
 
 api_router.use('/auth', auth_router);

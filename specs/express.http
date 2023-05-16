@@ -52,11 +52,19 @@ POST http://192.168.33.10:3000/api/auth/create_user
 Content-Type: application/json
 
 {
-  "name": "次郎一般ユーザー二郎",
-  "login_id": "jiro",
+  "name": "管理者ユーザーTaro",
+  "login_id": "taro",
   "password": "password"
 }
 
 
 ### card detail
 GET http://192.168.33.10:3000/api/admin/card_detail/WXDi-P00-036
+
+
+
+### save deck
+POST http://192.168.33.10:3000/api/save_deck
+Content-Type: application/json
+
+{"a":  100}

@@ -64,11 +64,30 @@ type EPS = {
     method: string
 }
 
+type CommaSeparatedString = string;
+
+type Deck = {
+    id: number,
+    name: string,
+    source: string,
+    is_deck: boolean,
+    lrig: string,
+    assists: CommaSeparatedString,
+    is_public: boolean,
+    ancestor?: number,
+    owner: number,
+    format: Format,
+    tags: string,
+    description: string,
+    created_at: Date
+}
+
 export type {
     Story,
     Format,
     CardData,
     CardDataClient,
     CardDataCompact,
-    EPS
+    EPS,
+    Deck
 };

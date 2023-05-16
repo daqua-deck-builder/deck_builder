@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
-import type {CardDataClient} from '../../../ex/types/card.js';
+import type {CardDataClient, Deck} from '../../../ex/types/card.js';
+import axios, {type AxiosResponse} from 'axios';
 
 type KeptCard = {
     amount: number,
@@ -8,7 +9,10 @@ type KeptCard = {
 
 type Group = 'main_lb' | 'main_no_lb' | 'white' | 'others';
 
-type State = {} & Record<Group, KeptCard[]>;
+type State = {
+    deck_id: number,
+    name: string
+} & Record<Group, KeptCard[]>;
 
 const judge_card_group = (card: CardDataClient): Group => {
     if (['シグニ', 'スペル'].includes(card.card_type)) {
@@ -23,6 +27,8 @@ const judge_card_group = (card: CardDataClient): Group => {
 const useKeepStore = defineStore('keep', {
     state(): State {
         return {
+            deck_id: -1,
+            name: '',
             main_lb: [],
             main_no_lb: [],
             white: [],
@@ -122,6 +128,33 @@ const useKeepStore = defineStore('keep', {
 
             others_new_members.forEach((c: KeptCard): void => {
                 this.append_to_others(c);
+            });
+        },
+        save_deck(info: any): Promise<void> {
+            return new Promise<void>((resolve) => {
+                const now = new Date();
+                const deck: Deck = {
+                    id: this.deck_id || -1,
+                    name: this.name || 'NO NAME',
+                    source: '',
+                    is_deck: true,
+                    lrig: '',
+                    assists: '',
+                    is_public: true,
+                    ancestor: -1,
+                    owner: -1,
+                    format: 3,
+                    tags: '',
+                    description: '',
+                    created_at: now
+                };
+
+                axios.post('/api/save_deck', {
+                    deck
+                }).then((res: AxiosResponse<{ success: boolean }>): void => {
+                    console.log(res.data.success);
+                    resolve();
+                });
             });
         }
     },
