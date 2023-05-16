@@ -62,6 +62,17 @@ const useKeepStore = defineStore('keep', {
 
             this[group] = [...target_group];
         },
+        remove(pronounce: string, group: Group): void {
+            const trimmed: KeptCard[] = [];
+
+            this[group].forEach((c: KeptCard) => {
+                if (c.pronounce !== pronounce) {
+                    trimmed.push(c);
+                }
+            });
+
+            this[group] = trimmed;
+        },
         trim(): void {
             const groups: Group[] = ['main_lb', 'main_no_lb', 'white', 'others'];
 

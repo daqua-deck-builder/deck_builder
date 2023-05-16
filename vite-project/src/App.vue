@@ -41,7 +41,7 @@ import KeepList from "./components/KeepList.vue";
     position: fixed;
     right: 0;
     top: 60px;
-    width: 490px;
+    width: 985px;
     float: right;
 }
 </style>
