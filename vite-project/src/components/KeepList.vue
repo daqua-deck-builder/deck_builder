@@ -14,7 +14,7 @@ const remove = (pronounce: string, group: 'main_lb' | 'main_no_lb' | 'white' | '
 };
 
 const trim = () => {
-    const do_trim = confirm('枚数が"×"になっているカードをリストから除去してもよろしいですか？');
+    const do_trim = confirm('枚数に応じてカードリストを整理してもよろしいですか？');
     if (do_trim) {
         keep_store.trim();
     }

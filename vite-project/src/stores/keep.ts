@@ -49,6 +49,24 @@ const useKeepStore = defineStore('keep', {
 
             this[group] = [...target_group];
         },
+        append_to_others(card: CardDataClient) {
+            const target_group = this.others;
+            let found: boolean = false;
+            for (let i = 0; i < target_group.length; i++) {
+                if (target_group[i].pronounce === card.pronounce) {
+                    target_group[i].amount = Math.min(1, Math.max(0, target_group[i].amount));
+                    found = true;
+                    break;
+                }
+            }
+
+            if (!found) {
+                target_group.push({amount: 1, ...card});
+            }
+
+            this.others = [...target_group];
+
+        },
         increase(pronounce: string, group: Group, delta): void {
             const target_group = this[group];
             const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
@@ -76,18 +94,35 @@ const useKeepStore = defineStore('keep', {
         trim(): void {
             const groups: Group[] = ['main_lb', 'main_no_lb', 'white', 'others'];
 
-            for (const group of groups) {
+            const others_new_members: KeptCard[] = [];
+
+            const trim_in_group = (group: Group): KeptCard[] => {
                 const trimmed: KeptCard[] = [];
                 const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
 
                 this[group].forEach((c: KeptCard) => {
                     if (c.amount > -1) {
                         c.amount = Math.min(max_amount, Math.max(0, c.amount));
-                        trimmed.push(c);
+
+                        if (c.amount === 0) {
+                            if (group !== 'others') {
+                                others_new_members.push(c);
+                            }
+                        } else {
+                            trimmed.push(c);
+                        }
                     }
                 });
-                this[group] = trimmed;
+                return trimmed;
+            };
+
+            for (const group of groups) {
+                this[group] = trim_in_group(group);
             }
+
+            others_new_members.forEach((c: KeptCard): void => {
+                this.append_to_others(c);
+            });
         }
     },
     getters: {}
