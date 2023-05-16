@@ -176,6 +176,9 @@ const {bg_gradient_style} = useGradientBg();
 table {
     table-layout: fixed;
     border-collapse: collapse;
+    &:first-child {
+        margin-right: 4px;
+    }
 }
 
 tr {
