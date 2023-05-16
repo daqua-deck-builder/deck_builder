@@ -29,7 +29,7 @@ const return_filtered = () => {
             };
         } else {
             lb_card_type_filter = (c: CardDataClient): boolean => {
-                return c.card_type.indexOf(_card_type) > -1;
+                return c.has_lb && c.card_type.indexOf(_card_type) > -1;
             };
         }
     } else {    // _has_lb === 2
