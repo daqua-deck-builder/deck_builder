@@ -96,12 +96,23 @@ card_store.install_worker(worker).then(() => {
         format = Math.max(Math.min(_f, 3), 1)
     }
 
+    keep_direct.value = sessionStorage.getItem('behavior.keep_direct') === '1';
+
     axios.get('/generated/cards.json').then((res: AxiosResponse<{ cards: CardDataClient[] }>) => {
         card_store.initialize_cards(res.data.cards, format);
     });
 });
 
-const keep_direct = ref<boolean>(false);
+const _keep_direct = ref<boolean>(false);
+const keep_direct = computed({
+    set: (value: boolean) => {
+        sessionStorage.setItem('behavior.keep_direct', value ? '1' : '0');
+        _keep_direct.value = value;
+    },
+    get: (): boolean => {
+        return _keep_direct.value;
+    }
+})
 
 const {bg_gradient_style} = useGradientBg();
 </script>
@@ -372,6 +383,7 @@ a.check {
         color: #0c7251;
         background-color: lightgreen;
         border: 1px solid green;
+
         &:before {
             content: '✓';
         }
@@ -381,6 +393,7 @@ a.check {
         color: black;
         background-color: grey;
         border: 1px solid #232323;
+
         &:before {
             content: ' ';
         }
