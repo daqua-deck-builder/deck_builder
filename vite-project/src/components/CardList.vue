@@ -35,7 +35,7 @@ const format = computed({
         return card_store.format;
     },
     set: (value: Format) => {
-        localStorage.setItem('saved.format', '' + value);
+        localStorage.setItem('filter.format', '' + value);
         card_store.set_format(value);
     }
 });
@@ -88,7 +88,7 @@ const append_to_keep = (index: number): void => {
 };
 
 card_store.install_worker(worker).then(() => {
-    const _f: number = parseInt(localStorage.getItem('saved.format'), 10);
+    const _f: number = parseInt(localStorage.getItem('filter.format'), 10);
 
     let format = FORMAT.all;
     if (!isNaN(_f)) {
