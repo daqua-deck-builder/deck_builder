@@ -1,8 +1,5 @@
 <script setup lang="ts">
-import CardList from "./components/CardList.vue";
 import UserInfo from "./components/UserInfo.vue";
-import KeepList from "./components/KeepList.vue";
-
 </script>
 
 <template lang="pug">
@@ -10,10 +7,7 @@ import KeepList from "./components/KeepList.vue";
 #top-fixed
     UserInfo
 #main-pain
-    CardList
-    #keep_list_wrapper
-        KeepList
-
+    router-view
 </template>
 
 <style scoped>
@@ -35,13 +29,5 @@ import KeepList from "./components/KeepList.vue";
     width: 99vw;
     max-height: 99vh;
     overflow-y: auto;
-}
-
-#keep_list_wrapper {
-    position: fixed;
-    right: 0;
-    top: 60px;
-    width: 985px;
-    float: right;
 }
 </style>

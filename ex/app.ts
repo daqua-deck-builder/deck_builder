@@ -1,4 +1,4 @@
-import express from 'express';
+import express, {Request, Response} from 'express';
 import cookieParser from 'cookie-parser';
 import {api_router} from "./routes/api.js";
 import {check_is_admin} from "./routes/api_auth.js";
@@ -8,6 +8,8 @@ import path from 'path';
 import dotenv from 'dotenv';
 import type {Env} from "./types/app.js";
 import Redis from 'ioredis';
+import fs from 'node:fs';
+import ErrnoException = NodeJS.ErrnoException;
 
 // @ts-ignore
 const {TEXT_CACHE_DIR, IMAGE_CACHE_DIR, DATABASE_URL}: Env = dotenv.config().parsed;
@@ -31,6 +33,12 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('../vite-project/dist'));
 
+app.get('/admin', (req: Request, res: Response): void => {
+    fs.readFile('../vite-project/dist/index.html', (err: ErrnoException | null, buffer: Buffer): void => {
+        res.send(buffer.toString());
+    });
+});
+
 app.use('/generated', express.static('./static/generated'));
 app.use('/image', check_is_admin, img_proxy_router);
 app.use('/api', api_router);
@@ -38,6 +46,6 @@ app.use('/api', api_router);
 
 const port = 3000;
 
-app.listen(port, () => {
+app.listen(port, (): void => {
     console.log(`start listening on port ${port}`);
 });

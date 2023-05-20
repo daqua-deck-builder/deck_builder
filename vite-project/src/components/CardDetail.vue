@@ -44,7 +44,7 @@ const label = computed(() => {
 
 const open_admin = (slug: string) => {
     if (auth_store.is_admin) {
-        window.open(`/admin.html?slug=${slug}`, '_blank');
+        window.open(`/admin/?slug=${slug}`, '_blank');
     }
 }
 
