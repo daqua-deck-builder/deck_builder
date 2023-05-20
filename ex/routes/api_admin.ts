@@ -10,6 +10,7 @@ const admin_router = express.Router();
 
 admin_router.get('/card_detail/:slug', async (req: Request<{ slug: string }>, res: Response, next: NextFunction): Promise<any> => {
     const slug: string = req.params.slug;
+
     // @ts-ignore
     const card_detail: CardDataClient | null = await prisma.card.findFirst({
         where: {
@@ -53,16 +54,22 @@ admin_router.post('/update_eps', (req: Request<{ eps: EPS }>, res) => {
 
 admin_router.get('/products', async (req: Request, res: Response<{ products: Product[] }>) => {
     // @ts-ignore
-    const products = await prisma["product"].findMany({});
-    res.json({
-        products
-    });
+    const products: Product[] | null = await prisma["product"].findMany({});
+
+    if (products) {
+        res.json({
+            products
+        });
+    } else {
+        res.json({products: []});
+    }
 });
 
 admin_router.post('/update_product', async (req, res) => {
     const product: Product = {...req.body["product"]};
     const new_product = (() => {
         const p: Product = {...product};
+        // @ts-ignore
         delete p.id;
         delete p.last_converted;
         delete p.last_fetched;
@@ -79,25 +86,31 @@ admin_router.post('/update_product', async (req, res) => {
 });
 
 admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
-    const product: Product = await prisma["product"].findFirst({
+    // @ts-ignore
+    const product: Product | null = await prisma["product"].findFirst({
         where: {
             id: req.body.id
         }
     });
 
-    const payload = {
-        product_no: product.product_no,
-        product_type: product.product_type,
-        virtual_product_no: ''
-    };
+    if (product) {
+        const payload = {
+            product_no: product.product_no,
+            product_type: product.product_type,
+            virtual_product_no: ''
+        };
 
-    // payload.virtual_product_no = req.body.virtual_product_no || '';
+        // payload.virtual_product_no = req.body.virtual_product_no || '';
 
-    console.log(payload);
+        console.log(payload);
 
-    fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
-        res.json({success: true});
-    });
+        fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
+            res.json({success: true});
+        });
+    } else {
+        res.json({success: false});
+    }
+
 })
 
 export {admin_router}
