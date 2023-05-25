@@ -11,11 +11,12 @@ const pinia = createPinia();
 const worker = new Worker(new URL('/worker.js', import.meta.url), {type: 'module'})
 
 const app = createApp(App);
-app.use(router);
-app.provide('worker', worker);
-
 app.use(pinia);
-const card_store = useCardStore();
-card_store.worker = worker;
+import("./router").then(({router}) => {
+    app.provide('worker', worker);
+    const card_store = useCardStore();
+    card_store.worker = worker;
+    app.use(router);
 
-app.mount('#app');
+    app.mount('#app');
+})

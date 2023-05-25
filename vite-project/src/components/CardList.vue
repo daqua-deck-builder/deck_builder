@@ -49,8 +49,7 @@ const color = computed({
     },
 })
 
-// @ts-ignore
-const target = ref<CardData>({slug: '', skills: ''});
+const target = ref<string>('');
 
 const burst = computed({
     get: () => {
@@ -65,10 +64,12 @@ const burst = computed({
 const set_target = (cd: CardDataClient) => {
     if (keep_direct.value) {
         keep_store.append(cd);
-    } else if (target.value.slug === cd.slug) {
+    } else if (target.value === cd.slug) {
         keep_store.append(cd);
     }
-    target.value = cd;
+    // console.log(cd.slug);
+    // card_store.target = cd.slug;
+    target.value = cd.slug;
 };
 
 const icon = computed(() => {
@@ -193,10 +194,14 @@ const {bg_gradient_style} = useGradientBg();
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
 .right_side.margin_left
-    CardDetail(
-        v-if="target.slug !== ''"
-        :card="target"
-    )
+    Suspense
+        template(#default)
+            CardDetail(
+                v-if="target !== ''"
+               :slug="target"
+           )
+        template(#fallback)
+            span
 </template>
 
 <style scoped lang="less">

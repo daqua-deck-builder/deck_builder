@@ -16,6 +16,17 @@ api_router.get('/users', async (req: Request, res: Response) => {
     res.json({users});
 });
 
+api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: string }>, res: Response<{ success: boolean, card: CardDataClient | null }>) => {
+    const slug = req.params.slug;
+
+    const card: CardDataClient | null = await prisma.card.findFirst({where: {slug}});
+    if (card) {
+        res.json({success: true, card});
+    } else {
+        res.json({success: false, card});
+    }
+});
+
 api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
     // @ts-ignore
     const cards: CardDataClient[] = await prisma.card.findMany({

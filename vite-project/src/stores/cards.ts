@@ -1,5 +1,6 @@
 import {defineStore} from "pinia";
 import type {CardDataClient} from '../../../ex/types/card.js';
+import axios, {type AxiosResponse} from "axios";
 
 type State = {
     cards: CardDataClient[],
@@ -9,7 +10,9 @@ type State = {
     format: 1 | 2 | 3,
     has_lb: 0 | 1 | 2,  // 0指定なし　1なし　2あり
 
-    worker: Worker | null
+    worker: Worker | null,
+    cached_cards: Map<string, CardDataClient>,
+    target: string
 };
 
 const useCardStore = defineStore('card', {
@@ -21,7 +24,9 @@ const useCardStore = defineStore('card', {
             card_type: '',
             format: 3,
             has_lb: 0,
-            worker: null
+            worker: null,
+            cached_cards: new Map(),
+            target: ''
         }
     },
     actions: {
@@ -60,6 +65,28 @@ const useCardStore = defineStore('card', {
             this.has_lb = payload;
             this.worker?.postMessage({type: 'has_lb', payload});
         },
+        cache(card: CardDataClient) {
+            this.cached_cards.set(card.slug, card);
+        }
+    },
+    getters: {
+        detail_by_slug(state: State): Function {
+            return async (slug: string): Promise<CardDataClient> => {
+                return new Promise<CardDataClient>((resolve) => {
+                    const detail: CardDataClient | null = state.cached_cards.get(slug);
+                    if (detail) {
+                        resolve(detail);
+                    } else {
+                        axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{ success: boolean, card: CardDataClient | null }>) => {
+                            if (res.data.success) {
+                                this.cache(res.data.card);
+                                resolve(res.data.card);
+                            }
+                        });
+                    }
+                });
+            }
+        }
     }
 });
 
