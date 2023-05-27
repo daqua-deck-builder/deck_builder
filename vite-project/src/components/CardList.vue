@@ -67,9 +67,9 @@ const set_target = (cd: CardDataClient) => {
     } else if (target.value === cd.slug) {
         keep_store.append(cd);
     }
-    // console.log(cd.slug);
-    // card_store.target = cd.slug;
-    target.value = cd.slug;
+
+    card_store.target = cd.slug;    // 明示的にストックさせ
+    target.value = cd.slug;         // 子からはそれを取得させる
 };
 
 const icon = computed(() => {
