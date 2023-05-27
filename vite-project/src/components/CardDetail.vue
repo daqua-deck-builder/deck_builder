@@ -1,95 +1,81 @@
 <script lang="ts">
 import type {CardDataClient} from '../../../ex/types/card.js';
-import {computed, ref} from "vue";
+import {defineComponent, PropType, onMounted, ref, watch, computed} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import SkillBox from "./SkillBox.vue";
 import {useAuthStore} from "../stores/auth";
 import {useCardStore} from "../stores/cards";
+import {create_default_card_data_client} from "../../../shared/functions";
 
-const card_store = useCardStore();
+type Props = {
+    slug: { type: string, required: true, default: '' }
+}
 
-const CardDetail = {
+export default defineComponent({
+    props: {
+        slug: String as PropType<Props['slug']>
+    },
     components: {
         SkillBox
     },
-    props: {
-        slug: {
-            type: String,
-            default: '',
-            required: true
-        }
-    },
-    data() {
-        return {
-            card: {img: '', skills: '', name: '', pronounce: '', slug: '', color: '', card_type: ''},
-            show_name: true,
-            card_store,
-            auth_store: useAuthStore()
-        }
-    },
-    computed: {
-        img_path() {
-            if (this.card.img !== '') {
+    setup(props: Props) {
+        const card_store = useCardStore();
+        const auth_store = useAuthStore();
+
+        const card = ref<CardDataClient>(create_default_card_data_client());
+        const show_name = ref<boolean>(true);
+
+        const img_path = computed(() => {
+            if (card.value.img !== '') {
                 try {
-                    return `/image/${this.card.img.replace(/@/, this.card.slug)}`;
+                    return `/image/${card.value.img.replace(/@/, card.value.slug)}`;
                 } catch {
                     return '';
                 }
             } else {
                 return '';
             }
-        },
-        skills() {
-            return this.card.skills.split('@@').filter((text: string) => {
-                return !!text
-            });
-        },
-        label() {
-            return this.show_name ? this.card.name : this.card.pronounce;
-        },
-        bg_gradient_style(colors: string) {
-            const {bg_gradient_style} = useGradientBg();
-            return bg_gradient_style.value(colors);
-        },
-        target() {
-            return this.card_store.target;
-        },
-        async card() {
-            return await this.card_store.detail_by_slug(this.target);
-        }
-    },
-    async created() {
-        this.card = await card_store.detail_by_slug(this.target);
-    },
-    watch: {
-        slug: {
-            async handler(newValue: string, oldValue: string) {
-                // @ts-ignore
-                this.card = await card_store.detail_by_slug(newValue);
-            },
-            immediate: true
-        }
-    },
-    methods: {
-        open_admin(slug: string) {
-            if (this.auth_store.is_admin) {
+        });
+
+        const skills = computed(() => card.value.skills.split('@@').filter((text: string) => !!text));
+        const label = computed(() => show_name.value ? card.value.name : card.value.pronounce);
+        const {bg_gradient_style} = useGradientBg();
+        const target = computed(() => card_store.target);
+
+        const fetchCardData = async () => {
+            card.value = await card_store.detail_by_slug(target.value);
+        };
+
+        onMounted(fetchCardData);
+        watch(() => props.slug, fetchCardData, {immediate: true});
+
+        const open_admin = (slug: string) => {
+            if (auth_store.is_admin) {
                 window.open(`/admin/?slug=${slug}`, '_blank');
             }
-        }
+        };
+
+        return {
+            card,
+            show_name,
+            img_path,
+            skills,
+            label,
+            bg_gradient_style,
+            target,
+            auth_store,
+            open_admin
+        };
     }
-}
-
-export default CardDetail;
-
+});
 </script>
 
 <template lang="pug">
-table.card_detail(style="width: 502px;" v-if="card")
+table.card_detail(style="width: 502px;")
     colgroup
         col(style="width: 250px;")
         col(style="width: 250px;")
-    //tr.card_name(:style="bg_gradient_style(card.color)" :data-color="card.color")
-    tr.card_name(:data-color="card.color")
+    tr.card_name(:style="bg_gradient_style(card.color)" :data-color="card.color")
         td.no_right_border.center(@click="open_admin(card.slug)") {{ card.slug }}
         td.no_left_border.label.center(@click="show_name = !show_name") {{ label }}
     tr(v-if="auth_store.is_admin")

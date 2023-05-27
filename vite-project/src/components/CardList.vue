@@ -198,8 +198,8 @@ const {bg_gradient_style} = useGradientBg();
         template(#default)
             CardDetail(
                 v-if="target !== ''"
-               :slug="target"
-           )
+                :slug="target"
+            )
         template(#fallback)
             span
 </template>

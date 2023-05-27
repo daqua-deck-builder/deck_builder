@@ -9,7 +9,7 @@ const create_default_card_data_client = () => {
         pronounce: '',
         img: '',
         card_type: '',
-        lrig: [],
+        lrig: '',
         level: '',
         color: '',
         klass: [],
