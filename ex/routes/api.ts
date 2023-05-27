@@ -2,7 +2,7 @@ import express, {NextFunction, Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
 import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
-import {CardDataClient, CardDataCompact, Deck, EPS} from "../types/card.js";
+import {CardDataClient, Deck, EPS} from "../types/card.js";
 import {auth_router, find_user_by_sid} from "./api_auth.js";
 import {admin_router} from "./api_admin.js";
 import {User} from "../types/app.js";
@@ -19,7 +19,9 @@ api_router.get('/users', async (req: Request, res: Response) => {
 api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: string }>, res: Response<{ success: boolean, card: CardDataClient | null }>) => {
     const slug = req.params.slug;
 
-    const card: CardDataClient | null = await prisma.card.findFirst({where: {slug}});
+    // @ts-ignore
+    const card: CardDataClient | null = await prisma.card.findFirst<CardDataClient>({where: {slug}});
+
     if (card) {
         res.json({success: true, card});
     } else {

@@ -52,9 +52,10 @@ type CardData = {
     coin: string
 };
 
-type CardDataClient = Omit<CardData, 'color' | 'skills'> & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
+type CardDataClient = Omit<CardData, 'color' | 'skills' | 'lrig'> & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
     color: string,
-    skills: string
+    skills: string,
+    lrig: string
 };
 
 type EPS = {
