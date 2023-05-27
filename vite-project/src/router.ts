@@ -4,6 +4,7 @@ import {useCardStore} from "./stores/cards";
 import Main from "./Main.vue";
 import Admin from "./Admin.vue";
 import CardDetail from "./components/CardDetail.vue";
+
 const card_store = useCardStore();
 
 const routes = [
@@ -16,7 +17,7 @@ const routes = [
             return {slug: route.params.slug};
         }
     },
-    {path: '/admin', component: Admin},
+    {path: '/admin/eps/:slug', component: Admin, props: true},
 ];
 
 const router = createRouter({

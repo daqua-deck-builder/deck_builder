@@ -51,7 +51,7 @@ export default defineComponent({
 
         const open_admin = (slug: string) => {
             if (auth_store.is_admin) {
-                window.open(`/admin/?slug=${slug}`, '_blank');
+                window.open(`/admin/eps/${slug}`, '_blank');
             }
         };
 

@@ -10,6 +10,7 @@ import type {Env} from "./types/app.js";
 import Redis from 'ioredis';
 import fs from 'node:fs';
 import ErrnoException = NodeJS.ErrnoException;
+import {backup_vue_router} from "./routes/middlewares.js";
 
 // @ts-ignore
 const {TEXT_CACHE_DIR, IMAGE_CACHE_DIR, DATABASE_URL}: Env = dotenv.config().parsed;
@@ -33,11 +34,23 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.static('../vite-project/dist'));
 
-app.get('/admin', (req: Request, res: Response): void => {
-    fs.readFile('../vite-project/dist/index.html', (err: ErrnoException | null, buffer: Buffer): void => {
-        res.send(buffer.toString());
-    });
-});
+let static_index_content: string | null;
+app.use(backup_vue_router(['/admin', '/card'], (req: Request, res: Response): void => {
+    if (static_index_content) {
+        res.send(static_index_content);
+    } else {
+        fs.readFile('../vite-project/dist/index.html', (err: ErrnoException | null, buffer: Buffer): void => {
+            if (err) {
+                console.error(err);
+                res.status(500).send("Server error");
+                static_index_content = null;
+            } else {
+                static_index_content = buffer.toString();
+                res.send(static_index_content);
+            }
+        });
+    }
+}));
 
 app.use('/generated', express.static('./static/generated'));
 app.use('/image', check_is_admin, img_proxy_router);

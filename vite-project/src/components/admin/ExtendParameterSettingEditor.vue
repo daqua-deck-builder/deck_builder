@@ -50,23 +50,19 @@ import {onMounted, ref, type Ref} from "vue";
 import type {CardDataClient} from '../../../../ex/types/card';
 import type {EPS} from "../../../../ex/types/card";
 
+type Props = {
+    slug: {type: string, required: true, default: ''}
+}
+
+const props = defineProps<Props>();
+
 const card!: Ref<CardDataClient | null> = ref(null);
 const epss: Ref<EPS[]> = ref([]);
 const skill_list: Ref<string[]> = ref([]);
 
 onMounted(() => {
-    const searches: string[] = location.search.replace(/^\?/, '').split('&');
-    let slug = '';
-    for (let i = 0; i < searches.length; i++) {
-        const [key, value] = searches[i].split('=');
-        if (key === 'slug') {
-            slug = value;
-            break;
-        }
-    }
-
-    if (slug) {
-        axios.get(`/api/admin/card_detail/${slug}`).then((res: AxiosResponse<{ card: CardDataClient, epss: EPS[] }>) => {
+    if (props.slug) {
+        axios.get(`/api/admin/card_detail/${props.slug}`).then((res: AxiosResponse<{ card: CardDataClient, epss: EPS[] }>) => {
             card.value = res.data.card;
             epss.value = res.data.epss;
             skill_list.value = res.data.card.skills.split('@@');
