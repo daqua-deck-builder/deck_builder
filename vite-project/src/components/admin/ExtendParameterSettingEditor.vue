@@ -51,7 +51,7 @@ import type {CardDataClient} from '../../../../ex/types/card';
 import type {EPS} from "../../../../ex/types/card";
 
 type Props = {
-    slug: {type: string, required: true, default: ''}
+    slug: { type: string, required: true, default: '' }
 }
 
 const props = defineProps<Props>();
