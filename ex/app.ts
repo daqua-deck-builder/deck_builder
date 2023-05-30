@@ -52,6 +52,17 @@ app.use(backup_vue_router(['/admin', '/card'], (req: Request, res: Response): vo
     }
 }));
 
+app.get('/products', (req: Request, res: Response): void => {
+    fs.readFile('../vite-project/dist/products.html', (err: ErrnoException | null, buffer: Buffer): void => {
+        if (err) {
+            console.error(err);
+            res.status(500).send("Server error");
+        } else {
+            res.send(buffer.toString());
+        }
+    });
+});
+
 app.use('/generated', express.static('./static/generated'));
 app.use('/image', check_is_admin, img_proxy_router);
 app.use('/api', api_router);
