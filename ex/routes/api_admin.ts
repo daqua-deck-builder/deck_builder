@@ -87,7 +87,7 @@ admin_router.post('/update_product', check_is_admin_json, async (req: Request<{ 
     res.json({success: true});
 });
 
-admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id: number }>, res: Response<{ success: boolean }>): Promise<void> => {
+admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id: number }>, res: Response<{ success: boolean, product_no?: string, last_fetched?: string }>): Promise<void> => {
     // @ts-ignore
     const product: Product | null = await prisma["product"].findFirst({
         where: {
@@ -107,13 +107,18 @@ admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id:
         console.log(payload);
 
         fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(async (): Promise<void> => {
+            const last_fetched = new Date();
             await prisma["product"].update({
                 where: {id: req.body.id},
                 data: {
-                    last_fetched: new Date()
+                    last_fetched
                 }
             });
-            res.json({success: true});
+            res.json({
+                success: true,
+                product_no: product.product_no,
+                last_fetched: last_fetched.toString()
+            });
         });
     } else {
         res.json({success: false});

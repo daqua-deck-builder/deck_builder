@@ -70,10 +70,20 @@ const start_fetch = (id: number) => {
     }
     prevent_double_fetch.value = true;
 
-    axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{ success: boolean }>) => {
-        console.log(res.data.success);
+    axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{ success: boolean, product_no?: string, last_fetched?: string }>) => {
         alert(`${id} fetch complete`);
         prevent_double_fetch.value = false;
+
+        if (res.data.success) {
+            const items = products.value;
+            for (let i = 0; i < items.length; i++) {
+                if (items[i].product_no === res.data.product_no) {
+                    // @ts-ignore
+                    items[i].last_fetched = res.data.last_fetched;
+                }
+            }
+            products.value = items;
+        }
     }).catch(() => {
         alert('サーバーエラー');
         prevent_double_fetch.value = false;
@@ -98,11 +108,13 @@ const append_new = () => {
         processing: false
     };
     products.value = [...products.value, new_product];
-}
+};
 
-const publish_all = () => {
-    axios.post('/api/admin/publish_cards').then((res: AxiosResponse<{ success: boolean }>) => {
-        alert(res.data.success);
+const publish_all = async (): Promise<void> => {
+    axios.post('/api/admin/publish_cards').then((res: AxiosResponse<{ success: boolean }>): void => {
+        if (res.data.success) {
+            alert('書き出しました');
+        }
     });
 };
 
