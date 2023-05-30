@@ -24,6 +24,7 @@
 
     .actions
         a.button(href="#" @click.prevent="new_eps") 新規
+        a.button(href="#" @click.prevent="set_value('skills')") ↓効果テキスト
 
     table(v-if="epss.length > 0" style="width: 600px;")
         colgroup
@@ -71,6 +72,16 @@ onMounted(() => {
         alert('slug not found');
     }
 });
+
+const set_value = (key: keyof CardDataClient): void => {
+    const content: Partial<CardDataClient> = {[key]: card.value![key]};
+    epss.value = [...epss.value, {
+        id: -1,
+        json: JSON.stringify(content),
+        slug: card.value!.slug,
+        method: 'extend'
+    }];
+}
 
 const submit_eps = (index: number): void => {
     const post_data: EPS = epss.value[index];
