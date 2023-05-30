@@ -36,7 +36,7 @@
                         option(value="starter") スターター
                 td
                     input(type="text" v-model.number="p.sort" style="width: 190px;")
-                td {{ p.last_fetched.replace(/T/, ' ') }}
+                td {{ (p.last_fetched || '').replace(/T/, ' ') }}
 
     .actions
         a.button(href="#" @click.prevent="append_new") Append new
