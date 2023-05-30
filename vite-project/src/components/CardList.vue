@@ -4,12 +4,15 @@ import type {CardDataClient, Format} from '../../../ex/types/card.js'
 import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
 import CardDetail from "./CardDetail.vue";
+import CardTableColumn from "./CardTableColumn.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import {useCardStore} from "../stores/cards";
 import {useKeepStore} from "../stores/keep";
+import {useColumnStore} from "../stores/columns";
 
 const card_store = useCardStore();
 const keep_store = useKeepStore();
+const column_store = useColumnStore();
 let worker = <Worker>inject('worker');
 
 const filter_word = computed({
@@ -167,29 +170,28 @@ const {bg_gradient_style} = useGradientBg();
             col(style="width: 100px;")
         thead
             tr
-                th No.
-                th 名前
-                th 色
-                //th ルリグ
-                th レベル
-                th 種族
-                th パワー
-                th 操作
+                th(v-for="column in column_store.active_columns" :key="column.key") {{ column.label }}
+                //th No.
+                //th 名前
+                //th 色
+                ////th ルリグ
+                //th レベル
+                //th 種族
+                //th パワー
+                //th 操作
         tbody
             tr.card(v-for="(c, $index) in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
-                td {{ c.slug }}
-                td.card_name(@click="set_target(c)")
-                    span.name
-                        span(:data-story="c.story")
-                        span(:data-icon="icon(c)" :data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
-                td.center {{ c.color }}
-                //td.center {{ c.lrig }}
-                td.center {{ c.level }}
-                td.center(v-html=" c.klass.replace(/,/, '<br>') ")
-                td.right
-                    span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
-                td.center(style="vertical-align: middle;")
-                    button(@click="append_to_keep($index)") +
+                CardTableColumn(:columns ="column_store.active_columns" :card="c" @set-target="set_target")
+                //td.card_name(@click="set_target(c)")
+                //    span.name
+                //        span(:data-story="c.story")
+                //        span(:data-icon="icon(c)")
+                //        span(:data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
+                //td.center(v-html=" c.klass.replace(/,/, '<br>') ")
+                //td.right
+                //    span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
+                //td.center(style="vertical-align: middle;")
+                //    button(@click="append_to_keep($index)") +
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
@@ -214,66 +216,6 @@ table {
     color: black;
 }
 
-.card_name {
-    cursor: pointer;
-
-    &:hover {
-        span {
-            text-decoration: underline;
-            //color: blue;
-        }
-    }
-
-    span {
-
-        &.name {
-            display: block;
-            float: left;
-            user-select: none;
-            transition: transform 0.1s ease-in-out;
-
-            &:active {
-                transform: translateY(-2px);
-            }
-        }
-
-        &:before {
-            display: inline-block;
-            width: 1rem;
-            height: 1rem;
-            position: relative;
-            top: 2px;
-            margin-left: 2px;
-            margin-right: 4px;
-        }
-
-        &[data-icon] {
-            &:before {
-                content: '　';
-            }
-        }
-
-        &[data-icon="lb"] {
-            &:before {
-                content: url('/lb.svg');
-            }
-        }
-
-        &[data-icon="tp"] {
-            &:before {
-                content: url('/team_piece.svg');
-            }
-        }
-
-        &[data-story="d"] {
-            &:before {
-                content: url('/dissona_black_wrapped.svg');
-            }
-        }
-
-    }
-
-}
 
 th, td {
     border: 1px solid black;
@@ -354,18 +296,6 @@ select {
     }
 }
 
-span[data-rarity*="SR"] {
-    color: gold;
-    pointer-events: none;
-    text-shadow: 1px 1px 0 rgba(0, 0, 0, 1),
-        -1px -1px 0 rgba(0, 0, 0, 1),
-        1px -1px 0 rgba(0, 0, 0, 1),
-    -1px 1px 0 rgba(0, 0, 0, 1);
-
-    &:hover {
-        color: black;
-    }
-}
 
 .actions {
     margin-bottom: 10px;
