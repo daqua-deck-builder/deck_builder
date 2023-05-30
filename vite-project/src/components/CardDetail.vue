@@ -47,7 +47,7 @@ export default defineComponent({
         };
 
         onMounted(fetchCardData);
-        watch(() => props.slug, fetchCardData, {immediate: true});
+        watch(() => props.slug, fetchCardData);
 
         const open_admin = (slug: string) => {
             if (auth_store.is_admin) {

@@ -71,7 +71,8 @@ const set_target = (cd: CardDataClient) => {
         keep_store.append(cd);
     }
 
-    card_store.target = cd.slug;    // 明示的にストックさせ
+    card_store.cache(cd);           // 明示的にストックさせ
+    card_store.target = cd.slug;
     target.value = cd.slug;         // 子からはそれを取得させる
 };
 
