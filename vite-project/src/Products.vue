@@ -7,8 +7,10 @@
             col(style="width: 40px;")
             col(style="width: 200px;")
             col(style="width: 250px;")
-            col(style="width: 100px;")
-            col(style="width: 100px;")
+            col(style="width: 150px;")
+            col(style="width: 150px;")
+            col(style="width: 200px;")
+            col(style="width: 200px;")
         thead
             tr
                 th ID
@@ -17,6 +19,7 @@
                 th product_no
                 th product_type
                 th sort
+                th Last Fetched
         tbody
             tr(v-for="(p, $index) in products" :key="p.id")
                 td.center {{ p.id }}
@@ -24,15 +27,17 @@
                     a.button(href="#" @click.prevent="update($index)") Update
                     a.button(href="#" @click.prevent="start_fetch(p.id)") Start fetch
                 td
-                    input(type="text" v-model="p.name")
+                    input(type="text" v-model="p.name" style="width: 240px;")
                 td
-                    input(type="text" v-model="p.product_no")
+                    input(type="text" v-model="p.product_no" style="width: 140px;")
                 td
-                    select(v-model="p.product_type")
-                        option(value="booster") booster
-                        option(value="starter") starter
+                    select(v-model="p.product_type" style="width: 140px;")
+                        option(value="booster") ブースター
+                        option(value="starter") スターター
                 td
-                    input(type="text" v-model.number="p.sort" )
+                    input(type="text" v-model.number="p.sort" style="width: 190px;")
+                td {{ p.last_fetched.replace(/T/, ' ') }}
+
     .actions
         a.button(href="#" @click.prevent="append_new") Append new
 </template>
@@ -56,10 +61,22 @@ const update = (index: number) => {
     });
 };
 
+const prevent_double_fetch = ref<boolean>(false);
+
 const start_fetch = (id: number) => {
+    if (prevent_double_fetch.value) {
+        alert('データ取得が進行中です');
+        return;
+    }
+    prevent_double_fetch.value = true;
+
     axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{ success: boolean }>) => {
         console.log(res.data.success);
         alert(`${id} fetch complete`);
+        prevent_double_fetch.value = false;
+    }).catch(() => {
+        alert('サーバーエラー');
+        prevent_double_fetch.value = false;
     });
 };
 
@@ -84,7 +101,7 @@ const append_new = () => {
 }
 
 const publish_all = () => {
-    axios.post('/api/admin/publish_cards').then((res: AxiosResponse<{success: boolean}>) => {
+    axios.post('/api/admin/publish_cards').then((res: AxiosResponse<{ success: boolean }>) => {
         alert(res.data.success);
     });
 };
@@ -92,6 +109,11 @@ const publish_all = () => {
 </script>
 
 <style scoped lang="less">
+table {
+    table-layout: fixed;
+    width: 1200px;
+}
+
 a:active, a:focus {
     color: red;
 }
