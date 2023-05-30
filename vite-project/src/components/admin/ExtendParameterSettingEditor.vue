@@ -103,6 +103,8 @@ const update_eps = ($index: number, event: { target: { value: string } }) => {
 </script>
 
 <style scoped lang="less">
+@import "../../composable/button.less";
+
 .eps_editor {
 
 }
@@ -131,5 +133,9 @@ th {
 textarea.eps_skill {
     width: 480px;
     height: 90px;
+}
+
+a.button {
+    .small_button();
 }
 </style>

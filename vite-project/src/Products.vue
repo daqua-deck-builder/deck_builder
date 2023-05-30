@@ -109,6 +109,8 @@ const publish_all = () => {
 </script>
 
 <style scoped lang="less">
+@import "./composable/button.less";
+
 table {
     table-layout: fixed;
     width: 1200px;
@@ -121,24 +123,14 @@ a:active, a:focus {
 a.button {
     color: blue;
 
+    .small_button();
+
     &:hover {
         background-color: lightgreen;
     }
 
     &:focus {
         color: red;
-    }
-
-    &:before {
-        content: '[';
-        color: grey;
-        margin-left: 2px;
-    }
-
-    &:after {
-        content: ']';
-        color: grey;
-        margin-right: 2px;
     }
 }
 

@@ -78,6 +78,8 @@ onMounted(() => {
 </template>
 
 <style scoped lang="less">
+@import "../composable/button.less";
+
 .bar {
     background-color: #313131;
 
@@ -106,23 +108,7 @@ onMounted(() => {
 
 .nav {
     a {
-        user-select: none;
-        -webkit-user-drag: none;
-        display: inline-block;
-        margin: 0 4px;
-
-        &:active {
-            position: relative;
-            top: 1px;
-        }
-
-        &:before {
-            content: '[';
-        }
-
-        &:after {
-            content: ']';
-        }
+        .small_button();
     }
 }
 </style>

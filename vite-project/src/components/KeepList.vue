@@ -77,8 +77,8 @@ const {bg_gradient_style} = useGradientBg();
     .info
         input(type="text" v-model.lazy="name")
     .actions
-        a.button(href="#" @click.prevent="save") 保存
-        a.button(href="#" @click.prevent="trim") トリム
+        a.small(href="#" @click.prevent="save") 保存
+        a.small(href="#" @click.prevent="trim") トリム
     .top
         table.keep_list
             colgroup
@@ -161,6 +161,7 @@ const {bg_gradient_style} = useGradientBg();
 
 <style scoped lang="less">
 @import "../composable/colored_table_row.less";
+@import "../composable/button.less";
 
 .keep_list {
     //zoom: 0.7;
@@ -209,6 +210,10 @@ span.amount {
     &[data-over="over"] {
         color: #ff4949;
     }
+}
+
+a.small {
+    .small_button();
 }
 
 a.button {
