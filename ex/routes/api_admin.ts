@@ -118,8 +118,13 @@ admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id:
     } else {
         res.json({success: false});
     }
+});
 
-})
+const zenkakuToHankaku = (str: string): string => {
+    return str.replace(/[Ａ-Ｚａ-ｚ０-９：＼／！]/g, function (s: string) {
+        return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
+    });
+};
 
 admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, res: Response<{ success: boolean }>): Promise<void> => {
     // @ts-ignore
@@ -137,6 +142,8 @@ admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, re
     console.log('publishing start');
 
     const cards_modified: CardDataClient[] = cards.map((c: CardDataClient) => {
+        c.name = zenkakuToHankaku(c.name);
+
         for (let i = 0; i < ep_settings.length; i++) {
             if (ep_settings[i].slug === c.slug) {
                 if (ep_settings[i].method === 'extend') {
