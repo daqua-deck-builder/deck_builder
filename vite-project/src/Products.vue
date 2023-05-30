@@ -1,23 +1,28 @@
 <template lang="pug">
 .admin
+    .actions
+        a.button(href="#" @click.prevent="publish_all") Publish
     table
         colgroup
-            col(style="width: 100px;")
+            col(style="width: 40px;")
+            col(style="width: 200px;")
             col(style="width: 250px;")
-            col(style="width: 100px;")
             col(style="width: 100px;")
             col(style="width: 100px;")
         thead
             tr
                 th ID
+                th
                 th NAME
                 th product_no
                 th product_type
                 th sort
-                th
         tbody
             tr(v-for="(p, $index) in products" :key="p.id")
                 td.center {{ p.id }}
+                td
+                    a.button(href="#" @click.prevent="update($index)") Update
+                    a.button(href="#" @click.prevent="start_fetch(p.id)") Start fetch
                 td
                     input(type="text" v-model="p.name")
                 td
@@ -28,9 +33,6 @@
                         option(value="starter") starter
                 td
                     input(type="text" v-model.number="p.sort" )
-                td
-                    a.button(href="#" @click.prevent="update($index)") Update
-                    a.button(href="#" @click.prevent="start_fetch(p.id)") Start fetch
     .actions
         a.button(href="#" @click.prevent="append_new") Append new
 </template>
@@ -80,6 +82,48 @@ const append_new = () => {
     };
     products.value = [...products.value, new_product];
 }
+
+const publish_all = () => {
+    axios.post('/api/admin/publish_cards').then((res: AxiosResponse<{success: boolean}>) => {
+        alert(res.data.success);
+    });
+};
+
 </script>
 
-<style scoped lang="less"></style>
+<style scoped lang="less">
+a:active, a:focus {
+    color: red;
+}
+
+a.button {
+    color: blue;
+
+    &:hover {
+        background-color: lightgreen;
+    }
+
+    &:focus {
+        color: red;
+    }
+
+    &:before {
+        content: '[';
+        color: grey;
+        margin-left: 2px;
+    }
+
+    &:after {
+        content: ']';
+        color: grey;
+        margin-right: 2px;
+    }
+}
+
+tr {
+    &:hover {
+        background-color: lightgreen;
+    }
+}
+
+</style>

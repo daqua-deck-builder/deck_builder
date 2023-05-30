@@ -1,6 +1,5 @@
 import express, {NextFunction, Request, Response} from "express";
 import {PrismaClient} from "@prisma/client";
-import fs from 'node:fs';
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 import {CardDataClient, Deck, EPS} from "../types/card.js";
 import {auth_router, find_user_by_sid} from "./api_auth.js";
@@ -27,41 +26,6 @@ api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: strin
     } else {
         res.json({success: false, card});
     }
-});
-
-api_router.post('/publish_cards.json', async (req: Request, res: Response) => {
-    // @ts-ignore
-    const cards: CardDataClient[] = await prisma.card.findMany({
-        orderBy: [
-            {
-                slug: 'desc',
-            },
-        ]
-    });
-
-    // @ts-ignore
-    const ep_settings: EPS[] = await prisma.ExtendParameterSetting.findMany();
-
-    console.log('publishing start');
-
-    const cards_modified: CardDataClient[] = cards.map((c: CardDataClient) => {
-        for (let i = 0; i < ep_settings.length; i++) {
-            if (ep_settings[i].slug === c.slug) {
-                if (ep_settings[i].method === 'extend') {
-                    c = {...c, ...JSON.parse(ep_settings[i].json)};
-                    console.log(`extend setting applied. slug: ${c.slug} data: ${ep_settings[i].json} `);
-                }
-            }
-        }
-        return c;
-    });
-
-    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, () => {
-        console.log('publishing complete');
-        res.json({
-            success: true
-        });
-    });
 });
 
 api_router.post('/fetch_card_data.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {

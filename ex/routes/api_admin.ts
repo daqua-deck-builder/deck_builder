@@ -3,6 +3,7 @@ import {PrismaClient} from "@prisma/client";
 import {CardDataClient, EPS} from "../types/card.js";
 import {Product} from "../types/app.js";
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
+import fs from "node:fs";
 
 const prisma = new PrismaClient();
 
@@ -104,7 +105,13 @@ admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
 
         console.log(payload);
 
-        fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
+        fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(async () => {
+            await prisma["product"].update({
+                where: {id: req.body.id},
+                data: {
+                    last_fetched: new Date()
+                }
+            });
             res.json({success: true});
         });
     } else {
@@ -112,5 +119,40 @@ admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
     }
 
 })
+
+admin_router.post('/publish_cards', async (req: Request, res: Response) => {
+    // @ts-ignore
+    const cards: CardDataClient[] = await prisma.card.findMany({
+        orderBy: [
+            {
+                slug: 'desc',
+            },
+        ]
+    });
+
+    // @ts-ignore
+    const ep_settings: EPS[] = await prisma.ExtendParameterSetting.findMany();
+
+    console.log('publishing start');
+
+    const cards_modified: CardDataClient[] = cards.map((c: CardDataClient) => {
+        for (let i = 0; i < ep_settings.length; i++) {
+            if (ep_settings[i].slug === c.slug) {
+                if (ep_settings[i].method === 'extend') {
+                    c = {...c, ...JSON.parse(ep_settings[i].json)};
+                    console.log(`extend setting applied. slug: ${c.slug} data: ${ep_settings[i].json} `);
+                }
+            }
+        }
+        return c;
+    });
+
+    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, () => {
+        console.log('publishing complete');
+        res.json({
+            success: true
+        });
+    });
+});
 
 export {admin_router}
