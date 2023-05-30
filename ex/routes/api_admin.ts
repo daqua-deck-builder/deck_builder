@@ -3,13 +3,14 @@ import {PrismaClient} from "@prisma/client";
 import {CardDataClient, EPS} from "../types/card.js";
 import {Product} from "../types/app.js";
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
+import {check_is_admin, check_is_admin_json} from "./api_auth.js";
 import fs from "node:fs";
 
 const prisma = new PrismaClient();
 
 const admin_router = express.Router();
 
-admin_router.get('/card_detail/:slug', async (req: Request<{ slug: string }>, res: Response, next: NextFunction): Promise<any> => {
+admin_router.get('/card_detail/:slug', check_is_admin_json, async (req: Request<{ slug: string }>, res: Response, next: NextFunction): Promise<any> => {
     const slug: string = req.params.slug;
 
     // @ts-ignore
@@ -33,7 +34,7 @@ admin_router.get('/card_detail/:slug', async (req: Request<{ slug: string }>, re
     }
 });
 
-admin_router.post('/update_eps', (req: Request<{ eps: EPS }>, res) => {
+admin_router.post('/update_eps', check_is_admin_json, (req: Request<{ eps: EPS }>, res: Response<{ epss: EPS[] }>) => {
     const data = req.body.eps;
     const data_id_removed = {...data};
     delete data_id_removed.id
@@ -53,7 +54,7 @@ admin_router.post('/update_eps', (req: Request<{ eps: EPS }>, res) => {
     });
 });
 
-admin_router.get('/products', async (req: Request, res: Response<{ products: Product[] }>) => {
+admin_router.get('/products', check_is_admin, async (req: Request, res: Response<{ products: Product[] }>): Promise<void> => {
     // @ts-ignore
     const products: Product[] | null = await prisma["product"].findMany({});
 
@@ -66,7 +67,7 @@ admin_router.get('/products', async (req: Request, res: Response<{ products: Pro
     }
 });
 
-admin_router.post('/update_product', async (req, res) => {
+admin_router.post('/update_product', check_is_admin_json, async (req: Request<{ product: Product }>, res: Response<{ success: boolean }>): Promise<void> => {
     const product: Product = {...req.body["product"]};
     const new_product = (() => {
         const p: Product = {...product};
@@ -86,7 +87,7 @@ admin_router.post('/update_product', async (req, res) => {
     res.json({success: true});
 });
 
-admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
+admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id: number }>, res: Response<{ success: boolean }>): Promise<void> => {
     // @ts-ignore
     const product: Product | null = await prisma["product"].findFirst({
         where: {
@@ -105,7 +106,7 @@ admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
 
         console.log(payload);
 
-        fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(async () => {
+        fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(async (): Promise<void> => {
             await prisma["product"].update({
                 where: {id: req.body.id},
                 data: {
@@ -120,7 +121,7 @@ admin_router.post('/fetch_items', async (req: Request<{ id: number }>, res) => {
 
 })
 
-admin_router.post('/publish_cards', async (req: Request, res: Response) => {
+admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, res: Response<{ success: boolean }>): Promise<void> => {
     // @ts-ignore
     const cards: CardDataClient[] = await prisma.card.findMany({
         orderBy: [

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import {onMounted, ref} from "vue";
+import {computed, onMounted, ref} from "vue";
 import axios, {type AxiosResponse} from "axios";
 import {useAuthStore} from "../stores/auth";
 
@@ -44,6 +44,10 @@ const dispatch_logout = () => {
     });
 };
 
+const products_page = computed(() => {
+    return location.port === '3001' ? '/products.html' : '/products';
+});
+
 onMounted(() => {
     axios.get('/api/auth/').then((res: AxiosResponse<{ login_id: string, username: string, is_admin: boolean }>) => {
         auth_store.username = res.data.username;
@@ -58,9 +62,10 @@ onMounted(() => {
 <template lang="pug">
 .bar(v-if="!first_loaded")
     span &nbsp;
-.bar.authenticated(v-if="auth_store.login_id && first_loaded")
+.bar.nav.authenticated(v-if="auth_store.login_id && first_loaded")
     span {{ auth_store.username }}
     a(href="#" @click.prevent="dispatch_logout") ログアウト
+    a(:href="products_page" target="_blank" v-if="auth_store.is_admin") 製品管理
 .bar.not_authenticated(v-if="!auth_store.login_id && first_loaded")
     form(action="/api/login" method="POST" @submit.prevent="submit")
         label
@@ -96,6 +101,28 @@ onMounted(() => {
 
         display: inline-block;
         margin-right: 2rem;
+    }
+}
+
+.nav {
+    a {
+        user-select: none;
+        -webkit-user-drag: none;
+        display: inline-block;
+        margin: 0 4px;
+
+        &:active {
+            position: relative;
+            top: 1px;
+        }
+
+        &:before {
+            content: '[';
+        }
+
+        &:after {
+            content: ']';
+        }
     }
 }
 </style>
