@@ -3,7 +3,7 @@ import {PrismaClient} from "@prisma/client";
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 import {CardDataClient, Deck, EPS} from "../types/card.js";
 import {auth_router, find_user_by_sid} from "./api_auth.js";
-import {admin_router} from "./api_admin.js";
+import {admin_router, apply_eps} from "./api_admin.js";
 import {User} from "../types/app.js";
 
 const prisma = new PrismaClient();
@@ -19,7 +19,22 @@ api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: strin
     const slug = req.params.slug;
 
     // @ts-ignore
-    const card: CardDataClient | null = await prisma.card.findFirst<CardDataClient>({where: {slug}});
+    const _card: CardDataClient | null = await prisma.card.findFirst<CardDataClient>({where: {slug}});
+    // @ts-ignore
+    const epss: EPS[] | never[] = await prisma.ExtendParameterSetting.findMany({
+        where: {
+            slug
+        }
+    });
+
+    let card!: CardDataClient;
+    if (_card && epss.length > 0) {
+        card = apply_eps(_card, epss);
+    } else {
+        if (_card) {
+            card = _card;
+        }
+    }
 
     if (card) {
         res.json({success: true, card});

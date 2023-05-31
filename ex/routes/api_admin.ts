@@ -131,6 +131,20 @@ const zenkakuToHankaku = (str: string): string => {
     });
 };
 
+const apply_eps = (card: CardDataClient, epss: EPS[]): CardDataClient => {
+    card.name = zenkakuToHankaku(card.name);
+
+    for (let i = 0; i < epss.length; i++) {
+        if (epss[i].slug === card.slug) {
+            if (epss[i].method === 'extend') {
+                card = {...card, ...JSON.parse(epss[i].json)};
+                // console.log(`extend setting applied. slug: ${card.slug} data: ${epss[i].json} `);
+            }
+        }
+    }
+    return card;
+};
+
 admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, res: Response<{ success: boolean }>): Promise<void> => {
     // @ts-ignore
     const cards: CardDataClient[] = await prisma.card.findMany({
@@ -146,18 +160,8 @@ admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, re
 
     console.log('publishing start');
 
-    const cards_modified: CardDataClient[] = cards.map((c: CardDataClient) => {
-        c.name = zenkakuToHankaku(c.name);
-
-        for (let i = 0; i < ep_settings.length; i++) {
-            if (ep_settings[i].slug === c.slug) {
-                if (ep_settings[i].method === 'extend') {
-                    c = {...c, ...JSON.parse(ep_settings[i].json)};
-                    console.log(`extend setting applied. slug: ${c.slug} data: ${ep_settings[i].json} `);
-                }
-            }
-        }
-        return c;
+    const cards_modified: CardDataClient[] = cards.map((card: CardDataClient) => {
+        return apply_eps(card, ep_settings);
     });
 
     fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, () => {
@@ -168,4 +172,4 @@ admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, re
     });
 });
 
-export {admin_router}
+export {admin_router, zenkakuToHankaku, apply_eps}
