@@ -1,9 +1,7 @@
 <script lang="ts">
 import type {CardDataClient} from '../../../ex/types/card.js'
-import {type Column, useColumnStore} from "../stores/columns";
+import {type Column} from "../stores/columns";
 import {defineComponent, h} from "vue";
-
-const column_store = useColumnStore();
 
 const icon = (c: CardDataClient): string => {
     if (c.has_lb) {
@@ -19,22 +17,22 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
         card: Object as () => CardDataClient,
         columns: Array as () => Column[]
     },
+    emits: ['set-target'],
     setup(props, {emit}) {
         const render = () => {
             const card = props.card;
             const columns = props.columns;
             return columns.map(col => {
                 return h('td', {
-                    class: `${col.key} ${col.align}`
+                    class: `${col.key} ${col.align}`,
+                    onClick: col.key === 'name' ? () => {
+                        emit('set-target', card);
+                    } : null
                 }, [col.key === 'name' ? [
                     h('span', {
                         class: 'name',
                         'data-icon': icon(card!),
-                        'data-rarity': card?.rarity,
-                        onClick: () => {
-                            emit('set-target', card);
-                        }
-
+                        'data-rarity': card?.rarity
                     }, card![col.key])
                 ] : [
                     col.key === 'power' ? card![col.key].replace(/k/, '000') : card![col.key]

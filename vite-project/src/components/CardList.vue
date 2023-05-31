@@ -231,16 +231,6 @@ tr {
     .colored_table_row();
 }
 
-tr {
-
-    &:hover {
-        td.card_name {
-            outline: 3px solid #000000;
-            //outline: 3px solid #202dff;
-        }
-    }
-}
-
 .left_side, .right_side {
     float: left;
 }
@@ -296,7 +286,6 @@ select {
         padding-right: 2rem;
     }
 }
-
 
 .actions {
     margin-bottom: 10px;
