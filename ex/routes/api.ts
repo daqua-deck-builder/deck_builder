@@ -24,14 +24,12 @@ api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: strin
             res.set('Content-Type', 'application/json');
             res.send(`{"success": true, "card": ${json_text}}`);
         } else {
-            // @ts-ignore
-            const _card: CardDataClient | null = await prisma.card.findFirst<CardDataClient>({where: {slug}});
-            // @ts-ignore
-            const epss: EPS[] | never[] = await prisma.ExtendParameterSetting.findMany({
+            const _card: CardDataClient | null = await prisma.card.findFirst({where: {slug}}) as CardDataClient | null;
+            const epss: EPS[] | never[] = await prisma.extendParameterSetting.findMany({
                 where: {
                     slug
                 }
-            });
+            }) as EPS[];
 
             let card!: CardDataClient;
             if (_card && epss.length > 0) {
