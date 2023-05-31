@@ -11,7 +11,8 @@
         tbody
             tr
                 th slug
-                td {{ card.slug }}
+                td
+                    router-link(:to="`/card/${card.slug}`") {{ card.slug }}
             tr
                 th name
                 td {{ card.name }}
