@@ -3,7 +3,6 @@ import {computed, ref, inject} from "vue";
 import type {CardDataClient, Format} from '../../../ex/types/card.js'
 import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
-import CardDetail from "./CardDetail.vue";
 import CardTableColumn from "./CardTableColumn.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import {useCardStore} from "../stores/cards";
@@ -170,15 +169,7 @@ const {bg_gradient_style} = useGradientBg();
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
-.right_side.margin_left
-    Suspense
-        template(#default)
-            CardDetail(
-                v-if="target !== ''"
-                :slug="target"
-            )
-        template(#fallback)
-            span
+
 </template>
 
 <style scoped lang="less">
@@ -186,7 +177,6 @@ const {bg_gradient_style} = useGradientBg();
 
 table {
     table-layout: fixed;
-    //border-collapse: collapse;
     background-color: white;
     color: black;
 }

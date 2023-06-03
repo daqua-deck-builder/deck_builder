@@ -3,6 +3,7 @@ import './style.less';
 import App from './App.vue';
 import {createPinia} from "pinia";
 import {useCardStore} from "./stores/cards";
+import {useWindowStore} from "./stores/window";
 import {router} from "./router";
 
 const pinia = createPinia();
@@ -16,6 +17,10 @@ import("./router").then(({router}) => {
     app.provide('worker', worker);
     const card_store = useCardStore();
     card_store.worker = worker;
+
+    const window_store = useWindowStore();
+    window_store.initialize();
+
     app.use(router);
 
     app.mount('#app');

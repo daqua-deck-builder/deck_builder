@@ -73,7 +73,6 @@ const {bg_gradient_style} = useGradientBg();
 
 <template lang="pug">
 .keep_list(v-if="keep_store")
-    .title キープリスト
     .info
         input(type="text" v-model.lazy="name")
     .actions
@@ -163,9 +162,6 @@ const {bg_gradient_style} = useGradientBg();
 .keep_list {
     width: 520px;
     background-color: white;
-    border: 1px solid black;
-    border-radius: 5px;
-    padding: 5px;
 
     table {
         width: 250px;
@@ -180,10 +176,6 @@ const {bg_gradient_style} = useGradientBg();
 
 .actions {
     margin-bottom: 4px;
-}
-
-.title {
-    font-weight: bolder;
 }
 
 table {

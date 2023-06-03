@@ -21,6 +21,7 @@ import UserInfo from "./components/UserInfo.vue";
 
 #main-pain {
     height: calc(100vh - 3rem);
+    width: 100vw;
     overflow-y: auto;
     z-index: 1;
     margin-left: 10px;
