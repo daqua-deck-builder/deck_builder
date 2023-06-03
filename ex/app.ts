@@ -15,6 +15,12 @@ import {backup_vue_router} from "./routes/middlewares.js";
 // @ts-ignore
 const {TEXT_CACHE_DIR, IMAGE_CACHE_DIR, DATABASE_URL}: Env = dotenv.config().parsed;
 
+console.log({
+    TEXT_CACHE_DIR,
+    IMAGE_CACHE_DIR,
+    DATABASE_URL
+});
+
 if (!DATABASE_URL) {
     console.error('DATABASE_URL not found in .env.');
     process.exit(1);
