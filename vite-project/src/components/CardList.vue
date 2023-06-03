@@ -88,10 +88,6 @@ const icon = computed(() => {
     }
 });
 
-const append_to_keep = (index: number): void => {
-    keep_store.append(card_store.cards[index]);
-};
-
 card_store.install_worker(worker).then(() => {
     const _f: number = parseInt(localStorage.getItem('filter.format'), 10);
 
@@ -161,25 +157,12 @@ const {bg_gradient_style} = useGradientBg();
         a.check(href="#" @click.prevent="keep_direct = !keep_direct" :data-keep-direct="keep_direct" alt="カード名を1クリックでカードをキープリストに投入する") ダイレクトキープ
     table
         colgroup
-            col(style="width: 140px;")
-            col(style="width: 240px;")
-            col(style="width: 60px;")
-            //col(style="width: 100px;")
-            col(style="width: 60px;")
-            col(style="width: 120px;")
-            col(style="width: 60px;")
-            col(style="width: 100px;")
+            col(v-for="c in column_store.active_columns"
+                :key="c.key"
+                :style="`width: ${c.width}px;`")
         thead
             tr
                 th(v-for="column in column_store.active_columns" :key="column.key") {{ column.label }}
-                //th No.
-                //th 名前
-                //th 色
-                ////th ルリグ
-                //th レベル
-                //th 種族
-                //th パワー
-                //th 操作
         tbody
             tr.card(v-for="(c, $index) in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 CardTableColumn(:columns ="column_store.active_columns" :card="c" @set-target="set_target")

@@ -6,7 +6,8 @@ type Column = {
     key: keyof CardDataClient | 'operation',
     order: number,
     display: boolean,
-    align: '' | 'center' | 'right'
+    align: '' | 'center' | 'right',
+    width: number
 }
 
 type State = {
@@ -19,52 +20,59 @@ const useColumnStore = defineStore('column', {
             columns: [
                 {
                     key: 'slug',
-                    label: 'ID',
+                    label: 'No.',
                     order: 1,
                     display: true,
-                    align: ''
+                    align: '',
+                    width: 140
                 },
                 {
                     key: 'name',
                     label: '名前',
                     order: 2,
                     display: true,
-                    align: ''
+                    align: '',
+                    width: 240
                 },
                 {
                     key: 'color',
                     label: '色',
                     order: 3,
                     display: true,
-                    align: 'center'
+                    align: 'center',
+                    width: 60
                 },
                 {
                     key: 'level',
-                    label: 'レベル',
+                    label: 'Lv',
                     order: 4,
                     display: true,
-                    align: 'center'
+                    align: 'center',
+                    width: 30
                 },
                 {
                     key: 'klass',
                     label: '種類',
                     order: 5,
                     display: true,
-                    align: 'center'
+                    align: 'center',
+                    width: 120
                 },
                 {
                     key: 'power',
                     label: 'パワー',
                     order: 6,
                     display: true,
-                    align: 'right'
+                    align: 'right',
+                    width: 50
                 },
                 {
                     key: 'operation',
                     label: '操作',
                     order: 7,
                     display: true,
-                    align: 'center'
+                    align: 'center',
+                    width: 100
                 },
             ]
         }
