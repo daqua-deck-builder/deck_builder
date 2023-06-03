@@ -12,6 +12,10 @@ const icon = (c: CardDataClient): string => {
     return '';
 };
 
+const story = (c: CardDataClient): string => {
+    return c.story || '';
+};
+
 const CardTableColumn = defineComponent<{}, {}, {}, {}>({
     props: {
         card: Object as () => CardDataClient,
@@ -32,6 +36,7 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
                     h('span', {
                         class: 'name',
                         'data-icon': icon(card!),
+                        'data-story': story(card!),
                         'data-rarity': card?.rarity
                     }, card![col.key])
                 ] : [
