@@ -20,14 +20,12 @@ import UserInfo from "./components/UserInfo.vue";
 }
 
 #main-pain {
+    height: calc(100vh - 3rem);
+    overflow-y: auto;
     z-index: 1;
     margin-left: 10px;
     padding-top: 60px;
     position: fixed;
     top: 0;
-
-    width: 99vw;
-    max-height: 99vh;
-    overflow-y: auto;
 }
 </style>
