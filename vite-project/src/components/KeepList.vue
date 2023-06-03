@@ -78,84 +78,81 @@ const {bg_gradient_style} = useGradientBg();
         input(type="text" v-model.lazy="name")
     .actions
         a.small(href="#" @click.prevent="save") 保存
-        a.small(href="#" @click.prevent="trim") トリム
+        a.small(href="#" @click.prevent="trim" title="枚数が-になっているものを「その他」カテゴリに移動し、×になっているものをリストから削除します") トリム
     .top
         table.keep_list
             colgroup
-                col(style="width: 40px;")
-                col(style="width: 300px;")
-                col(style="width: 100px;")
+                col(style="width: 20px;")
+                col(style="width: 230px;")
             tbody
                 tr
                     th.center
                         span.amount(:data-over="total(keep_store.main_lb) > 20 ? 'over': ''" v-text="total(keep_store.main_lb)")
-                    th(colspan="2") メインデッキ(LBあり)
+                    th メインデッキ(LBあり)
                 tr(v-if="keep_store" v-for="card of keep_store.main_lb" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
                     td.right
                         span.amount(v-text="amount(card.amount)")
-                    td
+                    td.label_action
                         span [LB] {{ card.name }}
-                    td.center
-                        a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'main_lb', 1)")
-                        a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'main_lb', -1)")
-                        a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'main_lb')")
+                        .actions_layered
+                            a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'main_lb', 1)" title="1枚増やす")
+                            a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'main_lb', -1)" title="1枚減らす")
+                            a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'main_lb')" title="取り除く")
         table.keep_list
             colgroup
-                col(style="width: 40px;")
-                col(style="width: 300px;")
-                col(style="width: 100px;")
+                col(style="width: 20px;")
+                col(style="width: 230px;")
             tbody
                 tr
                     th.center
                         span.amount(v-text="total(keep_store.main_no_lb)")
-                    th(colspan="2") メインデッキ(LBなし)
+                    th メインデッキ(LBなし)
                 tr(v-if="keep_store" v-for="card of keep_store.main_no_lb" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
                     td.right
                         span.amount(v-text="amount(card.amount)")
-                    td
+                    td.label_action
                         span {{ card.name }}
-                    td.center
-                        a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'main_no_lb', 1)")
-                        a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'main_no_lb', -1)")
-                        a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'main_no_lb')")
+                        .actions_layered
+                            a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'main_no_lb', 1)" title="1枚増やす")
+                            a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'main_no_lb', -1)" title="1枚減らす")
+                            a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'main_no_lb')" title="取り除く")
         br.clearfix
     .bottom
         table.keep_list
             colgroup
-                col(style="width: 40px;")
-                col(style="width: 300px;")
-                col(style="width: 100px;")
+                col(style="width: 20px;")
+                col(style="width: 230px;")
             tbody
                 tr
                     th.center
                         span.amount(:data-over="lrig_deck_over" v-text="total(keep_store.white)")
-                    th(colspan="2") ルリグデッキ
+                    th ルリグデッキ
                 tr(v-if="keep_store" v-for="card of keep_store.white" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
                     td.right
                         span.amount(v-text="amount(card.amount)")
-                    td
+                    td.label_action
                         span [白枠] {{ card.name }}
-                    td.center
-                        a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'white', 1)")
-                        a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'white', -1)")
-                        a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'white')")
+                        .actions_layered
+                            a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'white', 1)" title="1枚増やす")
+                            a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'white', -1)" title="1枚減らす")
+                            a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'white')" title="取り除く")
         table.keep_list
             colgroup
-                col(style="width: 40px;")
-                col(style="width: 300px;")
-                col(style="width: 100px;")
+                col(style="width: 20px;")
+                col(style="width: 230px;")
             tbody(v-if="keep_store.others.length > 0")
                 tr
-                    th(colspan="3") その他
+                    th
+                    th その他
                 tr(v-if="keep_store" v-for="card of keep_store.others" :key="card.slug" :data-color="card.color" :style="bg_gradient_style(card.color)")
                     td.right
                         span.amount(v-text="amount(card.amount)")
-                    td
+                    td.label_action
                         span [他] {{ card.name }}
-                    td.center
-                        a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'others', 1)")
-                        a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'others', -1)")
-                        a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'others')")
+                        .actions_layered
+                            a.button.increase(href="#" @click.prevent="increase(card.pronounce, 'others', 1)" title="1枚増やす")
+                            a.button.decrease(href="#" @click.prevent="increase(card.pronounce, 'others', -1)" title="1枚減らす")
+                            a.button.remove(href="#" @click.prevent="remove(card.pronounce, 'others')" title="取り除く")
         br.clearfix
 </template>
 
@@ -164,15 +161,14 @@ const {bg_gradient_style} = useGradientBg();
 @import "../composable/button.less";
 
 .keep_list {
-    //zoom: 0.7;
-    width: 985px;
+    width: 520px;
     background-color: white;
     border: 1px solid black;
     border-radius: 5px;
     padding: 5px;
 
     table {
-        width: 488px;
+        width: 250px;
         float: left;
     }
 }
@@ -201,7 +197,32 @@ table {
 
 tr {
     color: black;
+    height: 28px;
     .colored_table_row();
+}
+
+td.label_action {
+    span {
+        font-size: 1rem;
+        height: 21px;
+        display: inline-block;
+        line-height: 21px;
+    }
+
+    .actions_layered {
+        opacity: 0.8;
+        display: none;
+    }
+
+    &:hover {
+        span {
+            display: none;
+        }
+
+        .actions_layered {
+            display: block;
+        }
+    }
 }
 
 span.amount {
@@ -218,12 +239,13 @@ a.small {
 
 a.button {
     min-width: 24px;
+    height: 21px;
     text-align: center;
     display: inline-block;
     border: 1px solid grey;
     border-radius: 4px;
     background-color: white;
-    margin-right: 2px;
+    margin: 0 2px 0 0;
 
     &:last-child {
         margin-right: 0;
@@ -271,7 +293,5 @@ a.button {
             content: url('/remove.svg');
         }
     }
-
 }
-
 </style>
