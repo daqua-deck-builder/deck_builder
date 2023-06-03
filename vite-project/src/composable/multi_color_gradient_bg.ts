@@ -24,7 +24,15 @@ export default function useGradientBg() {
 
                 return `background: linear-gradient(to right, ${gradient_code});`;
             } else {
-                return '';
+                const color_codes: string[] = {
+                    '白': ['#fff1b4', '#fee684'],
+                    '青': ['#b4ceff', '#70a1ff'],
+                    '黒': ['#9263f9', '#7639ff'],
+                    '赤': ['#ffb4b4', '#ff6c6c'],
+                    '緑': ['#ccffb4', '#96ff60'],
+                    '無': ['#cfcfcf', '#9c9c9c']
+                }[color] || ['#ffffff', '#ffffff'];
+                return `background: linear-gradient(to right, ${color_codes[1]} 10%, ${color_codes[0]} 90%);`;
             }
         }
     });
