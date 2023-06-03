@@ -15,7 +15,7 @@
                     router-link(:to="`/card/${card.slug}`") {{ card.slug }}
             tr
                 th name
-                td {{ card.name }}
+                td(v-html="card.name")
             tr
                 th card_type
                 td {{ card.card_type }}

@@ -37,8 +37,9 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
                         class: 'name',
                         'data-icon': icon(card!),
                         'data-story': story(card!),
-                        'data-rarity': card?.rarity
-                    }, card![col.key])
+                        'data-rarity': card?.rarity,
+                        innerHTML: card!.name   // nameはpublish時にhtml化ずみ
+                    })
                 ] : [
                     col.key === 'power' ? card![col.key].replace(/k/, '000') : card![col.key]
                 ]])

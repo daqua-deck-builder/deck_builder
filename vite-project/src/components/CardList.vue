@@ -166,16 +166,7 @@ const {bg_gradient_style} = useGradientBg();
         tbody
             tr.card(v-for="(c, $index) in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 CardTableColumn(:columns ="column_store.active_columns" :card="c" @set-target="set_target")
-                //td.card_name(@click="set_target(c)")
-                //    span.name
-                //        span(:data-story="c.story")
-                //        span(:data-icon="icon(c)")
-                //        span(:data-rarity="c.rarity" v-html="c.name.replace(/（/, '<br />（')")
                 //td.center(v-html=" c.klass.replace(/,/, '<br>') ")
-                //td.right
-                //    span(style="margin-right: 0.2rem;" v-text=" c.power.replace(/k/, '000')")
-                //td.center(style="vertical-align: middle;")
-                //    button(@click="append_to_keep($index)") +
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。

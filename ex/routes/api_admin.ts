@@ -126,13 +126,14 @@ admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id:
 });
 
 const zenkakuToHankaku = (str: string): string => {
-    return str.replace(/[Ａ-Ｚａ-ｚ０-９：＼／！]/g, function (s: string) {
+    str = str.replace(/[Ａ-Ｚａ-ｚ０-９：＼／！]/g, function (s: string) {
         return String.fromCharCode(s.charCodeAt(0) - 0xFEE0);
     });
+    str = str.replace(/（/g, "(").replace(/）/g, ")");
+    return str;
 };
 
 const apply_eps = (card: CardDataClient, epss: EPS[]): CardDataClient => {
-    card.name = zenkakuToHankaku(card.name);
 
     for (let i = 0; i < epss.length; i++) {
         if (epss[i].slug === card.slug) {
@@ -142,6 +143,9 @@ const apply_eps = (card: CardDataClient, epss: EPS[]): CardDataClient => {
             }
         }
     }
+    card.name = card.name.replace(/\(/, '<br />(');
+    card.name = zenkakuToHankaku(card.name);
+
     return card;
 };
 

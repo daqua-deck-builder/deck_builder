@@ -77,7 +77,7 @@ table.card_detail(style="width: 502px;")
         col(style="width: 250px;")
     tr.card_name(:style="bg_gradient_style(card.color)" :data-color="card.color")
         td.no_right_border.center(@click="open_admin(card.slug)") {{ card.slug }}
-        td.no_left_border.label.center(@click="show_name = !show_name") {{ label }}
+        td.no_left_border.label.center(@click="show_name = !show_name" v-html="label")
     tr(v-if="auth_store.is_admin")
         td.center.image_wrapper(colspan="2")
             img.illustration(:data-type="card.card_type" :src="img_path")
