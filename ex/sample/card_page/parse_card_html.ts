@@ -187,7 +187,7 @@ const parse_modern_structure = ($: any): CardData | false => {
 
     const story = $($cd.eq(11)).find('img[src*="dissona"]').length > 0 ? 'd' : '';
 
-    const format: 1 | 2 | 3 = (($$: any): 1 | 2 | 3 => {
+    let format: 1 | 2 | 3 = (($$: any): 1 | 2 | 3 => {
         if ($$.find('img[alt*="ディーヴァ"]').length > 0) {
             return FORMAT.diva;
         } else if ($$.find('img[alt*="キー"]').length > 0) {
@@ -237,6 +237,9 @@ const parse_modern_structure = ($: any): CardData | false => {
         })(skills_combined, coin);
     }
 
+    if (card_type === 'コイン') {
+        format = FORMAT.diva
+    }
 
     return {
         slug,
