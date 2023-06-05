@@ -55,7 +55,9 @@ type CardData = {
 type CardDataClient = Omit<CardData, 'color' | 'skills' | 'lrig'> & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる
     color: string,
     skills: string,
-    lrig: string
+    lrig: string,
+    prev: string,
+    next: string
 };
 
 type EPS = {

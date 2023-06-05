@@ -1,6 +1,6 @@
 <script lang="ts">
 import type {CardDataClient} from '../../../ex/types/card.js';
-import {defineComponent, PropType, onMounted, ref, watch, computed} from "vue";
+import {defineComponent, PropType, onMounted, ref, watch, computed, SetupContext} from "vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import SkillBox from "./SkillBox.vue";
 import {useAuthStore} from "../stores/auth";
@@ -11,6 +11,11 @@ type Props = {
     slug: { type: string, required: true, default: '' }
 }
 
+interface Emits {
+    'set-target': (value: string) => void;
+}
+
+// @ts-ignore
 export default defineComponent({
     props: {
         slug: String as PropType<Props['slug']>
@@ -18,7 +23,7 @@ export default defineComponent({
     components: {
         SkillBox
     },
-    setup(props: Props) {
+    setup(props: Props, {emit}: SetupContext<any, any, any, Emits>) {
         const card_store = useCardStore();
         const auth_store = useAuthStore();
 
@@ -43,7 +48,8 @@ export default defineComponent({
         const target = computed(() => card_store.target);
 
         const fetchCardData = async () => {
-            card.value = await card_store.detail_by_slug(target.value);
+            card.value = await card_store.detail_by_slug(props.slug);
+            // console.log(`${card.value.prev} < > ${card.value.next}`)
         };
 
         onMounted(fetchCardData);
@@ -55,6 +61,15 @@ export default defineComponent({
             }
         };
 
+        const set_prev = () => {
+            // @ts-ignore
+            emit('set-target', card.value.prev);
+        }
+        const set_next = () => {
+            // @ts-ignore
+            emit('set-target', card.value.next);
+        }
+
         return {
             card,
             show_name,
@@ -64,7 +79,9 @@ export default defineComponent({
             bg_gradient_style,
             target,
             auth_store,
-            open_admin
+            open_admin,
+            set_prev,
+            set_next
         };
     }
 });
@@ -80,7 +97,14 @@ table.card_detail(style="width: 502px;")
         td.no_left_border.label.center(@click="show_name = !show_name" v-html="label")
     tr(v-if="auth_store.is_admin")
         td.center.image_wrapper(colspan="2")
-            img.illustration(:data-type="card.card_type" :src="img_path")
+            table.no_border
+                tr
+                    td.nav(@click="set_prev")
+                        span {{ card.prev }}
+                    td
+                        img.illustration(:data-type="card.card_type" :src="img_path")
+                    td.nav(@click="set_next")
+                        span {{ card.next }}
     tr.coin(v-if="card.coin")
         th コイン
         td {{ card.coin }}
@@ -152,7 +176,23 @@ img.illustration {
 
     &[data-type*="ピース"], &[data-type="キー"] {
         outline: 2px solid white;
-        width: 480px;
+        width: 360px;
+        //width: 480px;
+    }
+}
+
+table.no_border {
+    th, td {
+        border: none;
+        user-select: none;
+    }
+
+    td.nav {
+        cursor: pointer;
+
+        &:hover {
+            background-color: lightblue;
+        }
     }
 }
 

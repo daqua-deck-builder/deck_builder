@@ -51,6 +51,10 @@ const color = computed({
     },
 })
 
+const emits = defineEmits<{
+    (e: "set-target", slug: string): void
+}>();
+
 const target = ref<string>('');
 
 const burst = computed({
@@ -71,8 +75,8 @@ const set_target = (cd: CardDataClient) => {
     }
 
     card_store.cache(cd);           // 明示的にストックさせ
-    card_store.target = cd.slug;
     target.value = cd.slug;         // 子からはそれを取得させる
+    emits('set-target', cd.slug);
 };
 
 const icon = computed(() => {

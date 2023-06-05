@@ -5,6 +5,7 @@ import {Product} from "../types/app.js";
 import {procedure as fetch_product_data} from "../sample/scraping/procedure.js";
 import {check_is_admin, check_is_admin_json} from "./api_auth.js";
 import fs from "node:fs";
+import Redis from "ioredis";
 
 const prisma = new PrismaClient();
 
@@ -168,7 +169,28 @@ admin_router.post('/publish_cards', check_is_admin_json, async (req: Request, re
         return apply_eps(card, ep_settings);
     });
 
-    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, () => {
+    // @ts-ignore
+    const redis: Redis = req.app.locals.redis_data;
+    const keys_to_delete: string[] = await redis.keys('prevnext/*');
+    for (let key of keys_to_delete) {
+        await redis.del(key);
+    }
+    for (let i: number = 0; i < cards_modified.length; i++) {
+        const prev = cards_modified[i === 0 ? (cards_modified.length - 1) : (i - 1)].slug;
+        const next = cards_modified[i === cards_modified.length - 1 ? (0) : (i + 1)].slug;
+        const prevNext = {
+            prev, next
+        };
+
+        cards_modified[i].prev = prev;
+        cards_modified[i].next = next;
+        await redis.hmset(`prevnext/${cards_modified[i].slug}`, prevNext);
+    }
+
+    fs.writeFile('./static/generated/cards.json', JSON.stringify({cards: cards_modified}), {encoding: 'utf-8'}, (err: Error | null) => {
+        if (err) {
+            console.error(err)
+        }
         console.log('publishing complete');
         res.json({
             success: true

@@ -77,12 +77,22 @@ const useCardStore = defineStore('card', {
                     if (detail) {
                         resolve(detail);
                     } else {
-                        axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{ success: boolean, card: CardDataClient | null }>) => {
-                            if (res.data.success) {
-                                this.cache(res.data.card);
-                                resolve(res.data.card);
+                        let found: boolean;
+                        for (let i = 0; i < state.cards.length; i++) {
+                            if (state.cards[i].slug === slug) {
+                                this.cache(state.cards[i]);
+                                found = true;
+                                return resolve(state.cards[i]);
                             }
-                        });
+                        }
+                        if (!found) {
+                            axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{ success: boolean, card: CardDataClient | null }>) => {
+                                if (res.data.success) {
+                                    this.cache(res.data.card);
+                                    resolve(res.data.card);
+                                }
+                            });
+                        }
                     }
                 });
             }
