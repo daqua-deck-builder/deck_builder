@@ -5,6 +5,7 @@ import useGradientBg from "../composable/multi_color_gradient_bg";
 import SkillBox from "./SkillBox.vue";
 import {useAuthStore} from "../stores/auth";
 import {useCardStore} from "../stores/cards";
+import {useKeepStore} from "../stores/keep";
 import {create_default_card_data_client} from "../../../shared/functions";
 
 type Props = {
@@ -26,6 +27,7 @@ export default defineComponent({
     setup(props: Props, {emit}: SetupContext<any, any, any, Emits>) {
         const card_store = useCardStore();
         const auth_store = useAuthStore();
+        const keep_store = useKeepStore();
 
         const card = ref<CardDataClient>(create_default_card_data_client());
         const show_name = ref<boolean>(true);
@@ -61,6 +63,10 @@ export default defineComponent({
             }
         };
 
+        const stock = () => {
+            keep_store.append(card.value);
+        }
+
         const set_prev = () => {
             // @ts-ignore
             emit('set-target', card.value.prev);
@@ -81,7 +87,8 @@ export default defineComponent({
             auth_store,
             open_admin,
             set_prev,
-            set_next
+            set_next,
+            stock
         };
     }
 });
@@ -101,8 +108,13 @@ table.card_detail(style="width: 502px;")
                 tr
                     td.nav(@click="set_prev")
                         span {{ card.prev }}
-                    td
+                    td(style="position: relative")
                         img.illustration(:data-type="card.card_type" :src="img_path")
+                        svg.icon(width="40" height="40" viewBox="0 0 40 40")
+                            g.circle(@click="stock")
+                                circle(cx="20" cy="20" r="18" fill="blue")
+                                rect(fill="white" x="18" y="4" width="4" height="32")
+                                rect(fill="white" y="18" x="4" width="32" height="4")
                     td.nav(@click="set_next")
                         span {{ card.next }}
     tr.coin(v-if="card.coin")
@@ -196,4 +208,21 @@ table.no_border {
     }
 }
 
+svg.icon {
+    display: none;
+    position: absolute;
+    bottom: 30px;
+    right: 30px;
+
+    tr:hover & {
+        display: block;
+    }
+
+    g.circle {
+        cursor: pointer;
+        &:active {
+            transform: translate(0, 1px);
+        }
+    }
+}
 </style>
