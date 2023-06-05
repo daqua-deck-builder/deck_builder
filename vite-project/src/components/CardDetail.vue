@@ -10,6 +10,7 @@ import {create_default_card_data_client} from "../../../shared/functions";
 
 type Props = {
     slug: { type: string, required: true, default: '' }
+    single: { type: boolean, required: false, default: false }
 }
 
 interface Emits {
@@ -19,7 +20,8 @@ interface Emits {
 // @ts-ignore
 export default defineComponent({
     props: {
-        slug: String as PropType<Props['slug']>
+        slug: String as PropType<Props['slug']>,
+        single: Boolean as PropType<Props['single']>
     },
     components: {
         SkillBox
@@ -103,7 +105,7 @@ table.card_detail(style="width: 502px;")
         td.no_right_border.center(@click="open_admin(card.slug)") {{ card.slug }}
         td.no_left_border.label.center(@click="show_name = !show_name" v-html="label")
     tr(v-if="auth_store.is_admin")
-        td.center.image_wrapper(colspan="2")
+        td.center.image_wrapper(colspan="2" v-if="single")
             table.no_border
                 tr
                     td.nav(@click="set_prev")
@@ -117,6 +119,8 @@ table.card_detail(style="width: 502px;")
                                 rect(fill="white" y="18" x="4" width="32" height="4")
                     td.nav(@click="set_next")
                         span {{ card.next }}
+        td.center.image_wrapper(colspan="2" v-if="!single")
+            img.illustration(:data-type="card.card_type" :src="img_path")
     tr.coin(v-if="card.coin")
         th コイン
         td {{ card.coin }}
@@ -220,6 +224,7 @@ svg.icon {
 
     g.circle {
         cursor: pointer;
+
         &:active {
             transform: translate(0, 1px);
         }

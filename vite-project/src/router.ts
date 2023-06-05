@@ -14,7 +14,7 @@ const routes = [
         component: CardDetail,
         props: route => {
             card_store.target = route.params.slug;
-            return {slug: route.params.slug};
+            return {slug: route.params.slug, single: false};
         }
     },
     {path: '/admin/eps/:slug', component: Admin, props: true},

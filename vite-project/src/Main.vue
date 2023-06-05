@@ -8,6 +8,7 @@ FloatingWindow(id="detail" title="カード詳細")
             CardDetail(
                 v-if="target !== ''"
                 :slug="target"
+                :single="true"
                 @set-target="set_target2"
             )
             div(v-else style="width: 100px; height: 20px;")
