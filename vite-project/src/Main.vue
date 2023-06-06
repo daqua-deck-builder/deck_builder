@@ -6,8 +6,8 @@ FloatingWindow(id="detail" title="カード詳細")
     Suspense
         template(#default)
             CardDetail(
-                v-if="target !== ''"
-                :slug="target"
+                v-if="card_store.target !== ''"
+                :slug="card_store.target"
                 :single="true"
                 @set-target="set_target2"
             )
@@ -18,26 +18,24 @@ DragLayer
 </template>
 
 <script setup lang="ts">
-import {ref} from "vue";
 import CardList from "./components/CardList.vue";
 import KeepList from "./components/KeepList.vue";
 import FloatingWindow from "./components/FloatingWindow.vue";
 import DragLayer from "./components/DragLayer.vue";
 import CardDetail from "./components/CardDetail.vue";
 import {useCardStore} from "./stores/cards";
-import type {CardDataClient} from '../../ex/types/card.js'
+import useDetectCard from "./composable/detect_card";
 
 const card_store = useCardStore();
 
-const target = ref('');
 const set_target = (slug: string): void => {
-    target.value = slug;
+    card_store.target = slug;
 };
 
-const set_target2 = (slug: string): void => {
-    card_store.detail_by_slug(slug).then((card: CardDataClient) => {
-        target.value = card.slug;
-    });
+const {by_local_index} = useDetectCard();
+
+const set_target2 = (delta: 1 | -1): void => {
+    by_local_index(delta);
 };
 </script>
 

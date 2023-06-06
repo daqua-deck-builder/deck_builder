@@ -1,5 +1,6 @@
 import {createApp} from 'vue';
 import './style.less';
+import '../public/card_list.less';
 import App from './App.vue';
 import {createPinia} from "pinia";
 import {useCardStore} from "./stores/cards";

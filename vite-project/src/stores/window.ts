@@ -30,20 +30,19 @@ const useWindowStore = defineStore('window', {
     actions: {
         initialize(): void {
             this.windows.set('detail', {
-                x: 600,
+                x: 780,
                 y: 340,
                 z: this.zIndexCursor + 10,
                 id: 'detail'
             });
             this.windows.set('keep', {
-                x: 500,
-                y: 60,
+                x: 1100,
+                y: 43,
                 z: this.zIndexCursor + 20,
                 id: 'keep'
             });
         },
         move(movement: Vector2D): void {
-            console.log('move')
             const w = this.windows.get(this.dragging_target);
             w.x = w.x + movement.x;
             w.y = w.y + movement.y;

@@ -24,7 +24,7 @@ const useColumnStore = defineStore('column', {
                     order: 1,
                     display: true,
                     align: '',
-                    width: 140
+                    width: 160
                 },
                 {
                     key: 'name',

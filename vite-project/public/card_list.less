@@ -1,0 +1,21 @@
+tr.card {
+    td.slug {
+        &:before {
+            display: inline-block;
+            width: 1rem;
+            content: ' ';
+            margin-right: 4px;
+        }
+    }
+
+    &[data-current="yes"] {
+        td.slug {
+            font-weight: bolder;
+
+            &:before {
+                content: '●';
+                color: blue;
+            }
+        }
+    }
+}

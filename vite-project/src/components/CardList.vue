@@ -4,6 +4,7 @@ import type {CardDataClient, Format} from '../../../ex/types/card.js'
 import {FORMAT} from "../../../ex/constants.js";
 import axios, {type AxiosResponse} from "axios";
 import CardTableColumn from "./CardTableColumn.vue";
+import PageController from "./PageController.vue";
 import useGradientBg from "../composable/multi_color_gradient_bg";
 import {useCardStore} from "../stores/cards";
 import {useKeepStore} from "../stores/keep";
@@ -21,7 +22,7 @@ const filter_word = computed({
     set: (value: string) => {
         card_store.set_filter_word(value);
     },
-})
+});
 
 const card_type = computed({
     get: () => {
@@ -30,7 +31,7 @@ const card_type = computed({
     set: (value: string) => {
         card_store.set_card_type(value);
     }
-})
+});
 
 const format = computed({
     get: () => {
@@ -55,8 +56,6 @@ const emits = defineEmits<{
     (e: "set-target", slug: string): void
 }>();
 
-const target = ref<string>('');
-
 const burst = computed({
     get: () => {
         return card_store.has_lb;
@@ -67,16 +66,16 @@ const burst = computed({
     }
 });
 
-const set_target = (cd: CardDataClient) => {
+const set_target = ({card, index}: { card: CardDataClient, index: number }) => {
     if (keep_direct.value) {
-        keep_store.append(cd);
-    } else if (target.value === cd.slug) {
-        keep_store.append(cd);
+        keep_store.append(card);
+    } else if (card_store.target === card.slug) {
+        keep_store.append(card);
     }
 
-    card_store.cache(cd);           // 明示的にストックさせ
-    target.value = cd.slug;         // 子からはそれを取得させる
-    emits('set-target', cd.slug);
+    card_store.cache(card);           // 明示的にストックさせる
+    emits('set-target', card.slug);
+    cursor.value = index;
 };
 
 const icon = computed(() => {
@@ -116,7 +115,20 @@ const keep_direct = computed({
     get: (): boolean => {
         return _keep_direct.value;
     }
-})
+});
+
+const cards = computed((): CardDataClient[] => {
+    return card_store.paged_cards;
+});
+
+const cursor = computed({
+    get: (): number => {
+        return card_store.cursor;
+    },
+    set: (value: number) => {
+        card_store.cursor = value;
+    }
+});
 
 const {bg_gradient_style} = useGradientBg();
 </script>
@@ -155,9 +167,9 @@ const {bg_gradient_style} = useGradientBg();
             option(value="無") 無
             option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
-        span.amount(v-if="card_store.cards" v-text="`${card_store.cards.length} items`")
     .actions
         a.check(href="#" @click.prevent="keep_direct = !keep_direct" :data-keep-direct="keep_direct" alt="カード名を1クリックでカードをキープリストに投入する") ダイレクトキープ
+        PageController
     table
         colgroup
             col(v-for="c in column_store.active_columns"
@@ -167,9 +179,8 @@ const {bg_gradient_style} = useGradientBg();
             tr
                 th(v-for="column in column_store.active_columns" :key="column.key") {{ column.label }}
         tbody
-            tr.card(v-for="(c, $index) in card_store.cards" :key="c.slug" :data-color="c.color" :style="bg_gradient_style(c.color)")
-                CardTableColumn(:columns ="column_store.active_columns" :card="c" @set-target="set_target")
-                //td.center(v-html=" c.klass.replace(/,/, '<br>') ")
+            tr.card(v-for="(c, $index) in cards" :key="c.slug" :data-current="cursor === $index ? 'yes': ''" :data-color="c.color" :style="bg_gradient_style(c.color)")
+                CardTableColumn(:columns ="column_store.active_columns" :index="$index" :card="c" @set-target="set_target")
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
                 td(colspan="7") 検索条件に合致するカードはありません。
@@ -184,7 +195,6 @@ table {
     background-color: white;
     color: black;
 }
-
 
 th, td {
     border: 1px solid black;
@@ -217,13 +227,6 @@ tr {
 
 .conditions {
     margin-bottom: 12px;
-}
-
-span.amount {
-    display: inline-block;
-    line-height: 1rem;
-    font-size: 1rem;
-    width: 100px;
 }
 
 select.filter_select, input[type="text"].filter_word {

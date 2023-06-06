@@ -53,7 +53,6 @@ export default defineComponent({
 
         const fetchCardData = async () => {
             card.value = await card_store.detail_by_slug(props.slug);
-            // console.log(`${card.value.prev} < > ${card.value.next}`)
         };
 
         onMounted(fetchCardData);
@@ -67,16 +66,19 @@ export default defineComponent({
 
         const stock = () => {
             keep_store.append(card.value);
-        }
+        };
 
         const set_prev = () => {
             // @ts-ignore
-            emit('set-target', card.value.prev);
-        }
+            emit('set-target', -1);
+            card_store.cursor_decr();
+        };
+
         const set_next = () => {
             // @ts-ignore
-            emit('set-target', card.value.next);
-        }
+            emit('set-target', 1);
+            card_store.cursor_incr();
+        };
 
         return {
             card,
@@ -109,7 +111,8 @@ table.card_detail(style="width: 502px;")
             table.no_border
                 tr
                     td.nav(@click="set_prev")
-                        span {{ card.prev }}
+                        svg(width="57" height="57" viewBox="0 0 57 57")
+                            path.arrow(d="M 0 28 L 57 0 L 57 57 Z")
                     td(style="position: relative")
                         img.illustration(:data-type="card.card_type" :src="img_path")
                         svg.icon(width="40" height="40" viewBox="0 0 40 40")
@@ -118,7 +121,8 @@ table.card_detail(style="width: 502px;")
                                 rect(fill="white" x="18" y="4" width="4" height="32")
                                 rect(fill="white" y="18" x="4" width="32" height="4")
                     td.nav(@click="set_next")
-                        span {{ card.next }}
+                        svg(width="57" height="57" viewBox="0 0 57 57")
+                            path.arrow(d="M 57 28 L 0 57 L 0 0 Z")
         td.center.image_wrapper(colspan="2" v-if="!single")
             img.illustration(:data-type="card.card_type" :src="img_path")
     tr.coin(v-if="card.coin")
@@ -183,7 +187,7 @@ td.image_wrapper {
 }
 
 img.illustration {
-    outline: 2px solid black;
+    //outline: 2px solid black;
     width: 360px;
 
     &[data-type="ルリグ"], &[data-type="アーツ"], &[data-type="レゾナ"], &[data-type="レゾナ（クラフト）"], &[data-type="アーツ（クラフト）"] {
@@ -229,5 +233,9 @@ svg.icon {
             transform: translate(0, 1px);
         }
     }
+}
+
+path.arrow {
+    fill: #3498db;
 }
 </style>

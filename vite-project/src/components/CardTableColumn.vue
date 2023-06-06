@@ -19,7 +19,8 @@ const story = (c: CardDataClient): string => {
 const CardTableColumn = defineComponent<{}, {}, {}, {}>({
     props: {
         card: Object as () => CardDataClient,
-        columns: Array as () => Column[]
+        columns: Array as () => Column[],
+        index: Number
     },
     emits: ['set-target'],
     setup(props, {emit}) {
@@ -30,7 +31,7 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
                 return h('td', {
                     class: `${col.key} ${col.align}`,
                     onClick: col.key === 'name' ? () => {
-                        emit('set-target', card);
+                        emit('set-target', {card, index: props.index});
                     } : null
                 }, [col.key === 'name' ? [
                     h('span', {
@@ -42,7 +43,7 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
                     })
                 ] : [
                     col.key === 'power' ? card![col.key].replace(/k/, '000') : card![col.key]
-                ]])
+                ]]);
             });
         };
         return render;

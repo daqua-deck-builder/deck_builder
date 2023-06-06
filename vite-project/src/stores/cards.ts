@@ -12,7 +12,9 @@ type State = {
 
     worker: Worker | null,
     cached_cards: Map<string, CardDataClient>,
-    target: string
+    target: string,
+    page: number,
+    cursor: number
 };
 
 const useCardStore = defineStore('card', {
@@ -26,7 +28,9 @@ const useCardStore = defineStore('card', {
             has_lb: 0,
             worker: null,
             cached_cards: new Map(),
-            target: ''
+            target: '',
+            page: 0,
+            cursor: 0
         }
     },
     actions: {
@@ -44,6 +48,13 @@ const useCardStore = defineStore('card', {
         },
         set_cards(payload: CardDataClient[]) {
             this.cards = payload;
+            this.page = 0;
+            this.cursor = 0;
+            if (this.cards.length > 0) {
+                this.target = this.cards[0].slug;
+            } else {
+                this.target = '';
+            }
         },
         set_filter_word(payload: string) {
             this.filter_word = payload;
@@ -67,6 +78,36 @@ const useCardStore = defineStore('card', {
         },
         cache(card: CardDataClient) {
             this.cached_cards.set(card.slug, card);
+        },
+        cursor_incr() {
+            let next: number = this.cursor + 1;
+            if (next + 1 > this.paged_cards.length) {
+                next = 0;
+                let total_page: number = Math.ceil(this.cards.length / this.cards_per_page);
+                let next_page = this.page + 1;
+                if (next_page > total_page - 1) {
+                    next_page = 0;
+                }
+                this.page = next_page;
+            }
+            this.cursor = next;
+        },
+        cursor_decr() {
+            let next: number = this.cursor - 1;
+            if (next < 0) {
+                next = this.cards_per_page - 1;
+                let next_page = this.page - 1;
+                if (next_page < 0) {
+                    next_page = Math.ceil(this.cards.length / this.cards_per_page) - 1;
+                    next = this.cards.length % this.cards_per_page - 1;
+                }
+                this.page = next_page;
+            }
+            this.cursor = next;
+        },
+        set_page(page: number): void {
+            this.cursor = 0;
+            this.page = page;
         }
     },
     getters: {
@@ -96,6 +137,14 @@ const useCardStore = defineStore('card', {
                     }
                 });
             }
+        },
+        cards_per_page(): number {
+            return 25;
+        },
+        paged_cards(state: State): CardDataClient[] {
+            const start = state.page * this.cards_per_page;
+            const end = start + this.cards_per_page;
+            return state.cards.slice(start, end);
         }
     }
 });
