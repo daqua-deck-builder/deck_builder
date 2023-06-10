@@ -26,7 +26,10 @@ const set_max_page = () => {
 };
 
 const pages = computed(() => {
-    return Array.from({length: max_page.value}, (_, i) => i);
+    let start = Math.max(card_store.page - 2, 0); //カレントページから2を減算し、その結果が0より小さければ0を採用
+    let end = Math.min(start + 5, max_page.value); // startから5ページ分だけ取得するが、max_pageを超えないように調整
+    start = Math.max(end - 5, 0); // max_pageに達してしまい、5ページ取得できなかった場合の調整
+    return Array.from({length: end - start}, (_, i) => i + start);
 });
 
 const {by_whole_index} = useDetectCard();
