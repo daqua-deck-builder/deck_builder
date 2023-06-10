@@ -26,7 +26,7 @@ if (!DATABASE_URL) {
     process.exit(1);
 }
 
-const EXPRESS_ROOT = path.dirname(process.argv[1]);
+const EXPRESS_ROOT: string = path.dirname(process.argv[1]);
 
 // @ts-ignore
 const redis_data = new Redis();

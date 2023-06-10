@@ -1,4 +1,4 @@
-import type {CardDataClient} from "../../ex/types/card.js";
+import {type CardDataClient} from "../ex/types/card.js";
 
 let cards: CardDataClient[] = [];
 let filter_word: string = '';
@@ -50,8 +50,12 @@ const return_filtered = () => {
             })
     });
 };
-
-self.addEventListener('message', (info: MessageEvent<{ type: string, silent?: boolean, payload: any, format?: 1 | 2 | 3 | null }>): void => {
+self.addEventListener('message', (info: MessageEvent<{
+    type: string,
+    silent?: boolean,
+    payload: any,
+    format?: 1 | 2 | 3 | null
+}>): void => {
     switch (info.data.type) {
         case 'initialize-cards':
             let f = info.data.format;

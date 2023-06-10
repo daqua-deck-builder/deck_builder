@@ -1,4 +1,4 @@
-import {defineStore} from "pinia";
+import {defineStore, StoreDefinition} from "pinia";
 import type {CardDataClient} from '../../../ex/types/card.js';
 import axios, {type AxiosResponse} from "axios";
 
@@ -17,7 +17,16 @@ type State = {
     cursor: number
 };
 
-const useCardStore = defineStore('card', {
+type Getter = {
+    detail_by_slug: () => Function
+    // detail_by_slug: () => (slug: string) => Promise<CardDataClient | null>
+}
+
+type Actions = {
+    cache: (card: CardDataClient) => void
+} & any;
+
+const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStore('card', {
     state(): State {
         return {
             cards: [],
@@ -31,17 +40,17 @@ const useCardStore = defineStore('card', {
             target: '',
             page: 0,
             cursor: 0
-        }
+        };
     },
     actions: {
         install_worker(worker: Worker): Promise<void> {
-            return new Promise((resolve) => {
+            return new Promise((resolve): void => {
                 worker.onmessage = (event: MessageEvent<{ type: string, payload: CardDataClient[] }>) => {
                     this.set_cards(event.data.payload);
                 };
                 this.worker = worker;
                 resolve();
-            })
+            });
         },
         initialize_cards(payload: CardDataClient[], format: 1 | 2 | 3) {
             this.worker?.postMessage({type: 'initialize-cards', payload, format});
@@ -114,23 +123,30 @@ const useCardStore = defineStore('card', {
         detail_by_slug(state: State): Function {
             return async (slug: string): Promise<CardDataClient> => {
                 return new Promise<CardDataClient>((resolve) => {
-                    const detail: CardDataClient | null = state.cached_cards.get(slug);
+                    const detail: CardDataClient | undefined = state.cached_cards.get(slug);
                     if (detail) {
                         resolve(detail);
                     } else {
-                        let found: boolean;
+                        let found: boolean = false;
                         for (let i = 0; i < state.cards.length; i++) {
                             if (state.cards[i].slug === slug) {
+                                // @ts-ignore
                                 this.cache(state.cards[i]);
                                 found = true;
                                 return resolve(state.cards[i]);
                             }
                         }
                         if (!found) {
-                            axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{ success: boolean, card: CardDataClient | null }>) => {
+                            axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{
+                                success: boolean,
+                                card: CardDataClient | null
+                            }>) => {
                                 if (res.data.success) {
-                                    this.cache(res.data.card);
-                                    resolve(res.data.card);
+                                    if (res.data.card) {
+                                        // @ts-ignore
+                                        this.cache(res.data.card);
+                                        resolve(res.data.card);
+                                    }
                                 }
                             });
                         }

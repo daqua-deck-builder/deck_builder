@@ -1,5 +1,12 @@
-<script setup lang="ts">
+<script lang="ts">
 import UserInfo from "./components/UserInfo.vue";
+
+export default {
+    name: 'app',
+    components: {
+        UserInfo
+    }
+}
 </script>
 
 <template lang="pug">
