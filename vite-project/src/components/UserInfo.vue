@@ -46,10 +46,11 @@ const register = (): void => {
         return;
     }
     prevent_double_submit.value = true;
-    auth_store.register({
+    auth_store.create_user({
         name: name_new.value,
         login_id: login_id_new.value,
-        password: password_new.value
+        password: password_new.value,
+        password_confirm: password_confirm.value,
     }).then((): void => {
         prevent_double_submit.value = false
     });
@@ -61,7 +62,7 @@ const register = (): void => {
 .bar(v-if="!first_loaded")
     span &nbsp;
 .bar.nav.authenticated(v-if="auth_store.login_id && first_loaded")
-    span {{ auth_store.username }}
+    span {{ auth_store.name }}
     a(href="#" @click.prevent="dispatch_logout") ログアウト
     a(:href="products_page" target="_blank" v-if="auth_store.is_admin") 製品管理
 .bar.not_authenticated(v-if="!auth_store.login_id && first_loaded")
@@ -80,19 +81,19 @@ const register = (): void => {
             .inner
                 label
                     span ユーザー名
-                    input(type="text" v-model="name_new")
+                    input(type="text" v-model="name_new" autocomplete="off")
                 br
                 label
                     span 希望ログインID
-                    input(type="text" v-model="login_id_new")
+                    input(type="text" v-model="login_id_new" autocomplete="off")
                 br
                 label
                     span パスワード
-                    input(type="password" v-model="password_new")
+                    input(type="password" v-model="password_new" autocomplete="off")
                 br
                 label
                     span パスワード(確認)
-                    input(type="password" v-model="password_confirm")
+                    input(type="password" v-model="password_confirm" autocomplete="off")
                 br
                 label
                     span &nbsp;
