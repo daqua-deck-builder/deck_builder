@@ -168,7 +168,7 @@ const {bg_gradient_style} = useGradientBg();
             option(value=",") 多色
         input.filter_word(type="text" name="filter_word" v-model.lazy="filter_word")
     .actions
-        a.check(href="#" @click.prevent="keep_direct = !keep_direct" :data-keep-direct="keep_direct" alt="カード名を1クリックでカードをキープリストに投入する") ダイレクトキープ
+        a.check(href="#" @click.prevent="keep_direct = !keep_direct" :data-keep-direct="keep_direct" title="カード名を1クリックでカードをキープリストに投入する") ダイレクトキープ
         PageController
     table
         colgroup
