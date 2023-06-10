@@ -100,6 +100,7 @@ const make_user_logging_in = async (redis_data: redis.Redis, user: User, res: Re
                     maxAge: expires,
                     httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
                     secure: false, // HTTPSを必要とするかどうか
+                    sameSite: 'lax'
                 });
             res.json({
                 success: true,
