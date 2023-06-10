@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 import {PrismaClient} from "@prisma/client";
 import redis from 'ioredis';
 import {type LoginInfo} from "../types/app.js";
+import Redis from "ioredis";
 
 const prisma = new PrismaClient();
 
@@ -75,10 +76,48 @@ const generate_random = (): string => {
     return `${Math.random()}`;
 };
 
-auth_router.post('/create_user', async (req: Request<{ name: string, login_id: string, password: string }>, res: Response<{ success: boolean, reason?: string, user?: User }>): Promise<void> => {
+const make_user_logging_in = async (redis_data: redis.Redis, user: User, res: Response<{
+    success: boolean,
+    reason?: string,
+    user?: User
+}>): Promise<void> => {
+    const sid: string = generate_random();
+    const expires: number = 86400000;
+
+    // @ts-ignore
+    redis_data.set(`/sid:${sid}`, user.login_id, 'ex', expires).then((): void => {
+        prisma.user.update({
+            where: {
+                login_id: user.login_id
+            },
+            data: {
+                last_login: new Date()
+            }
+        }).then((): void => {
+            res.cookie(
+                "sid", sid,
+                {
+                    maxAge: expires,
+                    httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
+                    secure: false, // HTTPSを必要とするかどうか
+                });
+            res.json({
+                success: true,
+                reason: '',
+                user: user
+            });
+        });
+    });
+};
+
+auth_router.post('/create_user', async (req: Request<{
+    name: string,
+    login_id: string,
+    password: string
+}>, res: Response<{ success: boolean, reason?: string, user?: User }>): Promise<void> => {
     const {name, login_id, password} = req.body;
 
-    const login_id_used = await prisma.user.findFirst({
+    const login_id_used: User | null = await prisma.user.findFirst({
         where: {
             login_id
         }
@@ -91,42 +130,22 @@ auth_router.post('/create_user', async (req: Request<{ name: string, login_id: s
         });
     } else {
         const user: Omit<User, 'id'> = await create_user({name, login_id, password});
-        const created_user = await prisma.user.create({data: user});
-        res.json({
-            success: true,
-            user: created_user
-        });
+        const created_user: User = await prisma.user.create({data: user});
+        make_user_logging_in(req.app.locals.redis_data, created_user, res).then();
     }
 });
 
-auth_router.post('/login', (req: Request<{ login_id: string, password: string }>, res: Response<{ username: string, login_id: string, is_admin: boolean }>): void => {
+auth_router.post('/login', (req: Request<{ login_id: string, password: string }>, res: Response<{
+    success: boolean,
+    reason?: string,
+    user?: User
+}>): void => {
     auth_check(req.body).then((user: User): void => {
-        req.app.locals.redis_data.del(`/sid:${req.cookies.sid}`).then(() => {   // セッションIDを携えてきたらそちらはログアウト
-
-            const sid = generate_random();
-            const expires = 86400000;
-            req.app.locals.redis_data.set(`/sid:${sid}`, user.login_id, 'ex', expires).then((): void => {
-                prisma.user.update({
-                    where: {
-                        login_id: user.login_id
-                    },
-                    data: {
-                        last_login: new Date()
-                    }
-                }).then((): void => {
-                    res.cookie(
-                        "sid", sid,
-                        {
-                            maxAge: expires,
-                            httpOnly: true, // クッキーへのクライアントサイドのJavaScriptアクセスを防ぐ
-                            secure: false, // HTTPSを必要とするかどうか
-                        });
-                    res.json({username: user.name, login_id: user.login_id, is_admin: user.is_admin});
-                });
-            });
+        req.app.locals.redis_data.del(`/sid:${req.cookies.sid}`).then((): void => {   // セッションIDを携えてきたらそちらはログアウト
+            make_user_logging_in(req.app.locals.redis_data, user, res).then();
         });
     }).catch((): void => {
-        res.json({username: '', login_id: "", is_admin: false});
+        res.json({success: false, reason: ''});
     });
 });
 
@@ -174,7 +193,11 @@ const check_is_admin_json = (req: Request<any, any, { sid: string }, any>, res: 
     });
 };
 
-auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Response<{ username: string, login_id: string, is_admin: boolean }>): void => {
+auth_router.get('/', (req: Request<any, any, { sid: string }, any>, res: Response<{
+    username: string,
+    login_id: string,
+    is_admin: boolean
+}>): void => {
     find_user_by_sid(req.app.locals.redis_data, req.cookies.sid).then(async (login_id: string): Promise<void> => {
         const user_origin: User | null = await prisma.user.findFirst({
             where: {

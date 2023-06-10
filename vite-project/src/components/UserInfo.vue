@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import {computed, onMounted, ref} from "vue";
-import axios, {type AxiosResponse} from "axios";
 import {useAuthStore} from "../stores/auth";
 
 const auth_store = useAuthStore();
@@ -10,37 +9,20 @@ const first_loaded = ref<boolean>(false);
 const login_id = ref<string>('');
 const password = ref<string>('');
 
+const mode = ref<"signup" | "login">("login");
+
 const submit = () => {
-    if (login_id.value && password.value) {
-        axios.post('/api/auth/login', {
-            login_id: login_id.value,
-            password: password.value
-        }).then((res: AxiosResponse<{ username: string, login_id: string, is_admin: boolean }>) => {
-            console.log(
-                res.data
-            )
-            if (res.data.login_id) {
-                password.value = '';
-            } else {
-                alert('ログインに失敗しました。ログインIDまたはパスワードが不正です。')
-            }
-            login_id.value = res.data.login_id;
-            auth_store.username = res.data.username;
-            auth_store.login_id = res.data.login_id;
-            auth_store.is_admin = res.data.is_admin;
-        });
-    } else {
-        alert('ログインIDとパスワードを入力してください');
-    }
+    auth_store.login({login_id: login_id.value, password: password.value}).then((_login_id: string) => {
+        login_id.value = _login_id;
+    }).catch(reason => {
+        alert(reason);
+    });
 };
 
 const dispatch_logout = () => {
-    axios.post('/api/auth/logout').then(() => {
+    auth_store.logout().then(() => {
         login_id.value = '';
         password.value = '';
-        auth_store.username = '';
-        auth_store.login_id = '';
-        auth_store.is_admin = false;
     });
 };
 
@@ -49,13 +31,29 @@ const products_page = computed(() => {
 });
 
 onMounted(() => {
-    axios.get('/api/auth/').then((res: AxiosResponse<{ login_id: string, username: string, is_admin: boolean }>) => {
-        auth_store.username = res.data.username;
-        auth_store.login_id = res.data.login_id;
-        auth_store.is_admin = res.data.is_admin;
+    auth_store.fetch_user_info().then(() => {
         first_loaded.value = true;
     });
 });
+
+const name_new = ref<string>('');
+const login_id_new = ref<string>('');
+const password_new = ref<string>('');
+const password_confirm = ref<string>('');
+const prevent_double_submit = ref<boolean>(false);
+const register = (): void => {
+    if (prevent_double_submit.value) {
+        return;
+    }
+    prevent_double_submit.value = true;
+    auth_store.register({
+        name: name_new.value,
+        login_id: login_id_new.value,
+        password: password_new.value
+    }).then((): void => {
+        prevent_double_submit.value = false
+    });
+};
 
 </script>
 
@@ -67,7 +65,7 @@ onMounted(() => {
     a(href="#" @click.prevent="dispatch_logout") ログアウト
     a(:href="products_page" target="_blank" v-if="auth_store.is_admin") 製品管理
 .bar.not_authenticated(v-if="!auth_store.login_id && first_loaded")
-    form(action="/api/login" method="POST" @submit.prevent="submit")
+    form.login(action="/api/login" method="POST" @submit.prevent="submit" v-if="mode === 'login'")
         label
             span ID:
             input(type="text" v-model.lazy="login_id")
@@ -75,10 +73,80 @@ onMounted(() => {
             span Password:
             input(type="password" v-model.lazy="password")
         input(type="submit" value="Login")
+    a.toggle_mode(href="#" @click="mode='signup'" v-if="mode==='login'") Signup &gt;&gt;
+    a.toggle_mode(href="#" @click="mode='login'" v-if="mode==='signup'") &lt;&lt; Login
+    form.signup(v-if="mode === 'signup'")
+        .popup
+            .inner
+                label
+                    span ユーザー名
+                    input(type="text" v-model="name_new")
+                br
+                label
+                    span 希望ログインID
+                    input(type="text" v-model="login_id_new")
+                br
+                label
+                    span パスワード
+                    input(type="password" v-model="password_new")
+                br
+                label
+                    span パスワード(確認)
+                    input(type="password" v-model="password_confirm")
+                br
+                label
+                    span &nbsp;
+                    button(@click.prevent="register") 登録
 </template>
 
 <style scoped lang="less">
 @import "../composable/button.less";
+
+.popup {
+    padding: 50px;
+    width: calc(100vw - 120px);
+    height: calc(100vh - 180px);
+    position: absolute;
+    top: 60px;
+    left: 10px;
+    background-color: #505050;
+    border-color: black;
+    border-radius: 10px;
+}
+
+.inner {
+    opacity: 1;
+}
+
+form.login {
+    width: 600px;
+    display: inline-block;
+}
+
+form.signup {
+    width: 400px;
+    display: inline-block;
+    color: white;
+
+    label {
+        margin-bottom: 10px;
+    }
+
+    label span {
+        display: inline-block;
+        width: 120px;
+    }
+}
+
+a.toggle_mode {
+    width: 100px;
+    color: white;
+    display: inline-block;
+
+    &:hover {
+        text-decoration: underline;
+    }
+}
 
 .bar {
     background-color: #313131;
