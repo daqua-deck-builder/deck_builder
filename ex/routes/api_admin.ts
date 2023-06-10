@@ -68,9 +68,9 @@ admin_router.get('/products', check_is_admin, async (req: Request, res: Response
     }
 });
 
-admin_router.post('/update_product', check_is_admin_json, async (req: Request<{ product: Product }>, res: Response<{ success: boolean }>): Promise<void> => {
+admin_router.post('/update_product', check_is_admin_json, async (req: Request<{ product: Product }>, res: Response<{ success: boolean, product: Product }>): Promise<void> => {
     const product: Product = {...req.body["product"]};
-    const new_product = (() => {
+    const new_product: Product = (() => {
         const p: Product = {...product};
         // @ts-ignore
         delete p.id;
@@ -78,14 +78,19 @@ admin_router.post('/update_product', check_is_admin_json, async (req: Request<{ 
         delete p.last_fetched;
         return p;
     })();
-    await prisma["product"].upsert({
+
+    // @ts-ignore
+    const inserted_or_updated: Product = await prisma["product"].upsert({
         where: {
             id: product.id
         },
         update: product,
         create: new_product
     });
-    res.json({success: true});
+    res.json({
+        success: true,
+        product: inserted_or_updated
+    });
 });
 
 admin_router.post('/fetch_items', check_is_admin_json, async (req: Request<{ id: number }>, res: Response<{ success: boolean, product_no?: string, last_fetched?: string }>): Promise<void> => {

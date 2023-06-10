@@ -48,16 +48,26 @@ import type {Product} from '../../ex/types/app';
 import {ref} from "vue";
 
 const products = ref<Product[]>([]);
-axios.get('/api/admin/products').then((res: AxiosResponse<{ products: Product[] }>) => {
+axios.get('/api/admin/products').then((res: AxiosResponse<{ products: Product[] }>): void => {
     products.value = res.data.products;
 });
 
-const update = (index: number) => {
+const update = (index: number): void => {
     console.log(products.value[index]);
     axios.post('/api/admin/update_product', {
         product: products.value[index]
-    }).then((res: AxiosResponse<{ success: boolean }>) => {
-
+    }).then((res: AxiosResponse<{ success: boolean, product: Product }>): void => {
+        if (res.data.success) {
+            products.value = products.value.map((p: Product): Product => {
+                if (p.product_no === res.data.product.product_no) {
+                    return res.data.product;
+                } else {
+                    return p;
+                }
+            });
+        } else {
+            alert('更新/作成に失敗しました');
+        }
     });
 };
 
@@ -70,7 +80,11 @@ const start_fetch = (id: number) => {
     }
     prevent_double_fetch.value = true;
 
-    axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{ success: boolean, product_no?: string, last_fetched?: string }>) => {
+    axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{
+        success: boolean,
+        product_no?: string,
+        last_fetched?: string
+    }>) => {
         alert(`${id} fetch complete`);
         prevent_double_fetch.value = false;
 
