@@ -6,7 +6,6 @@ type KeptCard = {
     amount: number,
 } & CardDataClient;
 
-
 type Group = 'main_lb' | 'main_no_lb' | 'white' | 'others';
 
 type State = {
@@ -41,7 +40,7 @@ const useKeepStore = defineStore('keep', {
             const target_group = this[group];
             let found: boolean = false;
             const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
-            for (let i = 0; i < target_group.length; i++) {
+            for (let i: number = 0; i < target_group.length; i++) {
                 if (target_group[i].pronounce === card.pronounce) {
                     target_group[i].amount = Math.min(max_amount, Math.max(-1, target_group[i].amount + 1));
                     found = true;
@@ -55,7 +54,7 @@ const useKeepStore = defineStore('keep', {
 
             this[group] = [...target_group];
         },
-        append_to_others(card: CardDataClient) {
+        append_to_others(card: CardDataClient): void {
             const target_group = this.others;
             let found: boolean = false;
             for (let i = 0; i < target_group.length; i++) {
@@ -73,11 +72,11 @@ const useKeepStore = defineStore('keep', {
             this.others = [...target_group];
 
         },
-        increase(pronounce: string, group: Group, delta): void {
+        increase(pronounce: string, group: Group, delta: 1 | -1): void {
             const target_group = this[group];
             const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
 
-            for (let i = 0; i < target_group.length; i++) {
+            for (let i: number = 0; i < target_group.length; i++) {
                 if (target_group[i].pronounce === pronounce) {
                     target_group[i].amount = Math.min(max_amount, Math.max(-1, target_group[i].amount + delta));
                     break;
@@ -89,7 +88,7 @@ const useKeepStore = defineStore('keep', {
         remove(pronounce: string, group: Group): void {
             const trimmed: KeptCard[] = [];
 
-            this[group].forEach((c: KeptCard) => {
+            this[group].forEach((c: KeptCard): void => {
                 if (c.pronounce !== pronounce) {
                     trimmed.push(c);
                 }
@@ -106,7 +105,7 @@ const useKeepStore = defineStore('keep', {
                 const trimmed: KeptCard[] = [];
                 const max_amount: number = ['white', 'others'].includes(group) ? 1 : 4;
 
-                this[group].forEach((c: KeptCard) => {
+                this[group].forEach((c: KeptCard): void => {
                     if (c.amount > -1) {
                         c.amount = Math.min(max_amount, Math.max(0, c.amount));
 
@@ -131,7 +130,8 @@ const useKeepStore = defineStore('keep', {
             });
         },
         save_deck(info: any): Promise<void> {
-            return new Promise<void>((resolve) => {
+            console.log(info);
+            return new Promise<void>((resolve): void => {
                 const now = new Date();
                 const deck: Deck = {
                     id: this.deck_id || -1,
@@ -161,4 +161,4 @@ const useKeepStore = defineStore('keep', {
     getters: {}
 });
 
-export {useKeepStore, KeptCard};
+export {useKeepStore, type KeptCard};
