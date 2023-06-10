@@ -41,36 +41,47 @@ const useWindowStore = defineStore('window', {
                 z: this.zIndexCursor + 20,
                 id: 'keep'
             });
+
+            let max: number = this.zIndexCursor;
+            const keys: IterableIterator<string> = this.windows.keys();
+            for (let key of keys) {
+                max = Math.max(max, this.windows.get(key)!.z);
+            }
+            this.zIndexCursor = max;
         },
         move(movement: Vector2D): void {
-            const w = this.windows.get(this.dragging_target);
-            w.x = w.x + movement.x;
-            w.y = w.y + movement.y;
+            const w: WindowInfo | undefined = this.windows.get(this.dragging_target);
+            if (w) {
+                w.x = w.x + movement.x;
+                w.y = w.y + movement.y;
+            }
         },
         release_dragging_target(): void {
             this.dragging_target = '';
         },
         set_to_top(id: string): void {
             this.dragging_target = id;
-            const w = this.windows.get(id);
-            this.zIndexCursor = this.zIndexCursor + 10;
-            w.z = this.zIndexCursor;
+            const w: WindowInfo | undefined = this.windows.get(id);
+            if (w) {
+                this.zIndexCursor = this.zIndexCursor + 15;
+                w.z = this.zIndexCursor;
 
-            if (this.zIndexCursor > 1000) {
-                const keys: IterableIterator<string> = this.windows.keys();
+                if (this.zIndexCursor > 1000) {
+                    const keys: IterableIterator<string> = this.windows.keys();
 
-                for (let key of keys) {
-                    this.windows.get(key).z = this.windows.get(key).z - 800;
+                    for (let key of keys) {
+                        this.windows.get(key)!.z = this.windows.get(key)!.z - 800;
+                    }
+                    this.zIndexCursor = 100;
                 }
-                this.zIndexCursor = 100;
             }
         }
     },
     getters: {
         keep(): WindowInfo {
-            return this.windows.get('keep');
+            return this.windows.get('keep')!;
         }
     }
 });
 
-export {useWindowStore, WindowInfo};
+export {useWindowStore, type WindowInfo};
