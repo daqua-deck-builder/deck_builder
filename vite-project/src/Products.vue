@@ -25,7 +25,7 @@
                 td.center {{ p.id }}
                 td
                     a.button(href="#" @click.prevent="update($index)") Update
-                    a.button(href="#" @click.prevent="start_fetch(p.id)") Start fetch
+                    a.button(href="#" @click.prevent="start_fetch(p.id)" v-if="p.id > 0") Start fetch
                 td
                     input(type="text" v-model="p.name" style="width: 240px;")
                 td
