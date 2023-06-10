@@ -178,12 +178,12 @@ const {bg_gradient_style} = useGradientBg();
         thead
             tr
                 th(v-for="column in column_store.active_columns" :key="column.key") {{ column.label }}
-        tbody
+        tbody(v-if="card_store.cards.length !== 0")
             tr.card(v-for="(c, $index) in cards" :key="c.slug" :data-current="cursor === $index ? 'yes': ''" :data-color="c.color" :style="bg_gradient_style(c.color)")
                 CardTableColumn(:columns ="column_store.active_columns" :index="$index" :card="c" @set-target="set_target")
         tbody.not_found(v-if="card_store.cards.length === 0")
             tr
-                td(colspan="7") 検索条件に合致するカードはありません。
+                td(colspan="7" style="border: 1px solid black;") 検索条件に合致するカードはありません。
 
 </template>
 
@@ -194,15 +194,6 @@ table {
     table-layout: fixed;
     background-color: white;
     color: black;
-}
-
-th, td {
-    border: 1px solid black;
-}
-
-th {
-    background-color: #232323;
-    color: white;
 }
 
 tr {
