@@ -1,5 +1,5 @@
 import {defineStore} from "pinia";
-import type {CardDataClient, Format} from '../../../ex/types/card.js'
+import type {CardDataClient} from '../../../ex/types/card.js'
 
 type Column = {
     label: string,
@@ -85,4 +85,4 @@ const useColumnStore = defineStore('column', {
 });
 
 
-export {useColumnStore, Column};
+export {useColumnStore};

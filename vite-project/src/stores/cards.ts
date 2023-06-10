@@ -18,13 +18,24 @@ type State = {
 };
 
 type Getter = {
-    detail_by_slug: () => Function
-    // detail_by_slug: () => (slug: string) => Promise<CardDataClient | null>
+    detail_by_slug: () => Function,
+    cards_per_page: () => number
 }
 
 type Actions = {
-    cache: (card: CardDataClient) => void
-} & any;
+    install_worker(worker: Worker): Promise<void>,
+    initialize_cards(payload: CardDataClient[], format: 1 | 2 | 3): void,
+    set_cards(payload: CardDataClient[]): void,
+    set_filter_word(payload: string): void,
+    set_color(payload: string): void,
+    set_card_type(payload: string): void,
+    set_format(payload: 1 | 2 | 3): void,
+    set_has_lb(payload: 0 | 1 | 2): void,
+    cache(card: CardDataClient): void,
+    cursor_incr(): void,
+    cursor_decr(): void,
+    set_page(page: number): void,
+};
 
 const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStore('card', {
     state(): State {
@@ -45,17 +56,17 @@ const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStor
     actions: {
         install_worker(worker: Worker): Promise<void> {
             return new Promise((resolve): void => {
-                worker.onmessage = (event: MessageEvent<{ type: string, payload: CardDataClient[] }>) => {
+                worker.onmessage = (event: MessageEvent<{ type: string, payload: CardDataClient[] }>): void => {
                     this.set_cards(event.data.payload);
                 };
                 this.worker = worker;
                 resolve();
             });
         },
-        initialize_cards(payload: CardDataClient[], format: 1 | 2 | 3) {
+        initialize_cards(payload: CardDataClient[], format: 1 | 2 | 3): void {
             this.worker?.postMessage({type: 'initialize-cards', payload, format});
         },
-        set_cards(payload: CardDataClient[]) {
+        set_cards(payload: CardDataClient[]): void {
             this.cards = payload;
             this.page = 0;
             this.cursor = 0;
@@ -65,30 +76,30 @@ const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStor
                 this.target = '';
             }
         },
-        set_filter_word(payload: string) {
+        set_filter_word(payload: string): void {
             this.filter_word = payload;
             this.worker?.postMessage({type: 'filter_word', payload});
         },
-        set_color(payload: string) {
+        set_color(payload: string): void {
             this.color = payload;
             this.worker?.postMessage({type: 'color', payload});
         },
-        set_card_type(payload: string) {
+        set_card_type(payload: string): void {
             this.card_type = payload;
             this.worker?.postMessage({type: 'card_type', payload});
         },
-        set_format(payload: 1 | 2 | 3) {
+        set_format(payload: 1 | 2 | 3): void {
             this.format = payload;
             this.worker?.postMessage({type: 'format', payload});
         },
-        set_has_lb(payload: 0 | 1 | 2) {
+        set_has_lb(payload: 0 | 1 | 2): void {
             this.has_lb = payload;
             this.worker?.postMessage({type: 'has_lb', payload});
         },
-        cache(card: CardDataClient) {
+        cache(card: CardDataClient): void {
             this.cached_cards.set(card.slug, card);
         },
-        cursor_incr() {
+        cursor_incr(): void {
             let next: number = this.cursor + 1;
             if (next + 1 > this.paged_cards.length) {
                 next = 0;
@@ -101,7 +112,7 @@ const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStor
             }
             this.cursor = next;
         },
-        cursor_decr() {
+        cursor_decr(): void {
             let next: number = this.cursor - 1;
             if (next < 0) {
                 next = this.cards_per_page - 1;
@@ -140,7 +151,7 @@ const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStor
                             axios.get(`/api/card_detail/${slug}`).then((res: AxiosResponse<{
                                 success: boolean,
                                 card: CardDataClient | null
-                            }>) => {
+                            }>): void => {
                                 if (res.data.success) {
                                     if (res.data.card) {
                                         // @ts-ignore
@@ -158,8 +169,8 @@ const useCardStore: StoreDefinition<"card", State, Getter, Actions> = defineStor
             return 25;
         },
         paged_cards(state: State): CardDataClient[] {
-            const start = state.page * this.cards_per_page;
-            const end = start + this.cards_per_page;
+            const start: number = state.page * this.cards_per_page;
+            const end: number = start + this.cards_per_page;
             return state.cards.slice(start, end);
         }
     }
