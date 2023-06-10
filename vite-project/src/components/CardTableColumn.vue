@@ -35,9 +35,15 @@ const CardTableColumn = defineComponent<{}, {}, {}, {}>({
                     } : null
                 }, [col.key === 'name' ? [
                     h('span', {
-                        class: 'name',
-                        'data-icon': icon(card!),
+                        class: 'icon',
                         'data-story': story(card!),
+                    }),
+                    h('span', {
+                        class: 'icon',
+                        'data-icon': icon(card!),
+                    }),
+                    h('span', {
+                        class: 'name',
                         'data-rarity': card?.rarity,
                         innerHTML: card!.name   // nameはpublish時にhtml化ずみ
                     })
@@ -122,5 +128,9 @@ td.name {
             }
         }
     }
+}
+
+span.icon {
+    float: left;
 }
 </style>
