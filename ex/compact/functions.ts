@@ -107,7 +107,7 @@ for (let i = 0; i < CARDTYPE_PAIR.length; i++) {
     cardtype_source.set(CARDTYPE_PAIR[i][1], CARDTYPE_PAIR[i][0]);
 }
 
-for (let i = 0; i < LRIG_TEAM_NAME_PAIR.length; i++) {
+for (let i: number = 0; i < LRIG_TEAM_NAME_PAIR.length; i++) {
     lrig_name_source.set(LRIG_TEAM_NAME_PAIR[i][0], LRIG_TEAM_NAME_PAIR[i][1]);
     lrig_name_source.set(LRIG_TEAM_NAME_PAIR[i][1], LRIG_TEAM_NAME_PAIR[i][0]);
 }
@@ -116,7 +116,7 @@ const compact_color = (s: string) => {
     return color_source.get(s) || COMMON_WORD.UNKNOWN_COLOR;
 };
 
-const compact_cardtype = (s: string) => {
+const compact_card_type = (s: string) => {
     return cardtype_source.get(s) || CARD_TYPE.UNKNOWN_CARD_TYPE;
 };
 
@@ -160,7 +160,7 @@ const compact = (d: CardData): CardDataCompact => {
         n: d.name,
         p: d.pronounce,
         i: compact_img(d.img, d.slug),
-        t: compact_cardtype(d.card_type),
+        t: compact_card_type(d.card_type),
         lr: d.lrig,
         lv: d.level,
         c: d.color.map(compact_color),
@@ -177,7 +177,9 @@ const compact = (d: CardData): CardDataCompact => {
         sk: d.skills,
         st: d.story,
         fm: d.format,
-        co: d.coin
+        co: d.coin,
+        so: d.sort,
+        pr: d.product
     };
 };
 
@@ -187,7 +189,7 @@ const expand = (c: CardDataCompact): CardData => {
         name: c.n,
         pronounce: c.p,
         img: expand_img(c.i, c.s),   // @
-        card_type: compact_cardtype(c.t),
+        card_type: compact_card_type(c.t),
         lrig: c.lr,
         level: c.lv,
         color: c.c.map(compact_color),
@@ -204,7 +206,9 @@ const expand = (c: CardDataCompact): CardData => {
         skills: c.sk,
         story: c.st,
         format: c.fm,
-        coin: c.co
+        coin: c.co,
+        sort: c.so,
+        product: c.pr
     };
 };
 const cleanup_skill_text_line = (t: string): string => {
@@ -261,7 +265,7 @@ export {
     compact_img,
     trim_color_brace,
     compact_color,
-    compact_cardtype,
+    compact_card_type,
     compact_lrig_team,
     compact_lrig_team_multi,
     cleanup_skill_text_line,

@@ -1,5 +1,5 @@
 import * as cheerio from 'cheerio';
-import {cover_condition, send_request_and_cache} from "../../crawler/functions.js";
+import {cover_condition, send_request_and_cache, send_request_and_cache_card_detail} from "../../crawler/functions.js";
 import async from 'async';
 import _ from 'underscore';
 import {parse_modern_structure} from "../card_page/parse_card_html.js";
@@ -9,9 +9,13 @@ import {SendRequestAndCacheOption} from "../../types/crawler.js";
 
 type SearchCondition = {}
 
-const procedure = async (search_condition: Partial<SearchCondition> & { product_no: string }, text_cache_dir: string, force_update: boolean) => {
+const procedure = async (search_condition: Partial<SearchCondition> & {
+    product_no: string,
+    sort: number
+}, text_cache_dir: string, force_update: boolean): Promise<void> => {
 
-    return new Promise<void>((resolve, reject) => {
+    // 製品で検索した結果を調査する
+    return new Promise<void>((resolve, reject): void => {
         const arg: SendRequestAndCacheOption<any> = {
             method: 'GET',
             endpoint: '',
@@ -23,20 +27,21 @@ const procedure = async (search_condition: Partial<SearchCondition> & { product_
             force_update
         };
 
-        send_request_and_cache(arg, (page1: string) => {
-            const $ = cheerio.load(page1);
+        send_request_and_cache(arg, (page1: string, hit: boolean): void => {
+            // 検索結果1ページめ
+            const $: cheerio.CheerioAPI = cheerio.load(page1);
 
             // @ts-ignore
-            const items_amount = Number($('h3:first span').text().match(/(\d+)/)[0]);
-            const items_per_page = 3 * 7;
+            const items_amount: number = Number($('h3:first span').text().match(/(\d+)/)[0]);
+            const items_per_page: number = 3 * 7;
 
-            // @ts-ignore
-            const max_page = Math.ceil(items_amount / items_per_page);
+            const max_page: number = Math.ceil(items_amount / items_per_page);
 
-            const pages = _.range(2, max_page + 1); // ここの1ページめは既にキャッシュ済みなので2から
+            // 製品に何ページ分の検索結果があるか
+            const pages: number[] = _.range(2, max_page + 1); // ここの1ページめは既にキャッシュ済みなので2から
 
             const funcs = pages.map((page: number) => {
-                return (done: Function) => {
+                return (done: Function): void => {
                     const arg: SendRequestAndCacheOption<any> = {
                         method: 'GET',
                         endpoint: '',
@@ -51,12 +56,13 @@ const procedure = async (search_condition: Partial<SearchCondition> & { product_
                         force_update: false
                     };
 
-                    send_request_and_cache(arg, (any_page_content: string, hit: boolean) => {
+                    // Nページめに含まれるリンク一覧を取得する
+                    send_request_and_cache(arg, (any_page_content: string, hit: boolean): void => {
                         if (hit) {
                             done(null, any_page_content);
                         } else {
                             // キャッシュミスで実際にリクエストが送信されたら次を3秒待つ
-                            setTimeout(() => {
+                            setTimeout((): void => {
                                 done(null, any_page_content);
                             }, 3000);
                         }
@@ -65,26 +71,27 @@ const procedure = async (search_condition: Partial<SearchCondition> & { product_
             });
 
             // @ts-ignore
-            async.series(funcs, (errors: Error[] | null, page_contents: string[]) => {
+            async.series(funcs, (errors: Error[] | null, any_page_content: string[]): void => {
                 console.log(`fetching index of [${search_condition.product_no}] completed.`);
 
-                const all_contents = [page1, ...page_contents];
+                const all_contents: string[] = [page1, ...any_page_content];
                 let all_links: string[] = [];
 
-                all_contents.forEach((content) => {
+                all_contents.forEach((content: string): void => {
                     const local_links: string[] = parse_list_page_to_urls(content);
-                    all_links = [...all_links, ...local_links]
+                    all_links = [...all_links, ...local_links];
                 });
 
-                all_links = _.uniq(all_links);
+                all_links = _.uniq(all_links);  // カード詳細への全リンク
 
                 console.log(`${all_links.length} items found.`);
 
-                const funcs = all_links.map((detail_link: string) => {
-                    return (done: (err: Error | null, result: boolean) => void) => {
-                        const url = new URL(detail_link);
-                        // @ts-ignore
-                        const payload = search_params_to_object(url.searchParams);
+                // 個々のカードの情報をダウンロードする
+                const funcs: Function[] = all_links.map((detail_link: string, index: number): Function => {
+                    return (done: (err: Error | null, result: boolean) => void): void => {
+                        const url: URL = new URL(detail_link);
+                        const payload: Record<string, string> = search_params_to_object(url.searchParams);
+                        const card_sort: number = search_condition.sort - index; // 製品内ではリストの先頭の方のカードが上に並ぶようにする
 
                         const arg: SendRequestAndCacheOption<typeof payload> = {
                             method: 'GET',
@@ -97,41 +104,54 @@ const procedure = async (search_condition: Partial<SearchCondition> & { product_
                             force_update
                         };
 
-                        send_request_and_cache(arg, (content: string, hit: boolean): void => {
-                            const cd: CardData | false = parse_modern_structure(cheerio.load(content));
-                            if (cd) {
-                                if (force_update) {
-                                    update_card(cd).then(() => {
-                                        if (hit) {
-                                            done(null, true);
-                                        } else {
-                                            setTimeout(() => {
+                        send_request_and_cache_card_detail(arg, (content: string, hit: boolean): void => {
+                            try {
+                                const cd: CardData | false = parse_modern_structure(cheerio.load(content));
+                                if (cd) {
+                                    cd.sort = card_sort;
+                                    cd.product = search_condition.product_no;
+
+                                    if (force_update) {
+                                        update_card(cd).then((): void => {
+                                            if (hit) {
                                                 done(null, true);
-                                            }, 3000);
-                                        }
-                                    });
+                                            } else {
+                                                setTimeout((): void => {
+                                                    done(null, true);
+                                                }, 3000);
+                                            }
+                                        });
+                                    } else {
+                                        insert_card_if_new(cd).then((): void => {
+                                            if (hit) {
+                                                done(null, true);
+                                            } else {
+                                                setTimeout((): void => {
+                                                    done(null, true);
+                                                }, 3000);
+                                            }
+                                        });
+                                    }
                                 } else {
-                                    insert_card_if_new(cd).then(() => {
-                                        if (hit) {
-                                            done(null, true);
-                                        } else {
-                                            setTimeout(() => {
-                                                done(null, true);
-                                            }, 3000);
-                                        }
-                                    });
+                                    done(null, true);
                                 }
-                            } else {
-                                done(null, true);
+                            } catch (e) {
+                                console.error(e);
+                                // @ts-ignore
+                                done(payload.card_no, false);
                             }
                         });
                     }
                 });
 
                 // @ts-ignore
-                async.series(funcs, (errors: Error | null, results: boolean[]) => {
+                async.series(funcs, (errors: Error[] | null, results: boolean[]): void => {
                     console.log(`${search_condition.product_no} ${results.length} items cached.`);
-                    resolve();
+                    if (errors) {
+                        reject(errors);
+                    } else {
+                        resolve();
+                    }
                 });
             });
         });
@@ -139,22 +159,19 @@ const procedure = async (search_condition: Partial<SearchCondition> & { product_
 };
 
 const search_params_to_object = (searchParams: URLSearchParams): Record<string, string> => {
-    const obj = {};
+    const obj: Record<string, string> = {};
     for (let [key, value] of searchParams.entries()) {
-        // @ts-ignore
         obj[key] = value;
     }
     return obj;
 };
 
 const parse_list_page_to_urls = (elem: string): string[] => {
-// const parse_list_page_to_urls = (elem: cheerio.Element): string[] => {
-    const $ = cheerio.load(elem);
-    // @ts-ignore
-    const links = $('a.c-box');
+    const $: cheerio.CheerioAPI = cheerio.load(elem);
+    const links: cheerio.Cheerio<cheerio.Element> = $('a.c-box');
     const items: string[] = [];
-    links.each((index, element) => {
-        items.push(element.attribs.href)
+    links.each((index: number, element: cheerio.Element): void => {
+        items.push(element.attribs.href);
     });
     return items;
 };

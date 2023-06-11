@@ -241,30 +241,38 @@ const parse_modern_structure = ($: any): CardData | false => {
         format = FORMAT.diva
     }
 
-    return {
-        slug,
-        name: name.replace(/　/ig, ' '),
-        pronounce,
-        img: trim_img_path(img),
-        card_type,
-        lrig,
-        level: erase_no_value(level),
-        color,
-        klass,
-        cost: drop_no_value(cost),
-        limit: erase_no_value(limit),
-        power: convert_power(erase_no_value(power)),
-        team: drop_no_value(team),
-        team_piece,
-        timing: drop_no_value(timing),
-        rarity,
-        has_lb,
-        lb_text,
-        skills,
-        story,
-        format,
-        coin
-    };
+    try {
+        return {
+            slug,
+            name: name.replace(/　/ig, ' '),
+            pronounce,
+            img: trim_img_path(img),
+            card_type,
+            lrig,
+            level: erase_no_value(level),
+            color,
+            klass,
+            cost: drop_no_value(cost),
+            limit: erase_no_value(limit),
+            power: convert_power(erase_no_value(power)),
+            team: drop_no_value(team),
+            team_piece,
+            timing: drop_no_value(timing),
+            rarity,
+            has_lb,
+            lb_text,
+            skills,
+            story,
+            format,
+            coin,
+
+            // DB格納時にセットする
+            sort: 0,
+            product: ''
+        };
+    } catch {
+        throw new Error()
+    }
 };
 
 if (process.argv[1].indexOf('parse_card_html') > -1) {

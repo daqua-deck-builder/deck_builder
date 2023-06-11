@@ -52,38 +52,40 @@ api_router.get('/card_detail/:slug', async (req: Request<any, any, { slug: strin
 
 });
 
-api_router.post('/fetch_card_data.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {
-    const payload = {
-        ...{
-            product_no: '',
-            product_type: 'booster'
-        }, ...req.body
-    };
+// api_router.post('/fetch_card_data.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {
+//     const payload = {
+//         ...{
+//             product_no: '',
+//             product_type: 'booster'
+//         }, ...req.body
+//     };
+//
+//     payload.virtual_product_no = req.body.virtual_product_no || '';
+//
+//     console.log(payload);
+//     res.json({})
+//     return
+//
+//     fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
+//         res.json({success: true});
+//     });
+// });
 
-    payload.virtual_product_no = req.body.virtual_product_no || '';
-
-    console.log(payload);
-
-    fetch_product_data(payload, req.app.locals.text_cache_dir, false).then(() => {
-        res.json({success: true});
-    });
-});
-
-api_router.post('/force_update_db.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {
-    const payload = {
-        ...{
-            product_no: '',
-            product_type: 'booster'
-        }, ...req.body
-    };
-
-    payload.virtual_product_no = req.body.virtual_product_no || '';
-
-    console.log(payload);
-    fetch_product_data(payload, req.app.locals.text_cache_dir, true).then(() => {
-        res.json({success: true});
-    });
-});
+// api_router.post('/force_update_db.json', (req: Request<any, any, { product_no: string, product_type: string, virtual_product_no?: string }, any>, res: Response) => {
+//     const payload = {
+//         ...{
+//             product_no: '',
+//             product_type: 'booster'
+//         }, ...req.body
+//     };
+//
+//     payload.virtual_product_no = req.body.virtual_product_no || '';
+//
+//     console.log(payload);
+//     fetch_product_data(payload, req.app.locals.text_cache_dir, true).then(() => {
+//         res.json({success: true});
+//     });
+// });
 
 api_router.post('/create_extend_parameter_setting.json', async (req: Request<any, any, { slug: string, json: string, method: string }, any>, res: Response<{ success: boolean }>) => {
     let data!: Object;

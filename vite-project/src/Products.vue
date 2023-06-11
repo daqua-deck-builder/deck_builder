@@ -83,7 +83,8 @@ const start_fetch = (id: number) => {
     axios.post('/api/admin/fetch_items', {id}).then((res: AxiosResponse<{
         success: boolean,
         product_no?: string,
-        last_fetched?: string
+        last_fetched?: string,
+        reason?: string
     }>) => {
         alert(`${id} fetch complete`);
         prevent_double_fetch.value = false;
@@ -97,6 +98,8 @@ const start_fetch = (id: number) => {
                 }
             }
             products.value = items;
+        } else {
+            alert(res.data.reason);
         }
     }).catch(() => {
         alert('サーバーエラー');

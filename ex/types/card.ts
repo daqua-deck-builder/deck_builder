@@ -17,14 +17,16 @@ type CardDataCompact = {
     pw: string,     // power
     tm: string[],   // team
     tp: boolean,    // team_piece
-    ti: string[],  // timing
+    ti: string[],   // timing
     r: string,      // rarity
     b: boolean,     // has_lb
     bt: string,     // lb_text
     sk: string[],   // skills
     st: Story,      // story
     fm: Format,     // format
-    co: string      // coin
+    co: string,     // coin
+    so: number,     // sort
+    pr: string      // product
 };
 
 type CardData = {
@@ -49,7 +51,9 @@ type CardData = {
     skills: string[],
     story: Story,
     format: Format,
-    coin: string
+    coin: string,
+    sort: number,
+    product: string
 };
 
 type CardDataClient = Omit<CardData, 'color' | 'skills' | 'lrig'> & {  // コンパクト/エキスパンドを作り込む前のフロント開発をこれで間に合わせる

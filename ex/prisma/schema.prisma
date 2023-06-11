@@ -24,14 +24,14 @@ model User {
 }
 
 model Product {
-  id   Int    @id @default(autoincrement())
-  name  String
-  product_no String
-  product_type String
-  last_fetched  DateTime?
-  last_converted  DateTime?
-  sort  Int
-  processing  Boolean
+  id             Int       @id @default(autoincrement())
+  name           String
+  product_no     String
+  product_type   String
+  last_fetched   DateTime?
+  last_converted DateTime?
+  sort           Int
+  processing     Boolean
 }
 
 model Color {
@@ -63,6 +63,8 @@ model Card {
   story      String
   format     Int
   coin       String  @default("")
+  product    String  @default("")
+  sort       Int
 }
 
 model ExtendParameterSetting {
@@ -86,7 +88,7 @@ model Deck {
   lrig        String
   assists     String
   is_public   Boolean
-  ancestor   Int?
+  ancestor    Int?
   owner       Int
   format      Int
   tags        String
